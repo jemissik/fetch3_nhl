@@ -522,42 +522,28 @@ H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink,EVsink_ts, THETA, infil
 
 ####################### Water balance ###################################
 
-
 theta_i=sum(THETA[:,1]*dz)
 theta_t=sum(THETA[:,-1]*dz)
 theta_tot=theta_i-theta_t  #(m)
 theta_tot=theta_tot*1000  #(mm)
 
+infilt_tot=sum(infiltration)*dt*1000 #mm
 if UpperBC==0:
-    theta_tot=(theta_tot)+sum(infiltration)*dt0*1000
+    theta_tot=(theta_tot)+infilt_tot
+############################
 
-
-theta_ts=np.zeros(shape=nt)
-for i in np.arange(1,nt,1):
-    theta_ts[i]=sum(THETA[0:nz_s,i]*dz)
-
-#water taken from roots
-EVsink_total=np.zeros(shape=(len(EVsink_ts)))
-for i in np.arange(1,len(EVsink_ts),1):
-    EVsink_total[i]=sum(-EVsink_ts[:,i])*dz  #(1/s) over the simulation times dz [m]= m
+EVsink_total=np.zeros(shape=(len(EVsink_ts[0])))
+for i in np.arange(1,len(EVsink_ts[0]),1):
+    EVsink_total[i]=sum(-EVsink_ts[:,i]*dz)  #(1/s) over the simulation times dz [m]= m
     
-root_water=sum(EVsink_total)*1000*dt # mm #the dt factor is accounting for the time step
+root_water=sum(EVsink_total)*1000*dt #mm 
+#############################
 
-
-
-transpiration_2=sum(-transpiration)*1000*dt ##mm
+transpiration_2=sum(sum(trans_2d))*1000*dt*dz ##mm
 
 #summing during all time steps and multiplying by 1000 = mm  #
 #the dt factor is accounting for the time step - to the TOTAl and not the rate
 
-
-#FLUX AT THE BOTTOM
-
-H_Pa=H*1000000
-
-Flux_bottom=-K[0,:]*(((H_Pa[1,:]-H_Pa[0,:])/dz)+params['Rho']*params['g']) #[m/s]
-Flux_bottom=sum(Flux_bottom)*dt0 #m
-Flux_bottom=Flux_bottom*1000 #mm
 
 ############################################################################
 df_time = pd.DataFrame(data=np.arange(0,nt,1),index=step_time)
@@ -565,6 +551,36 @@ df_time = pd.DataFrame(data=np.arange(0,nt,1),index=step_time)
 
  ##PLOTS
 
+plt.subplot(3, 1, 1)
+#bottom and top of the canopy
+plt.plot(step_time[:],H[nz_r,:],linewidth=0.8)
+plt.plot(step_time[:],H[nz-1,:],linewidth=0.8)
+plt.legend(['bottom of the canopy','top of the canopy'], loc=1, fontsize = 'small')
+plt.ylabel('$\Phi$ (MPa) - canopy')
+
+
+plt.subplot(3, 1, 2)
+#bottom and top of the roots
+plt.plot(step_time[:],H[nz_s,:],linewidth=0.8)
+plt.plot(step_time[:],H[nz_r-1,:],linewidth=0.8)
+plt.legend(['bottom of the roots','top of the roots'], loc=1, fontsize = 'small')
+plt.ylabel('$\Phi$ (MPa) - roots')
+
+
+plt.subplot(3, 1, 3)
+#bottom and top of the soil - bottom with roots
+plt.plot(step_time[:],H[nz_s-(nz_r-nz_s),:],linewidth=0.8)
+plt.plot(step_time[:],H[nz_s-1,:],linewidth=0.8)
+plt.legend([str(round(z[nz_s-(nz_r-nz_s)],2)),str(round(z[nz_s-1],2))], loc=1, fontsize = 'small')
+plt.ylabel('$\Phi$ (MPa) - soil')
+
+
+#bottom and top of the soil - bottom with roots
+plt.plot(step_time[:],H[nz_s-1,:],linewidth=0.8)
+plt.plot(step_time[:],H[0,:],linewidth=0.8)
+
+plt.legend(['top of the soil'], loc=1, fontsize = 'small')
+plt.ylabel('$\Phi$ (MPa) - soil')
 
 
 

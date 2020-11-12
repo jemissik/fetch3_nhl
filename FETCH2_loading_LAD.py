@@ -257,7 +257,7 @@ for i in np.arange(0,len(VPD),1):
 z_LAD=z_Above[1:]    
 LAD=np.zeros(shape=(int(params['Hspec']/dz)))  #[1/m]
 
-L_m=0.2 #maximum value of LAD a canopy layer
+L_m=0.25 #maximum value of LAD a canopy layer
 z_m=11   #height in which L_m is found [m]
 
 #LAD function according to Lalic et al 2014
