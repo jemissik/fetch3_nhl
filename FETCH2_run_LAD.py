@@ -104,7 +104,8 @@ def Porous_media_xylem(arg,params,i):
     #kmax = m/s
     K=params['kmax']*Aind_x*cavitation_xylem
 
-    #KEEPING CAPACITANCE CONSTANT - using value according to VERMA ET AL., 2014
+    #CAPACITANCE FUNCTION AS IN BOHRER ET AL 2005
+    #testing- after that fix hard code of parameters
     C=np.zeros(shape=len(z[nz_r:nz]))
     Phi_0=5.74*10**8
     p=20

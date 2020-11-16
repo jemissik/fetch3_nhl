@@ -72,7 +72,9 @@ params['Ksax']=(10**(-5))/(params['Rho']*params['g'])    #specific axial conduct
 params['kmax']=(10**(-5))/(params['Rho']*params['g'])    #conductivity of xylem  [ m/s]
 params['ap']=2*10**(-6)                                  #xylem cavitation parameter [Pa-1]
 params['bp']=-1.5*10**(6)                                #xylem cavitation parameter [Pa]  
-
+params['Phi_0']=5.74*10**8                               #From bohrer et al 2005       
+params['p']=20                                           #From bohrer et al 2005
+params['sat_xylem']=0.65                                 #value for TESTING 
 ####################PENMAN-MONTEITH EQUATION PARAMETERS
 #W m^-2 is the same as J s^-1 m^-2
 #1J= 1 kg m2/s2
@@ -193,7 +195,7 @@ nz_clay=int(np.flatnonzero(z==clay_d)) #node where clay layer finishes- sand sta
 Precipitation=Precipitation/1800 #dividing the value over half hour to seconds [mm/s]
 rain=Precipitation/params['Rho']  #[converting to m/s]
 q_rain=np.interp(np.arange(0,tmax+dt0,dt0), t_data, rain) #interpolating
-q_rain=np.nan_to_num(q_rain) #m/s precipitatio rate= infiltration rate
+q_rain=np.nan_to_num(q_rain) #m/s precipitation rate= infiltration rate
 
 
 ########################################################################
@@ -257,15 +259,15 @@ for i in np.arange(0,len(VPD),1):
 z_LAD=z_Above[1:]    
 LAD=np.zeros(shape=(int(params['Hspec']/dz)))  #[1/m]
 
-L_m=0.2 #maximum value of LAD a canopy layer
-z_m=11   #height in which L_m is found [m]
+params['L_m']=0.2  #maximum value of LAD a canopy layer
+params['z_m']=11   #height in which L_m is found [m]
 
 #LAD function according to Lalic et al 2014
 for i in np.arange(0,len(z_LAD),1):
-    if  0.1<=z_LAD[i]<z_m:
-        LAD[i]=L_m*(((params['Hspec']-z_m)/(params['Hspec']-z_LAD[i]))**6)*np.exp(6*(1-((params['Hspec']-z_m)/(params['Hspec']-z_LAD[i]))))
-    if  z_m<=z_LAD[i]<=14:
-        LAD[i]=L_m*(((params['Hspec']-z_m)/(params['Hspec']-z_LAD[i]))**0.5)*np.exp(0.5*(1-((params['Hspec']-z_m)/(params['Hspec']-z_LAD[i]))))
+    if  0.1<=z_LAD[i]<params['z_m']:
+        LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**6)*np.exp(6*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
+    if  params['z_m']<=z_LAD[i]<=14:
+        LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**0.5)*np.exp(0.5*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
 
 LAD[-1]=0
 
@@ -280,7 +282,8 @@ initial_H=np.zeros(shape=nz)
 factor_soil=5.688/(int((4.2-3)/dz)) #factor por interpolation
 
 
-#soil initial conditions as described in the paper
+#soil initial conditions as described in the paper [VERMA et al., 2014]
+#THIS WILL BE CHANGED FOR A MORE GENERAL APPROACH - DIFFERENT SITE 
 for i in np.arange(0,len(z_soil),1):
     if  0.0<=z_soil[i]<=3.0 :
         initial_H[i]=-6.09
@@ -325,11 +328,6 @@ step_time = pd.Series(pd.date_range(date1, date2, freq='30T'))
 
 
 
-
-
-
-
-#adding a comment line just to upload [as a test] a new version to github
 
 
 
