@@ -106,7 +106,10 @@ def Porous_media_xylem(arg,params,i):
 
     #KEEPING CAPACITANCE CONSTANT - using value according to VERMA ET AL., 2014
     C=np.zeros(shape=len(z[nz_r:nz]))
-    C[:]=1.1*10**(-11) #1/Pa
+    Phi_0=5.74*10**8
+    p=20
+    sat_xylem=0.65
+    C[:]=((Aind_x*p*sat_xylem)/(Phi_0))*((Phi_0-arg)/Phi_0)**(-(p+1))
       
     return C,K, cavitation_xylem
 ########################################################################################
@@ -273,7 +276,7 @@ def Picard(H_initial):
     sav=0
 
     
-    for i in np.arange(1,nt,1): 
+    for i in np.arange(1,200000,1): 
         #use nt for entire period
         
         # Initialize the Picard iteration solver - saving variables every half-hour
