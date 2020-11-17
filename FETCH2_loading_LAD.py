@@ -71,7 +71,8 @@ params['Ksax']=(10**(-5))/(params['Rho']*params['g'])    #specific axial conduct
 #XYLEM PARAMETERS
 params['kmax']=(10**(-5))/(params['Rho']*params['g'])    #conductivity of xylem  [ m/s]
 params['ap']=2*10**(-6)                                  #xylem cavitation parameter [Pa-1]
-params['bp']=-1.5*10**(6)                                #xylem cavitation parameter [Pa]  
+params['bp']=-1.5*10**(6)                                #xylem cavitation parameter [Pa]
+params['Aind_x']=8.62*10**(-4)                           #m2 xylem/m2 ground]  
 params['Phi_0']=5.74*10**8                               #From bohrer et al 2005       
 params['p']=20                                           #From bohrer et al 2005
 params['sat_xylem']=0.65                                 #value for TESTING 
@@ -275,15 +276,13 @@ LAD[-1]=0
 
 
 ############ INITIAL conditions according to VERMA ET AL., 2014 
-#initial condition replicating the initial condition used in this paper. 
+#soil initial conditions as described in the paper [VERMA et al., 2014]
+#THIS WILL BE CHANGED FOR A MORE GENERAL APPROACH - DIFFERENT SITE 
 initial_H=np.zeros(shape=nz)
 
 
 factor_soil=5.688/(int((4.2-3)/dz)) #factor por interpolation
 
-
-#soil initial conditions as described in the paper [VERMA et al., 2014]
-#THIS WILL BE CHANGED FOR A MORE GENERAL APPROACH - DIFFERENT SITE 
 for i in np.arange(0,len(z_soil),1):
     if  0.0<=z_soil[i]<=3.0 :
         initial_H[i]=-6.09

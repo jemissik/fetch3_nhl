@@ -98,19 +98,14 @@ def Porous_media_xylem(arg,params,i):
             cavitation_xylem[i]=(1-1/(1+scipy.exp(params['ap']*(arg[i]-params['bp']))))
         
     #Index Ax/As - area of xylem per area of soil
-    
-    Aind_x=8.62*10**(-4)     #m2 xylem/m2 ground
-     
     #kmax = m/s
-    K=params['kmax']*Aind_x*cavitation_xylem
+    K=params['kmax']*params['Aind_x']*cavitation_xylem
 
     #CAPACITANCE FUNCTION AS IN BOHRER ET AL 2005
     #testing- after that fix hard code of parameters
     C=np.zeros(shape=len(z[nz_r:nz]))
-    Phi_0=5.74*10**8
-    p=20
-    sat_xylem=0.65
-    C[:]=((Aind_x*p*sat_xylem)/(Phi_0))*((Phi_0-arg)/Phi_0)**(-(p+1))
+
+    C=((params['Aind_x']*params['p']*params['sat_xylem'])/(params['Phi_0']))*((params['Phi_0']-arg)/params['Phi_0'])**(-(params['p']+1))
       
     return C,K, cavitation_xylem
 ########################################################################################
