@@ -102,7 +102,6 @@ def Porous_media_xylem(arg,params,i):
     K=params['kmax']*params['Aind_x']*cavitation_xylem
 
     #CAPACITANCE FUNCTION AS IN BOHRER ET AL 2005
-    #testing- after that fix hard code of parameters
     C=np.zeros(shape=len(z[nz_r:nz]))
 
     C=((params['Aind_x']*params['p']*params['sat_xylem'])/(params['Phi_0']))*((params['Phi_0']-arg)/params['Phi_0'])**(-(params['p']+1))
@@ -121,12 +120,16 @@ def Porous_media_root(arg,params,dz,theta):
             stress_kr[i]=(1-1/(1+scipy.exp(params['ap']*(arg[i]-params['bp']))))  #CAVITATION CURVE FOR THE ROOT XYLEM
 
     #Keax = effective root axial conductivity 
-    K=params['Ksax']*stress_kr #[m2/s Pa]
+    K=params['Ksax']*1*stress_kr #[m2/s Pa]
      
     #KEEPING CAPACITANCE CONSTANT - using value according to VERMA ET AL., 2014
     C=np.zeros(shape=nz_r-nz_s)
-    C[:]=1.1*10**(-11)  #(1/Pa)
+    #C[:]=1.1*10**(-11)  #(1/Pa)
     
+    #considering axial area rollowing basal area [cylinder]
+    #C=((params['Aind_x']*params['p']*params['sat_xylem'])/(params['Phi_0']))*((params['Phi_0']-arg)/params['Phi_0'])**(-(params['p']+1))
+    C=((1*params['p']*params['sat_xylem'])/(params['Phi_0']))*((params['Phi_0']-arg)/params['Phi_0'])**(-(params['p']+1))
+
     return C, K, stress_kr
 
 ###############################################################################
@@ -255,7 +258,6 @@ def Picard(H_initial):
 ####################################################################################################################################    
     
 
-    deltam=np.zeros(shape=(nz))
 
    #INITIALIZING THESE VARIABLES FOR ITERATIONS
     cnp1m=np.zeros(shape=(nz))
@@ -263,7 +265,8 @@ def Picard(H_initial):
     stress_kx=np.zeros(shape=(nz-nz_r))
     stress_kr=np.zeros(shape=(nz_r-nz_s))
     stress_roots=np.zeros(shape=(nz_r-nz_s))
-    
+    deltam=np.zeros(shape=(nz))
+
 
     #vector for adding potentials in B matrix
     TS=np.zeros(shape=(nz_r))
@@ -272,7 +275,7 @@ def Picard(H_initial):
     sav=0
 
     
-    for i in np.arange(1,200000,1): 
+    for i in np.arange(1,nt,1): 
         #use nt for entire period
         
         # Initialize the Picard iteration solver - saving variables every half-hour
@@ -538,7 +541,7 @@ for i in np.arange(1,len(EVsink_ts[0]),1):
 root_water=sum(EVsink_total)*1000*dt #mm 
 #############################
 
-transpiration_2=sum(sum(trans_2d))*1000*dt*dz ##mm
+transpiration_tot=sum(sum(trans_2d))*1000*dt*dz ##mm
 
 #summing during all time steps and multiplying by 1000 = mm  #
 #the dt factor is accounting for the time step - to the TOTAl and not the rate
@@ -592,9 +595,3 @@ df_EP = pd.DataFrame(data=d,index=step_time[:])
 trans_h=dt*df_EP['trans'].resample('60T').sum() # hourly accumulated
 
 
-
-
-#testing commint
-
-
-#xxxxxxxxxxxxxxxxxxxxxx
