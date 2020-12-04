@@ -66,6 +66,7 @@ params['Ksat_2']=3.45*10**(-5)
 params['Kr']=(7.2*10**(-10))/(params['Rho']*params['g']) #soil-to-root radial conductance [m/sPa]                                                          
 params['qz']=9                                           #unitless - parameter for the root mass distribution - Verma et al., 2014
 params['Ksax']=(10**(-5))/(params['Rho']*params['g'])    #specific axial conductivity of roots  [ m/s]
+params['Aind_r']=1                                       #m2 root xylem/m2 ground]  
 
 
 #XYLEM PARAMETERS

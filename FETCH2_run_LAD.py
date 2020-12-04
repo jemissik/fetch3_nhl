@@ -118,17 +118,21 @@ def Porous_media_root(arg,params,dz,theta):
             stress_kr[i]=1
         else:
             stress_kr[i]=(1-1/(1+scipy.exp(params['ap']*(arg[i]-params['bp']))))  #CAVITATION CURVE FOR THE ROOT XYLEM
+    
+    
+    #Index Ar/As - area of root xylem per area of soil - considered 1 following VERMA ET AL 2014 {for this case}
 
     #Keax = effective root axial conductivity 
-    K=params['Ksax']*1*stress_kr #[m2/s Pa]
+    K=params['Ksax']*params['Aind_r']*stress_kr #[m2/s Pa]
      
     #KEEPING CAPACITANCE CONSTANT - using value according to VERMA ET AL., 2014
     C=np.zeros(shape=nz_r-nz_s)
     #C[:]=1.1*10**(-11)  #(1/Pa)
     
+    #CAPACITANCE FUNCTION AS IN BOHRER ET AL 2005
+
     #considering axial area rollowing basal area [cylinder]
-    #C=((params['Aind_x']*params['p']*params['sat_xylem'])/(params['Phi_0']))*((params['Phi_0']-arg)/params['Phi_0'])**(-(params['p']+1))
-    C=((1*params['p']*params['sat_xylem'])/(params['Phi_0']))*((params['Phi_0']-arg)/params['Phi_0'])**(-(params['p']+1))
+    C=((params['Aind_r']*params['p']*params['sat_xylem'])/(params['Phi_0']))*((params['Phi_0']-arg)/params['Phi_0'])**(-(params['p']+1))
 
     return C, K, stress_kr
 
