@@ -29,9 +29,8 @@ df_verma.index = step_time_hh
 df_rain.index = step_time_hh
 
 #To simulate a shorther period of time
-#df_rain=df_rain.loc['2007-01-01 1:00:00':]
-#df_verma=df_verma.loc['2007-01-01 1:00:00':]
-
+df_rain=df_rain.loc[:'2007-03-01 00:00:00']
+df_verma=df_verma.loc[:'2007-03-01 00:00:00']
 
 Precipitation=df_rain.values
 Precipitation=Precipitation.reshape(len(Precipitation))
@@ -261,7 +260,7 @@ for i in np.arange(0,len(VPD),1):
 z_LAD=z_Above[1:]    
 LAD=np.zeros(shape=(int(params['Hspec']/dz)))  #[1/m]
 
-params['L_m']=0.2  #maximum value of LAD a canopy layer
+params['L_m']=0.4  #maximum value of LAD a canopy layer
 params['z_m']=11   #height in which L_m is found [m]
 
 #LAD function according to Lalic et al 2014
@@ -269,14 +268,10 @@ params['z_m']=11   #height in which L_m is found [m]
 for i in np.arange(0,len(z_LAD),1):
     if  0.1<=z_LAD[i]<params['z_m']:
         LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**6)*np.exp(6*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
-    if z_LAD[i]==params['z_m']:
-        LAD[i]=0.2
-    if  params['z_m']<z_LAD[i]<params['Hspec']:
+    if  params['z_m']<=z_LAD[i]<params['Hspec']:
         LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**0.5)*np.exp(0.5*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
     if z_LAD[i]==params['Hspec']:
         LAD[i]=0    
-
-
 
 ############ INITIAL conditions according to VERMA ET AL., 2014 
 #soil initial conditions as described in the paper [VERMA et al., 2014]
