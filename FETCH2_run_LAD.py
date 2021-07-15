@@ -21,14 +21,11 @@ from FETCH2_loading_LAD import tmax
 from FETCH2_loading_LAD import dz
 from FETCH2_loading_LAD import nz
 from FETCH2_loading_LAD import nz_r
-from FETCH2_loading_LAD import nz_Above
 from FETCH2_loading_LAD import nz_s
 from FETCH2_loading_LAD import z
-from FETCH2_loading_LAD import z_root
 from FETCH2_loading_LAD import z_soil
 from FETCH2_loading_LAD import z_upper
 from FETCH2_loading_LAD import Soil_depth
-from FETCH2_loading_LAD import z_Above
 from FETCH2_loading_LAD import stop_tol
 
 from FETCH2_loading_LAD import Root_depth
@@ -36,14 +33,6 @@ from FETCH2_loading_LAD import q_rain
 from FETCH2_loading_LAD import step_time
 from FETCH2_loading_LAD import Head_bottom_H
 from FETCH2_loading_LAD import H_initial
-from FETCH2_loading_LAD import f_d
-from FETCH2_loading_LAD import f_s
-from FETCH2_loading_LAD import f_Ta
-from FETCH2_loading_LAD import VPD
-from FETCH2_loading_LAD import NET
-from FETCH2_loading_LAD import delta
-from FETCH2_loading_LAD import e_sat
-from FETCH2_loading_LAD import Ta
 from FETCH2_loading_LAD import S
 from FETCH2_loading_LAD import nz_sand
 from FETCH2_loading_LAD import nz_clay
@@ -120,7 +109,8 @@ def Porous_media_root(arg,params,dz,theta):
             stress_kr[i]=(1-1/(1+scipy.exp(params['ap']*(arg[i]-params['bp']))))  #CAVITATION CURVE FOR THE ROOT XYLEM
     
     
-    #Index Ar/As - area of root xylem per area of soil - considered 1 following VERMA ET AL 2014 {for this case}
+    #Index Ar/As - area of root xylem per area of soil
+    #considered 1 following VERMA ET AL 2014 {for this case}
 
     #Keax = effective root axial conductivity 
     K=params['Ksax']*params['Aind_r']*stress_kr #[m2/s Pa]
@@ -489,7 +479,7 @@ def Picard(H_initial):
                 if BottomBC==0:    
                     hnp1mp1[0] = Head_bottom_H[i]
                 
-                if np.mod(t_num[i],1800)==0:
+                if np.mod(t_num[i],1800)==0: #saving output variables every 30min 
                     sav=sav+1
 
                     H[:,sav] = hnp1mp1 #saving potential
@@ -596,6 +586,6 @@ plt.ylabel('$\Phi$ (MPa) - soil')
 d = {'trans':(sum(trans_2d[:,:]*dz)*1000)} #mm/s
 df_EP = pd.DataFrame(data=d,index=step_time[:])
 
-trans_h=dt*df_EP['trans'].resample('60T').sum() # hourly accumulated
+trans_h=dt*df_EP['trans'].resample('60T').sum() # hourly accumulated simulated transpiration
 
 
