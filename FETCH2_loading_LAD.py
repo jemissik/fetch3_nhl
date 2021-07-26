@@ -5,7 +5,7 @@ Created on Wed Mar 20 07:07:38 2019
 
 @author: mdef0001
 """
-
+from pathlib import Path
 import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
@@ -33,10 +33,11 @@ from scipy.interpolate import interp1d
 
 ############################## Opening files as dataframes #######################
 
-path_1= r'C:\Users\marce\Desktop\Verma_data\layers_soil\Kaxial_cte\Verma cavitation\EP_BC\codes_verma_dz\Precipitation_Verma.csv'
+BASE = Path.cwd()
+path_1= BASE / "Precipitation_Verma.csv"
 df_rain=pd.read_csv(path_1, float_precision='high',header=None)
 
-path_2 = r'C:\Users\marce\Desktop\Verma_data\layers_soil\Kaxial_cte\Verma cavitation\EP_BC\codes_verma_dz\Derek_data_up.csv'
+path_2 = BASE / "Derek_data_up.csv"
 
 date1 = pd.to_datetime('2007-01-01 00:00:00') #begining of simulation
 date2=pd.to_datetime('2007-06-09 00:00:00')   #end of simulation 

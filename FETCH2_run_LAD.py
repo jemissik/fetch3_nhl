@@ -14,55 +14,10 @@ from numpy.linalg import multi_dot
 from scipy.interpolate import interp1d
 
 #importing variables 
-from FETCH2_loading_LAD import params
-from FETCH2_loading_LAD import dt0
-from FETCH2_loading_LAD import dt
-from FETCH2_loading_LAD import tmax
-from FETCH2_loading_LAD import dz
-from FETCH2_loading_LAD import nz
-from FETCH2_loading_LAD import nz_r
-from FETCH2_loading_LAD import nz_s
-from FETCH2_loading_LAD import z
-from FETCH2_loading_LAD import z_soil
-from FETCH2_loading_LAD import z_upper
-from FETCH2_loading_LAD import Soil_depth
-from FETCH2_loading_LAD import stop_tol
-
-from FETCH2_loading_LAD import Root_depth
-from FETCH2_loading_LAD import q_rain
-from FETCH2_loading_LAD import step_time
-from FETCH2_loading_LAD import Head_bottom_H
-from FETCH2_loading_LAD import H_initial
-from FETCH2_loading_LAD import S
-from FETCH2_loading_LAD import nz_sand
-from FETCH2_loading_LAD import nz_clay
-from FETCH2_loading_LAD import clay_d
-
-from FETCH2_loading_LAD import f_Ta_2d
-from FETCH2_loading_LAD import f_s_2d
-from FETCH2_loading_LAD import f_d_2d
-from FETCH2_loading_LAD import VPD_2d
-from FETCH2_loading_LAD import NET_2d
-from FETCH2_loading_LAD import delta_2d
-
-
-from FETCH2_loading_LAD import LAD
-from FETCH2_loading_LAD import hx50
-from FETCH2_loading_LAD import ga
-from FETCH2_loading_LAD import gama
-from FETCH2_loading_LAD import lamb
-from FETCH2_loading_LAD import Cp
-from FETCH2_loading_LAD import gb
-from FETCH2_loading_LAD import gsmax
-from FETCH2_loading_LAD import nl
-from FETCH2_loading_LAD import Emax
-
-
-from FETCH2_loading_LAD import UpperBC
-from FETCH2_loading_LAD import BottomBC
-
-
-
+from FETCH2_loading_LAD import params, dt0, dt, tmax, dz, nz, nz_r, nz_s, z, z_soil, z_upper, Soil_depth, stop_tol, \
+    Root_depth, q_rain, step_time, Head_bottom_H, H_initial, S, nz_sand, nz_clay, clay_d, \
+    f_Ta_2d, f_s_2d, f_d_2d, VPD_2d, NET_2d, delta_2d, \
+    LAD, hx50, ga, gama, lamb, Cp, gb, gsmax, nl, Emax, UpperBC, BottomBC
 
 ############## inital condition #######################
 
