@@ -63,7 +63,7 @@ params={}
 params['Rho']=1000       #[kg/m3]
 params['g']=9.8          #[m/s2]
 
-#SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPD
+#SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
 
 #CLAY
 params['alpha_1']=0.8                        #soil hydraulic parameter [1/m]
@@ -81,6 +81,13 @@ params['n_2']=2.4
 params['m_2']=1-(1/params['n_2'])
 params['Ksat_2']=3.45*10**(-5)
 
+#Soil stress parameters
+theta_1_clay=0.08
+theta_2_clay=0.12
+            
+theta_1_sand=0.05
+theta_2_sand=0.09
+
 
 #ROOT PARAMETERS 
 #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
@@ -91,7 +98,7 @@ params['Aind_r']=1                                       #m2 root xylem/m2 groun
 
 
 #XYLEM PARAMETERS
-params['kmax']=(10**(-5))/(params['Rho']*params['g'])    #conductivity of xylem  [ m/s]
+params['kmax']=(10**(-5))/(params['Rho']*params['g'])    #conductivity of xylem  [ m2/sPa]
 params['ap']=2*10**(-6)                                  #xylem cavitation parameter [Pa-1]
 params['bp']=-1.5*10**(6)                                #xylem cavitation parameter [Pa]
 params['Aind_x']=8.62*10**(-4)                           #m2 xylem/m2 ground]  
