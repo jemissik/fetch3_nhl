@@ -1,5 +1,19 @@
 import numpy as np
 
+def calc_Kg(Ta):
+    """
+    Calculate the temperature-dependent conductance coefficient
+    From Ewers et al 2007
+    Equation A.2 from Mirfenderesgi et al 2016
+    Inputs:
+    Ta : air temperature [deg C]
+
+    Outputs:
+    Kg: temperature-dependent conductance coefficient [kPa m3 kg-1]
+    """
+
+    Kg = 115.8 * 0.4236 * Ta
+    return Kg
 
 def calc_mixing_length(z, h, alpha = 0.4/3):
     """
