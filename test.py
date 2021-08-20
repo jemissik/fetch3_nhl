@@ -31,6 +31,20 @@ def calc_mixing_length(z, h, alpha = 0.4/3):
 
 # TODO: Solve Km and Uz
 
+def calc_uz(Uz, ustar):
+    """
+    Calculates the wind speed at canopy height z adjusted by the friction velocity
+    Eqn A.5 from Mirfenderesgi et al 2016
+
+    Inputs:
+    Uz : wind speed at height z [m s-1]
+    ustar : friction velocity [m s-1]
+
+    Outputs:
+     uz : wind speed [m s-1] at canopy height z adjusted by the friction velocity
+    """
+    uz = Uz*ustar
+    return uz
 
 def thomas_tridiagonal (aa, bb, cc, dd):
     """
