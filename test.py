@@ -21,7 +21,7 @@ def calc_mixing_length(z, h, alpha = 0.4/3):
     mixing_length : mixing length [m] at each height in z
     """
 
-    dz = z[1] - z[0]  # Calculate the vertical discretization interval
+    dz = z[1] - z[0]  # Vertical discretization interval
     d = 0.67 * h  # zero-plane displacement height [m]
     subcanopy_height = (alpha * h - 2 * dz) / 0.2
 
@@ -30,3 +30,36 @@ def calc_mixing_length(z, h, alpha = 0.4/3):
     return mixing_length
 
 # TODO: Solve Km and Uz
+
+
+def thomas_tridiagonal (aa, bb, cc, dd):
+    """
+    Thomas algorithm for solving tridiagonal matrix
+    TODO Add documentation
+    Inputs:
+
+    Outputs:
+    """
+
+    #initialize arrays
+    n = len(bb)
+    bet = np.zeros(n)
+    gam = np.zeros(n)
+    q = np.zeros(n)
+
+    bet[0] = bb[0]
+    gam[0] = dd[0]/bb[0]
+
+    for i in range(1, n):
+        bet[i] = bb[i] - (aa[i] * cc[i - 1] / bet[i - 1])
+        gam[i] = (dd[i] - aa[i] * gam[i - 1]) / bet[i]
+
+    q[n-1] = gam[n-1]
+
+    for i in range(n-2, -1, -1):
+        q[i] = gam[i]-(cc[i]*q[i+1]/bet[i])
+
+    return q
+
+
+
