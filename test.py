@@ -43,7 +43,6 @@ def calc_mixing_length(z, h, alpha = 0.4/3):
                                  [lambda z: 0.2 * z + 2 * dz, alpha * h, lambda z: 0.4 * (z - d) + alpha * h])
     return mixing_length
 
-
 def calc_uz(Uz, ustar):
     """
     Calculates the wind speed at canopy height z adjusted by the friction velocity
@@ -88,7 +87,6 @@ def thomas_tridiagonal (aa, bb, cc, dd):
 
     return q
 
-
 def solve_Uz(z, mixing_length,Cd ,a_s, U_top):
     """
     Solves the momentum equation to calculate the vertical wind profile.
@@ -100,7 +98,7 @@ def solve_Uz(z, mixing_length,Cd ,a_s, U_top):
     z : vector of heights [m]
     mixing_length : mixing length [d] at each height in z
     Cd : drag coefficient [unitless], assumed to be 0.2 (Katul et al 2004)
-    TODO a_s: leaf surface area
+    TODO a_s: leaf surface area [m2]
     U_top : Measured wind speed at top of canopy [m s-1]
 
     Outputs:
@@ -160,4 +158,22 @@ def solve_Uz(z, mixing_length,Cd ,a_s, U_top):
         U = eps1 * Un + (1 - eps1) * U
 
     return U, Km
+
+def calc_gb(uz, d):
+    """
+    Calculate the leaf boundary layer conductance
+
+    Inputs:
+    ________
+    uz: wind speed at canopy height z [m s-1]
+    d: characteristic leaf length [m]
+
+    Outputs:
+    ________________
+    gb: leaf boundary layer conductance [mol m-2 s-1]
+    TODO figure out where the units for gb come from
+
+    """
+    gb = 0.147 * (uz/d)**0.5
+    return gb
 
