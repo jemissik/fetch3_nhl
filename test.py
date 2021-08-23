@@ -161,7 +161,7 @@ def solve_Uz(z, mixing_length,Cd ,a_s, U_top):
 
 def calc_gb(uz, d):
     """
-    Calculate the leaf boundary layer conductance
+    Calculates the leaf boundary layer conductance
 
     Inputs:
     ________
@@ -176,4 +176,22 @@ def calc_gb(uz, d):
     """
     gb = 0.147 * (uz/d)**0.5
     return gb
+
+def calc_geff(gb, gs):
+    """
+    Calculates the effective leaf conductance
+    Eqn A.3 of Mirfenderesgi
+
+    Inputs:
+    ----------
+    gb : boundary layer conductance [mol m-2 s-1]
+    gs : stomatal conductance [mol m-2 s-1]
+
+    Outputs:
+    -------
+    geff : effective leaf conductance [mol m-2 s-1]
+
+    """
+    geff = (gb * gs) / (gb + gs)
+    return geff
 
