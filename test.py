@@ -195,3 +195,41 @@ def calc_geff(gb, gs):
     geff = (gb * gs) / (gb + gs)
     return geff
 
+def calc_zenith_angle(doy, lat, long, standard_meridian, time_of_day):
+    """
+    Calculates the solar zenith angle, based on Campbell & Norman, 1998
+
+    Inputs:
+    ----------
+    doy : Day of year (Ordinal day, e.g. 1 = Jan 1)
+    lat : Latitude
+    long : Longitude (Needs to be negative for deg W, positive for deg E)
+    standard_meridian : Standard meridian [deg] for the given location (Needs to be negative for deg W, positive for deg E)
+    time_of_day : Time of day (hours) in local standard time
+
+    Outputs:
+    -------
+    zenith_angle_deg : zenith angle of the sun [degrees]
+
+    """
+    # Calculate the solar declination angle, Eqn 11.2, Campbell & Norman
+    declination_angle_rad = np.arcsin(0.39785 * np.sin(np.deg2rad(278.97 + 0.9856 * doy + 1.9165 * np.sin(np.deg2rad(356.6 + 0.9856 * doy)))))
+
+    # Calculate the equation of time, Eqn 11.4, Campbell & Norman
+    f = np.deg2rad(279.575 + 0.98565) # in radians
+    ET = (-104.7 * np.sin(f) + 596.2 * np.sin(2 * f) + 4.3 * np.sin (3 * f) - 12.7 * np.sin(4 * f) - 429.3 * np.cos (f) - 2.0 * np.cos(2 * f) + 19.3 * np.cos(3 * f))/3600
+
+    # Calculate the longitude correction
+    # + 1/15 or an hour for each degree east of standard meridian
+    # - 1/15 or an hour for each degree west of standard meridian
+    long_correction = (long - standard_meridian) * 1/15
+
+    # Calculate the time of solar noon (t0), Eqn 11.3, Campbell & Norman
+    t0 = 12 - long_correction - ET
+
+    # Calculate the zenith angle, Eqn 11.1, Campbell & Norman
+    lat_rad = np.deg2rad(lat)
+    zenith_angle_rad = np.arccos(np.sin(lat_rad) * np.sin(declination_angle_rad) + np.cos(lat_rad) * np.cos(declination_angle_rad) * np.cos(np.pi/12 * (time_of_day - t0)))
+    zenith_angle_deg = np.rad2deg(zenith_angle_rad)
+
+    return zenith_angle_deg
