@@ -53,7 +53,7 @@ def calc_uz(Uz, ustar):
     ustar : friction velocity [m s-1]
 
     Outputs:
-     uz : wind speed [m s-1] at canopy height z adjusted by the friction velocity
+    uz : wind speed [m s-1] at canopy height z adjusted by the friction velocity
     """
     uz = Uz*ustar
     return uz
@@ -229,7 +229,31 @@ def calc_zenith_angle(doy, lat, long, standard_meridian, time_of_day):
 
     # Calculate the zenith angle, Eqn 11.1, Campbell & Norman
     lat_rad = np.deg2rad(lat)
-    zenith_angle_rad = np.arccos(np.sin(lat_rad) * np.sin(declination_angle_rad) + np.cos(lat_rad) * np.cos(declination_angle_rad) * np.cos(np.pi/12 * (time_of_day - t0)))
+    zenith_angle_rad = np.arccos(np.sin(lat_rad) * np.sin(declination_angle_rad)
+                                 + np.cos(lat_rad) * np.cos(declination_angle_rad) * np.cos(np.pi/12 * (time_of_day - t0)))
     zenith_angle_deg = np.rad2deg(zenith_angle_rad)
 
     return zenith_angle_deg
+
+def calc_rad_attenuation(zenith_angle, LAI, Cf = 0.85, x = 1):
+    """
+    Calculates the vertical attenuation of radiation through the canopy
+
+    Inputs:
+    ----------
+    zenith_angle
+    LAI : Normalized leaf area index at each height in z
+    Cf : Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
+    x : Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+
+    Outputs:
+    -------
+    P0 : attenuation fraction of PAR penetrating the canopy at each level z [unitless]
+    # TODO MATLAB version has both LAI and LAD in parameters, only LAD is used. What are the correct units? 
+    # TODO MATLAB version flips the arrays... why? needs to be done here? 
+    """
+    # Calculate the light extinction coefficient (unitless)
+    k = (((x**2 + np.tan(np.deg2rad(zenith_angle)) ** 2) ** 0.5) * np.cos(np.deg2rad(zenith_angle))) / (x + 1.744 * (x + 1.182) ** 0.773)
+
+    # Calculate P0
+    P0 = np.exp(k * LAI * Cf)
