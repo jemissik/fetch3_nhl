@@ -235,12 +235,13 @@ def calc_zenith_angle(doy, lat, long, standard_meridian, time_of_day):
 
     return zenith_angle_deg
 
-def calc_rad_attenuation(zenith_angle, LAI, Cf = 0.85, x = 1):
+def calc_rad_attenuation(PAR, zenith_angle, LAI, Cf = 0.85, x = 1):
     """
     Calculates the vertical attenuation of radiation through the canopy
 
     Inputs:
     ----------
+    PAR : photosynthetically active radiation at canopy top [umol m-2 s-1]
     zenith_angle
     LAI : Normalized leaf area index at each height in z
     Cf : Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
@@ -249,11 +250,15 @@ def calc_rad_attenuation(zenith_angle, LAI, Cf = 0.85, x = 1):
     Outputs:
     -------
     P0 : attenuation fraction of PAR penetrating the canopy at each level z [unitless]
+    Qp : absorbed photosynthetically active radiation at each level within the canopy
     # TODO MATLAB version has both LAI and LAD in parameters, only LAD is used. What are the correct units? 
     # TODO MATLAB version flips the arrays... why? needs to be done here? 
     """
     # Calculate the light extinction coefficient (unitless)
     k = (((x**2 + np.tan(np.deg2rad(zenith_angle)) ** 2) ** 0.5) * np.cos(np.deg2rad(zenith_angle))) / (x + 1.744 * (x + 1.182) ** 0.773)
 
-    # Calculate P0
+    # Calculate P0 and Qp
     P0 = np.exp(k * LAI * Cf)
+    Qp = P0 * PAR
+    
+    return P0, Qp
