@@ -30,6 +30,6 @@ met_data = pd.DataFrame(mat['DCRU'], columns = ['DOY', 'CO2', 'RH', 'Ustar', 'U_
 params = pd.DataFrame(np.reshape(mat['params'], (-1, 3)), index = species, columns = ['Vcmax', 'alpha', 'alpha_p'])
 
 # LAD data 
-LAD_data = pd.DataFrame(mat['LAD'])
-LAD_data.drop(4, axis = 1, inplace = True) # drop the extra column of LAD data... there were 5 columns but 4 species
-LAD_data.columns = mat['fn']
+LAD = pd.DataFrame(mat['LAD'])
+LAD.drop(4, axis = 1, inplace = True) # drop the extra column of LAD data... there were 5 columns but 4 species
+LAD.columns = mat['fn']

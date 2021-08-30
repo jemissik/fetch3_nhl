@@ -1,5 +1,45 @@
 import numpy as np
 
+def esat(Tair):
+	'''
+    Calculates the saturation vapor pressure using the Clausius-Clapeyron equation
+
+	Inputs:
+	Tair: Air temperature [degrees C]
+
+	Outputs:
+	The saturation vapor pressure [kPa]
+	'''
+
+	#constants
+	e0 = 0.611 #kPa
+	T0 = 273 #K
+	Rv = 461 #J K-1 kg -1, gas constant for water vapor
+	Lv = 2.5 * 10**6 #J kg-1
+
+	Tair = Tair + 273.15 #convert temperature to Kelvin
+
+
+	return e0 * np.exp((Lv/Rv)*(1/T0 - 1/Tair))
+
+def vpd_kPa(Tair, RH):
+	'''
+    Calculates vapor pressure deficit from air temperature and relative humidity.
+
+	Inputs:
+	Tair: Air temperature [degrees C]
+	RH: relative humidity [%]
+
+	Outputs:
+	Vapor pressure deficit [kPa]
+	'''
+
+	#calculate esat
+	es = esat(Tair)
+	eactual = RH*es/100
+
+	return (es - eactual)
+
 def calc_Kg(Ta):
     """
     Calculate the temperature-dependent conductance coefficient
@@ -107,7 +147,7 @@ def solve_Uz(z, mixing_length,Cd ,a_s, U_top):
     U : wind speed at each height in z [m s-1]
     """
 
-    dz = z[1] - z[0]  # Vertical discretization intervals
+    dz = z[1] - z[0]  # Vertical discretization interval
     n = len(z)
     U_bottom = 0  # no-slip boundary
     U = np.linspace(U_bottom, U_top, n)  # Vertical wind speed profile, beginning iteration with linear profile
@@ -220,8 +260,8 @@ def calc_zenith_angle(doy, lat, long, standard_meridian, time_of_day):
     ET = (-104.7 * np.sin(f) + 596.2 * np.sin(2 * f) + 4.3 * np.sin (3 * f) - 12.7 * np.sin(4 * f) - 429.3 * np.cos (f) - 2.0 * np.cos(2 * f) + 19.3 * np.cos(3 * f))/3600
 
     # Calculate the longitude correction
-    # + 1/15 or an hour for each degree east of standard meridian
-    # - 1/15 or an hour for each degree west of standard meridian
+    # + 1/15 of an hour for each degree east of standard meridian
+    # - 1/15 of an hour for each degree west of standard meridian
     long_correction = (long - standard_meridian) * 1/15
 
     # Calculate the time of solar noon (t0), Eqn 11.3, Campbell & Norman
