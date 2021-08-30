@@ -107,7 +107,7 @@ def solve_Uz(z, mixing_length,Cd ,a_s, U_top):
     U : wind speed at each height in z [m s-1]
     """
 
-    dz = z[1] - z[0]  # Vertical discretization interval
+    dz = z[1] - z[0]  # Vertical discretization intervals
     n = len(z)
     U_bottom = 0  # no-slip boundary
     U = np.linspace(U_bottom, U_top, n)  # Vertical wind speed profile, beginning iteration with linear profile
