@@ -306,9 +306,41 @@ def calc_rad_attenuation(PAR, zenith_angle, LAI, Cf = 0.85, x = 1):
     
     return P0, Qp
 
+def calc_gs_Leuning(g0, g1, A, c_s, gamma_star, VPD, D0 = 3):
+    """
+    [Calculates gs according to Leuning 1995 
+    TODO check units for gs of CO2 vs H2O.. is there some multiplier?]
+
+    Parameters
+    ----------
+    g0 : [mol m-2 s-1]
+        [cuticular conductance, residual stomatal conductance at the light compensation point (empirically fitted parameter)]
+    g1 : [unitless]
+        [empirically fitted parameter]
+    A : [umol CO2 m-2 s-1]
+        [net CO2 assimilation rate]
+    c_s : [umol mol-1]
+        [atmospheric CO2 concentration]
+    gamma_star : [umol mol-1]
+        [CO2 compensation point]
+    VPD : [kPa]
+        [VPD TODO Should be the humidity deficit at the leaf surface]
+    D0 : [kPa]
+        [reference vapor pressure, assumed to be 3.0 kPa]
+
+    Returns
+    -------
+    gs [mol H2O m-2 s-1]
+        [stomatal conductance]
+    """
+    
+    gs = g0 + g1 * A/((c_s - gamma_star)(1 - VPD/D0))
+    return gs
+
 def physiological_model(Tair, VPD, Qp, Ca, U, Vcmax, alpha_p):
     """
     Calculates photosynthesis and stomatal conductance
+    Uses Leuning model for stomatal conductance
 
     Parameters
     ----------
