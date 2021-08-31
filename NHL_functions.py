@@ -1,6 +1,6 @@
 import numpy as np
 
-def esat(Tair):
+def calc_esat(Tair):
 	'''
     Calculates the saturation vapor pressure using the Clausius-Clapeyron equation
 
@@ -22,7 +22,7 @@ def esat(Tair):
 
 	return e0 * np.exp((Lv/Rv)*(1/T0 - 1/Tair))
 
-def vpd_kPa(Tair, RH):
+def calc_vpd_kPa(Tair, RH):
 	'''
     Calculates vapor pressure deficit from air temperature and relative humidity.
 
@@ -35,7 +35,7 @@ def vpd_kPa(Tair, RH):
 	'''
 
 	#calculate esat
-	es = esat(Tair)
+	es = calc_esat(Tair)
 	eactual = RH*es/100
 
 	return (es - eactual)
@@ -235,7 +235,7 @@ def calc_geff(gb, gs):
     geff = (gb * gs) / (gb + gs)
     return geff
 
-def calc_zenith_angle(doy, lat, long, standard_meridian, time_of_day):
+def calc_zenith_angle(doy, lat, long, time_offset, time_of_day):
     """
     Calculates the solar zenith angle, based on Campbell & Norman, 1998
 
@@ -244,7 +244,7 @@ def calc_zenith_angle(doy, lat, long, standard_meridian, time_of_day):
     doy : Day of year (Ordinal day, e.g. 1 = Jan 1)
     lat : Latitude
     long : Longitude (Needs to be negative for deg W, positive for deg E)
-    standard_meridian : Standard meridian [deg] for the given location (Needs to be negative for deg W, positive for deg E)
+    time_offset : Time offset [in hours] for local standard time zone, e.g, for Pacific Standard Time, time_offset = -8 
     time_of_day : Time of day (hours) in local standard time
 
     Outputs:
@@ -252,6 +252,9 @@ def calc_zenith_angle(doy, lat, long, standard_meridian, time_of_day):
     zenith_angle_deg : zenith angle of the sun [degrees]
 
     """
+    # Calculate the standard meridian (in degrees) from the time zone offset 
+    standard_meridian = time_offset * 15 
+    
     # Calculate the solar declination angle, Eqn 11.2, Campbell & Norman
     declination_angle_rad = np.arcsin(0.39785 * np.sin(np.deg2rad(278.97 + 0.9856 * doy + 1.9165 * np.sin(np.deg2rad(356.6 + 0.9856 * doy)))))
 
@@ -302,3 +305,37 @@ def calc_rad_attenuation(PAR, zenith_angle, LAI, Cf = 0.85, x = 1):
     Qp = P0 * PAR
     
     return P0, Qp
+
+def physiological_model(Tair, VPD, Qp, Ca, U, Vcmax, alpha_p):
+    """
+    Calculates photosynthesis and stomatal conductance
+
+    Parameters
+    ----------
+    Tair : [deg C]
+        [Air temperature]
+    VPD : [Kpa]
+        Vapor pressure deficit
+    Qp : [type]
+        [description]
+    Ca : [type]
+        CO2 concentration
+    U : Wind speed of
+        [description]
+    Vcmax : [type]
+        Farquhar model parameter
+    alpha_p : [type]
+        Farquhar model parameter
+    
+    Outputs
+    -------
+    An
+    gs
+    Ci
+    Cs
+    gb
+    geff
+    
+        
+        
+    """
