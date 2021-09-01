@@ -441,7 +441,7 @@ def solve_leaf_physiology(Tair, VPD, Qp, Ca, U, Vcmax25, alpha_p, d = 0.0015, D0
 
     return A, gs, Ci, Cs, gb, geff
 
-def calc_h2o_source_leaf(VPD, Tair, geff, Press): 
+def calc_transpiration_leaf(VPD, Tair, geff, Press): 
     """
     Calculates the water vapor source from the leaf 
 
@@ -463,6 +463,27 @@ def calc_h2o_source_leaf(VPD, Tair, geff, Press):
     """
     Kg = calc_Kg(Tair)  #kPa m3 kg-1
     rhov = 44.6 * Press / 101.3 * 273.15 / (Tair + 273.15)  # water vapor density, mol m-3 
-    h2o_source_leaf = 0.4 * (geff * VPD) / (Kg * rhov)  # kg s-1 m-2_leaf  TODO where does the 0.4 come from? 
+    transpiration_leaf = 0.4 * (geff * VPD) / (Kg * rhov)  # kg s-1 m-2_leaf  TODO where does the 0.4 come from? 
     
-    return h2o_source_leaf
+    return transpiration_leaf
+
+def calc_respiration(Tair): 
+    """
+    Calculates respiration
+    Based on Q10 model 
+
+    Parameters
+    ----------
+    Tair : [deg C]
+        Air temperature
+
+    Returns
+    -------
+    [umol CO2 m-2 s-1]
+        Respiration
+    """
+    Tr = 10
+    RE10 = 2.6
+    Q10 = 2.25
+    Re = RE10 * Q10 **((Tair - Tr)/Tr)
+    return Re
