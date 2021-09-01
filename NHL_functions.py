@@ -199,9 +199,11 @@ def solve_Uz(z, mixing_length,Cd ,a_s, U_top):
 
     return U, Km
 
-def calc_gb(uz, d):
+def calc_gb(uz, d = 0.0015):
     """
-    Calculates the leaf boundary layer conductance
+    Calculates the leaf boundary layer conductance and resistance, assuming laminar boundary layer 
+    TODO See Monteith & Unsworth 2013? or another source? 
+    TODO Need to make separate functions for water vapor and CO2 
 
     Inputs:
     ________
@@ -210,12 +212,17 @@ def calc_gb(uz, d):
 
     Outputs:
     ________________
-    gb: leaf boundary layer conductance [mol m-2 s-1]
-    TODO figure out where the units for gb come from
+    gb: leaf boundary layer conductance [TODO units??]
+    rb: leaf boundary layer resistance [TODO units??]
+    
+    References
+    ----------
+    Monteith J, Unsworth M. Principles of environmental physics: plants, animals, and the atmosphere. Academic Press; 2013 Jul 26.
 
     """
-    gb = 0.147 * (uz/d)**0.5
-    return gb
+    rb = (395 * 29 / 1150) * (d / (np.sqrt(uz ** 2) + 0.001)) ** 0.5  #TODO change sqrt (u^2) part 
+    gb = 1/rb
+    return gb, rb
 
 def calc_geff(gb, gs):
     """
@@ -306,7 +313,7 @@ def calc_rad_attenuation(PAR, zenith_angle, LAI, Cf = 0.85, x = 1):
     
     return P0, Qp
 
-def calc_gs_Leuning(g0, g1, A, c_s, gamma_star, VPD, D0 = 3):
+def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
     """
     [Calculates gs according to Leuning 1995 
     TODO check units for gs of CO2 vs H2O.. is there some multiplier?]
@@ -315,7 +322,7 @@ def calc_gs_Leuning(g0, g1, A, c_s, gamma_star, VPD, D0 = 3):
     ----------
     g0 : [mol m-2 s-1]
         [cuticular conductance, residual stomatal conductance at the light compensation point (empirically fitted parameter)]
-    g1 : [unitless]
+    m : [unitless]
         [empirically fitted parameter]
     A : [umol CO2 m-2 s-1]
         [net CO2 assimilation rate]
@@ -334,10 +341,10 @@ def calc_gs_Leuning(g0, g1, A, c_s, gamma_star, VPD, D0 = 3):
         [stomatal conductance]
     """
     
-    gs = g0 + g1 * A/((c_s - gamma_star)(1 - VPD/D0))
+    gs = g0 + m * A/((c_s - gamma_star)(1 - VPD/D0))
     return gs
 
-def physiological_model(Tair, VPD, Qp, Ca, U, Vcmax, alpha_p):
+def solve_leaf_physiology(Tair, VPD, Qp, Ca, U, Vcmax25, alpha_p, d = 0.0015, D0 = 3):
     """
     Calculates photosynthesis and stomatal conductance
     Uses Leuning model for stomatal conductance
@@ -354,20 +361,82 @@ def physiological_model(Tair, VPD, Qp, Ca, U, Vcmax, alpha_p):
         CO2 concentration
     U : Wind speed of
         [description]
-    Vcmax : [type]
+    Vcmax25 : [type]
         Farquhar model parameter
     alpha_p : [type]
         Farquhar model parameter
+    d : [m]
+        Leaf length scale for aerodynamic resistance 
+    D0 : [kPa]
+        [reference vapor pressure, assumed to be 3.0 kPa]
     
     Outputs
     -------
-    An
-    gs
-    Ci
-    Cs
-    gb
-    geff
-    
-        
-        
+    A : photosynthesis [umol m-2 s-1]
+    gs : stomatal conductance [mol m-2 s-1]
+    Ci : intracellular CO2 concentration [umol mol-1]
+    Cs : CO2 concentration at leaf surface [umol mol-1]
+    gb : boundary layer conductance [mol m-2 s-1]
+    geff : effective leaf conductance [mol m-2 s-1]
+
     """
+    # Parameters
+    #Farquhar model
+    Kc25 = 300 # [umol mol-1] Michaelis-Menten constant for CO2, at 25 deg C
+    Ko25 = 300 # [mmol mol-1] Michaelis-Menten constant for O2, at 25 deg C
+    e_m = 0.08 # [mol mol-1]
+    o = 210 #[mmol mol-1]
+    #Leuning model 
+    g0 = 0.01 #[mol m-2 s-1]
+    m = 4.0  #unitless 
+    
+    # Adjust the Farquhar model parameters for temperature 
+    Vcmax = Vcmax25 * np.exp( 0.088 * (Tair - 25)) / (1 + np.exp(0.29 * (Tair - 41)))
+    Kc = Kc25 * np.exp(0.074 * (Tair -25))
+    Ko = Ko25 * np.exp(0.018 * (Tair - 25))
+    
+    #Calculate gamma_star and Rd 
+    Rd = 0.015 * Vcmax  # Dark respiration [umol m-2 s-1]
+    gamma_star = (3.69 + 0.188 * (Tair - 25) + 0.0036 * (Tair -25 ) ** 2) * 10
+    
+    # equation for RuBP saturated rate of CO2 assimilation
+    def calc_Ac(Vcmax, Ci, gamma_star, Kc, o, Ko, Rd): 
+        return Vcmax * (Ci - gamma_star)/(Ci + Kc * (1 + o / Ko)) - Rd
+    
+    # equation for RuBP limited rate of CO2 assimilation
+    def calc_Aj(alpha_p, e_m, Qp, Ci, gamma_star, Rd): 
+        return alpha_p * e_m * Qp * (Ci - gamma_star) / (Ci + 2 * gamma_star) - Rd
+    
+    # Solve for An, gs, and Ci
+    Ci = 0.99 * Ca
+    Cs = Ca  # CO2 concentration at the surface 
+    err = 10000
+    count = 0
+    while (max(err) > 0.01) & count < 200: 
+        
+        #Calculate photosynthesis
+        Ac = calc_Ac(Vcmax, Ci, gamma_star, Kc, o, Ko, Rd)
+        Aj = calc_Aj(alpha_p, e_m, Qp, Ci, gamma_star, Rd)
+        A = min(Ac, Aj)
+        
+        # Calculate stomatal conductance 
+        gs = calc_gs_Leuning(g0, m, A, Cs, gamma_star, VPD, D0 = D0)
+        
+        # Calculate leaf boundary layer resistance 
+        gb, rb = calc_gb(U, d)
+        Cs = max(Ca - A * rb, 0.1 * Ca)
+        Ci2 = Cs - A / gs
+        err = np.abs(Ci - Ci2)
+        Ci = Ci2
+        count += 1
+    
+    geff = calc_geff(gb, gs)  # TODO The same conductance is used for gb,co2 and gb,h2o. need to fix. 
+    
+    A[0] = A[1]
+    Ci[0] = Ci[1]
+    Cs[0]=Cs[1]
+    gs[0]=gs[1]
+    gb[0]=gb[1]
+    geff[0]=geff[1]
+
+    return A, gs, Ci, Cs, gb, geff
