@@ -52,7 +52,7 @@ def calc_Kg(Ta):
     Kg: temperature-dependent conductance coefficient [kPa m3 kg-1]
     """
 
-    Kg = 115.8 * 0.4236 * Ta
+    Kg = 115.8 * 0.4226 * Ta  #TODO is it .4226 or .4336, the appendix and code don't agree 
     return Kg
 
 def calc_mixing_length(z, h, alpha = 0.4/3):
@@ -440,3 +440,29 @@ def solve_leaf_physiology(Tair, VPD, Qp, Ca, U, Vcmax25, alpha_p, d = 0.0015, D0
     geff[0]=geff[1]
 
     return A, gs, Ci, Cs, gb, geff
+
+def calc_h2o_source_leaf(VPD, Tair, geff, Press): 
+    """
+    Calculates the water vapor source from the leaf 
+
+    Parameters
+    ----------
+    VPD : kPa
+        vapor pressure deficit
+    Tair : deg C
+        air :
+    geff : mol m-2_leaf s-1
+        effective leaf conductance 
+    Press : kPa
+        air pressure 
+
+    Returns
+    -------
+    [kg s-1 m-2_leaf]
+        water vapor source per unit leaf area
+    """
+    Kg = calc_Kg(Tair)  #kPa m3 kg-1
+    rhov = 44.6 * Press / 101.3 * 273.15 / (Tair + 273.15)  # water vapor density, mol m-3 
+    h2o_source_leaf = 0.4 * (geff * VPD) / (Kg * rhov)  # kg s-1 m-2_leaf  TODO where does the 0.4 come from? 
+    
+    return h2o_source_leaf
