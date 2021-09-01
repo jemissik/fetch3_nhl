@@ -487,3 +487,54 @@ def calc_respiration(Tair):
     Q10 = 2.25
     Re = RE10 * Q10 **((Tair - Tr)/Tr)
     return Re
+
+def solve_C_closure(z, h, Kc, Ca, S_initial, Re, Tair, VPD, Qp, U, a_s, Vcmax25, alpha_p):
+    
+    CF = 1.15 * 1000 / 29
+    Re = Re / CF
+    S = S_initial / CF
+    
+    dz = z[1] - z[0]
+    C = Ca
+    
+    #start iterative solution
+    err = 10 ** 9
+    while err > 0.0001:
+        # set up coefficients for ODE
+        a1 = Kc
+        dKc = np.concatenate(([Kc[1]-Kc[0]], np.diff(Kc)))  # Use Kc[1]-Kc[0] for first 2 elements of dKc
+        a2 = dKc / dz
+        a3 = 0 * z
+        a4 = S
+        
+        upd = (a1 / (dz * dz) + a2 / (2 * dz))
+        dia = (-a1 * 2 / (dz * dz) + a3)
+        lod = (a1 / (dz * dz) - a2 / (2 * dz))
+        co = a4
+        
+        lod[0] = 0
+        dia[0] = 1
+        upd[0] = -1
+        co[0] = Re * dz / (Kc[0] + 0.00001)
+        lod[-1] = 0
+        dia[-1] = 1
+        upd[-1] = 0
+        co[-1] = Ca[-1]
+        
+        # Use Thomas algorithm to solve 
+        Cn = thomas_tridiagonal(lod, dia, upd, co)
+        err = np.max(np.abs(Cn - C))
+        
+        #use successive relaxations in iterations
+        eps1 = 0.1
+        C = (eps1 * Cn + (1 - eps1) * C)
+        Ca = C
+        A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, VPD, Qp, Ca, U, Vcmax25, alpha_p, d = 0.0015, D0 = 3)
+        S = -A * a_s / CF
+    
+    # Fluxes are computed in umol/m2/s; Sources are computed in umol/m3/s
+    Fc = -np.concatenate(Re, np.diff(Kc)) / dz
+    Fc = CF * Fc
+    S = S * CF
+        
+    return C, Fc, S
