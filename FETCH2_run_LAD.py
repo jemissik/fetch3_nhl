@@ -11,72 +11,17 @@ import matplotlib.pyplot as plt
 from scipy import linalg
 import scipy
 from numpy.linalg import multi_dot
-from scipy.interpolate import interp1d
 
 #importing variables 
-from FETCH2_loading_LAD import params
-from FETCH2_loading_LAD import dt0
-from FETCH2_loading_LAD import dt
-from FETCH2_loading_LAD import tmax
-from FETCH2_loading_LAD import dz
-from FETCH2_loading_LAD import nz
-from FETCH2_loading_LAD import nz_r
-from FETCH2_loading_LAD import nz_Above
-from FETCH2_loading_LAD import nz_s
-from FETCH2_loading_LAD import z
-from FETCH2_loading_LAD import z_root
-from FETCH2_loading_LAD import z_soil
-from FETCH2_loading_LAD import z_upper
-from FETCH2_loading_LAD import Soil_depth
-from FETCH2_loading_LAD import z_Above
-from FETCH2_loading_LAD import stop_tol
-
-from FETCH2_loading_LAD import Root_depth
-from FETCH2_loading_LAD import q_rain
-from FETCH2_loading_LAD import step_time
-from FETCH2_loading_LAD import Head_bottom_H
-from FETCH2_loading_LAD import H_initial
-from FETCH2_loading_LAD import f_d
-from FETCH2_loading_LAD import f_s
-from FETCH2_loading_LAD import f_Ta
-from FETCH2_loading_LAD import VPD
-from FETCH2_loading_LAD import NET
-from FETCH2_loading_LAD import delta
-from FETCH2_loading_LAD import e_sat
-from FETCH2_loading_LAD import Ta
-from FETCH2_loading_LAD import S
-from FETCH2_loading_LAD import nz_sand
-from FETCH2_loading_LAD import nz_clay
-from FETCH2_loading_LAD import clay_d
-
-from FETCH2_loading_LAD import f_Ta_2d
-from FETCH2_loading_LAD import f_s_2d
-from FETCH2_loading_LAD import f_d_2d
-from FETCH2_loading_LAD import VPD_2d
-from FETCH2_loading_LAD import NET_2d
-from FETCH2_loading_LAD import delta_2d
-
-
-from FETCH2_loading_LAD import LAD
-from FETCH2_loading_LAD import hx50
-from FETCH2_loading_LAD import ga
-from FETCH2_loading_LAD import gama
-from FETCH2_loading_LAD import lamb
-from FETCH2_loading_LAD import Cp
-from FETCH2_loading_LAD import gb
-from FETCH2_loading_LAD import gsmax
-from FETCH2_loading_LAD import nl
-from FETCH2_loading_LAD import Emax
-
-
-from FETCH2_loading_LAD import UpperBC
-from FETCH2_loading_LAD import BottomBC
-
-
-
+from FETCH2_loading_LAD import params, dt0, dt, tmax, dz, nz, nz_r, nz_s, z, z_soil, z_upper, Soil_depth, stop_tol, \
+    Root_depth, q_rain, step_time, Head_bottom_H, H_initial, S, nz_sand, nz_clay, clay_d, \
+    f_Ta_2d, f_s_2d, f_d_2d, VPD_2d, NET_2d, delta_2d, \
+    LAD, hx50, ga, gama, lamb, Cp, gb, gsmax, nl, Emax, UpperBC, BottomBC,\
+    theta_1_clay, theta_2_clay,theta_1_sand, theta_2_sand
 
 ############## inital condition #######################
 
+#setting profile for initial condition
 if BottomBC==0:
     H_initial[0]=Head_bottom_H[0]
     
@@ -86,6 +31,7 @@ t_num = np.arange(0,tmax+dt0,dt0)         #[s]
 nt = len(t_num)  #number of time steps 
 ########################################
 
+#function for stem xylem: K and C
 def Porous_media_xylem(arg,params,i):
     
     #arg= potential [Pa]
@@ -109,6 +55,7 @@ def Porous_media_xylem(arg,params,i):
     return C,K, cavitation_xylem
 ########################################################################################
 
+#function for root xylem: K and C
 def Porous_media_root(arg,params,dz,theta):
      #arg= potential (Pa)
     stress_kr=np.zeros(shape=(len(arg)))
@@ -120,7 +67,8 @@ def Porous_media_root(arg,params,dz,theta):
             stress_kr[i]=(1-1/(1+scipy.exp(params['ap']*(arg[i]-params['bp']))))  #CAVITATION CURVE FOR THE ROOT XYLEM
     
     
-    #Index Ar/As - area of root xylem per area of soil - considered 1 following VERMA ET AL 2014 {for this case}
+    #Index Ar/As - area of root xylem per area of soil
+    #considered 1 following VERMA ET AL 2014 {for this case}
 
     #Keax = effective root axial conductivity 
     K=params['Ksax']*params['Aind_r']*stress_kr #[m2/s Pa]
@@ -138,6 +86,7 @@ def Porous_media_root(arg,params,dz,theta):
 
 ###############################################################################
 
+#vanGenuchten for soil K and C
 def vanGenuchten(arg,params,z):
     
     #arg = potential from Pascal to meters
@@ -183,8 +132,8 @@ def vanGenuchten(arg,params,z):
     
  
  
-    K=(K/(params['Rho']*params['g'])) # potential in Pa
-    C=(C/(params['Rho']*params['g'])) # potential in Pa
+    K=(K/(params['Rho']*params['g'])) # since H is in Pa
+    C=(C/(params['Rho']*params['g'])) # since H is in Pa
 
   
     return C, K,theta, Se
@@ -197,7 +146,8 @@ def vanGenuchten(arg,params,z):
 ###############################################################################
 
 def Picard(H_initial):
-    
+    #picard iteration solver, as described in the supplementary material
+    #solution following Celia et al., 1990
     
     # Stem water potential [Pa]
 
@@ -217,7 +167,7 @@ def Picard(H_initial):
     w=np.ones((nz-1,1))
     MMinus = np.diagflat(np.ones((nz,1))) + np.diagflat(w,-1)
     
-    ############################Initializing the pressure heads/variables 
+    ############################Initializing the pressure heads/variables ###################
     #only saving variables EVERY HALF HOUR
     dim=np.mod(t_num,1800)==0
     dim=sum(bool(x) for x in dim)
@@ -300,11 +250,14 @@ def Picard(H_initial):
         while(stop_flag==0):
         #=========================== above-ground xylem ========================    
              # Get C,K,for soil, roots, stem
-            
+             
+            #VanGenuchten relationships applied for the soil nodes
             cnp1m[0:nz_s], knp1m[0:nz_s],theta[:], Se[:,i]=vanGenuchten(hnp1m[0:nz_s],params,z_soil)
             
+            #Equations for C, K for the root nodes
             cnp1m[nz_s:nz_r],knp1m[nz_s:nz_r],stress_kr[:] = Porous_media_root(hnp1m[nz_s:nz_r],params,dz,theta[nz_s-(nz_r-nz_s):nz_s])
             
+            #Equations for C, K for stem nodes
             cnp1m[nz_r:nz],knp1m[nz_r:nz], stress_kx[:] = Porous_media_xylem(hnp1m[nz_r:nz],params,i)
           
 
@@ -314,11 +267,13 @@ def Picard(H_initial):
             C=np.diagflat(cnp1m)
             
             #interlayer hydraulic conductivity - transition between roots and stem
+            #calculated as a simple average
             knp1m[nz_r]=(knp1m[nz_r-1]+knp1m[nz_r])/2
             
             #interlayer between clay and sand
             knp1m[nz_clay]=(knp1m[nz_clay]+knp1m[nz_clay+1])/2
             
+            #equation S.17
             kbarplus = (1/2)*np.matmul(MPlus,knp1m)  #1/2 (K_{i} + K_{i+1})
             
             kbarplus[nz-1]=0    #boundary condition at the top of the tree : no-flux
@@ -326,7 +281,7 @@ def Picard(H_initial):
             
             Kbarplus =np.diagflat(kbarplus)
                 
-            
+            #equation S.16
             kbarminus = (1/2)*np.matmul(MMinus,knp1m)  #1/2 (K_{i-1} - K_{i})
             
             kbarminus[0]=0    #boundary contition at the bottom of the soil                
@@ -334,17 +289,13 @@ def Picard(H_initial):
             
             Kbarminus = np.diagflat(kbarminus)
             
-            ##########ROOT WATER UPTAKE TERM [SOURCE]  #QUIJANO AND KUMAR (2015) FORMULATION
+            ##########ROOT WATER UPTAKE TERM ############################
             stress_roots=np.zeros(shape=(len(z[nz_s-(nz_r-nz_s):nz_s])))
             
             #FEDDES root water uptake stress function
-            #parameters from VERMA ET AL 2014
-            theta_1_clay=0.08
-            theta_2_clay=0.12
+            #parameters from VERMA ET AL 2014: Equations S.73, 74 and 75 supplementary material
             
-            theta_1_sand=0.05
-            theta_2_sand=0.09
-            
+            #clay
             for k,j in zip(np.arange(nz_s-(nz_r-nz_s),nz_clay+1,1),np.arange(0,((len(stress_roots-1))-(nz_sand-nz_clay)),1)): #clay
                 if theta[k]<=theta_1_clay:
                     stress_roots[j]=0
@@ -352,7 +303,7 @@ def Picard(H_initial):
                     stress_roots[j]=(theta[k]-theta_1_clay)/(theta_2_clay-theta_1_clay)
                 if theta[k] > theta_2_clay:
                     stress_roots[j]=1
-            
+            #sand
             for k,j in zip(np.arange(nz_clay+1,nz_s,1),np.arange(len(stress_roots)-(nz_sand-nz_clay),len(stress_roots),1)): #sand
                if theta[k]<=theta_1_sand:
                     stress_roots[j]=0
@@ -362,7 +313,6 @@ def Picard(H_initial):
                     stress_roots[j]=1
             
 
-            
             #specific radial conductivity under saturated soil conditions            
             Ksrad=stress_roots*params['Kr'] #stress function is unitless
             
@@ -380,13 +330,14 @@ def Picard(H_initial):
             
             
             #Infiltration calculation - only infitrates if top soil layer is not saturated
+            #equation S.53 
             if UpperBC==0:
                 q_inf=min(q_rain[i],
                                 ((params['theta_S2']-theta[-1])*(dz/dt0))) #m/s
     
                
-################################## SINK TERM ON THE SAME TIMESTEP #####################################
-      
+################################## SINK/SOURCE TERM ON THE SAME TIMESTEP #####################################
+              #equation S.22 suplementary material
             if Root_depth==Soil_depth:
                 #diagonals
                 for k,e in zip(np.arange(0,nz_s,1),np.arange(0,(nz_r-nz_s),1)):
@@ -400,12 +351,12 @@ def Picard(H_initial):
                     
                 for k, j,e in zip(np.arange(nz_s,nz_r,1),np.arange(0,nz_s,1),np.arange(0,(nz_r-nz_s),1)):
                     A[k,j]=+Kr[e] #soil
-    #                
+                    
                 
-                #residual for vector R
+                 #residual for vector Right hand side vector
                 TS[0:nz_s]=-Kr*(hnp1m[0:nz_s]-hnp1m[nz_s:nz_r]) #soil  
                 TS[(nz_s):nz_r]=+Kr*(hnp1m[0:nz_s]-hnp1m[nz_s:nz_r]) #root
-    #         
+             
 
             else: 
                  #diagonals
@@ -420,16 +371,16 @@ def Picard(H_initial):
                     
                 for k, j,e in zip(np.arange(nz_s,nz_r,1),np.arange(nz_s-(nz_r-nz_s),nz_s,1),np.arange(0,(nz_r-nz_s),1)):
                     A[k,j]=+Kr[e] #soil
-    #                
+                    
  
-                #residual for vector R
+                #residual for vector Right hand side vector
                 TS[nz_s-(nz_r-nz_s):nz_s]=-Kr*(hnp1m[nz_s-(nz_r-nz_s):nz_s]-hnp1m[nz_s:nz_r]) #soil  
                 TS[(nz_s):nz_r]=+Kr*(hnp1m[nz_s-(nz_r-nz_s):nz_s]-hnp1m[nz_s:nz_r]) #root
-    #         
+            
                          
 ########################################################################################################            
             
-            ##########TRANPIRATION  [SINK] 
+            ##########TRANPIRATION FORMULATION #################
           
             f_leaf_2d[:,i]=(1+(hn[nz_r:nz]/hx50)**nl)**(-1)
             
@@ -437,7 +388,7 @@ def Picard(H_initial):
 
             gc_2d[:,i]=((gs_2d[:,i]*gb)/(gs_2d[:,i]+gb)) 
             
-#          
+          
             if S[i]>5: #income radiation > 5 = daylight
                 Pt_2d[:,i]=((NET_2d[:,i]*delta_2d[i]+Cp*VPD_2d[:,i]*ga)/(lamb*(delta_2d[i]*gc_2d[:,i]+gama*(ga+gc_2d[:,i]))))*gc_2d[:,i] #[m/s]
             else: #nighttime transpiration
@@ -445,7 +396,7 @@ def Picard(H_initial):
 
 
             
-            #SINK/SOURCE ARRAY
+            #SINK/SOURCE ARRAY : concatenating all sinks and sources in a vector
             Pt_2d[:,i]=Pt_2d[:,i]*LAD[:]  #m/s * 1/m = [1/s]
             S_S[:,i]=np.concatenate((TS,-Pt_2d[:,i])) #vector with sink and sources
             
@@ -454,7 +405,7 @@ def Picard(H_initial):
             #dummy variable to help breaking the multiplication into parts
             matrix2=multi_dot([Kbarplus,DeltaPlus,hnp1m]) - multi_dot([Kbarminus,DeltaMinus,hnp1m])
            
-            #% Compute the residual of MPFD (RHS)
+            #% Compute the residual of MPFD (right hand side)
 
             R_MPFD = (1/(dz**2))*(matrix2) + (1/dz)*params['Rho']*params['g']*(kbarplus - kbarminus) - (1/dt0)*np.dot((hnp1m - hn),C)+(S_S[:,i])
             
@@ -474,22 +425,24 @@ def Picard(H_initial):
                 R_MPFD[0]=R_MPFD[0]-(kbarplus[0]*params['Rho']*params['g'])/dz
             
             
-            #Compute deltam for iteration level m+1
+            #Compute deltam for iteration level m+1 : equations S.25 to S.41 (matrix)
             deltam = np.dot(linalg.pinv2(A),R_MPFD)
-            # 
+             
             
-            if  np.max(np.abs(deltam[:])) < stop_tol:
+            if  np.max(np.abs(deltam[:])) < stop_tol:  #equation S.42
                 stop_flag = 1
                 hnp1mp1 = hnp1m + deltam
                 
                 niter=niter+1
                 
                 print("calculated time steps",niter)
-                #Bottom boundary condition at bottom of the soil - changing for the next time step value for next cycle   
+                #Bottom boundary condition at bottom of the soil
+                #setting for the next time step value for next cycle   
                 if BottomBC==0:    
                     hnp1mp1[0] = Head_bottom_H[i]
                 
-                if np.mod(t_num[i],1800)==0:
+                #saving output variables only every 30min 
+                if np.mod(t_num[i],1800)==0: 
                     sav=sav+1
 
                     H[:,sav] = hnp1mp1 #saving potential
@@ -596,6 +549,6 @@ plt.ylabel('$\Phi$ (MPa) - soil')
 d = {'trans':(sum(trans_2d[:,:]*dz)*1000)} #mm/s
 df_EP = pd.DataFrame(data=d,index=step_time[:])
 
-trans_h=dt*df_EP['trans'].resample('60T').sum() # hourly accumulated
+trans_h=dt*df_EP['trans'].resample('60T').sum() # hourly accumulated simulated transpiration
 
 
