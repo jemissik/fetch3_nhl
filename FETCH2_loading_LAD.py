@@ -34,22 +34,17 @@ from scipy.interpolate import interp1d
 ############################## Opening files as dataframes #######################
 
 BASE = Path.cwd()
-path_1= BASE / "Precipitation_Verma.csv"
-df_rain=pd.read_csv(path_1, float_precision='high',header=None)
 
-path_2 = BASE / "Derek_data_up.csv"
+data_path = BASE / "Derek_data_up.csv"
 
 date1 = pd.to_datetime('2007-01-01 00:00:00') #begining of simulation
 date2=pd.to_datetime('2007-06-09 00:00:00')   #end of simulation
 step_time_hh = pd.Series(pd.date_range(date1, date2, freq='30T'))
 
-df_verma = pd.read_csv(path_2)
+df_verma = pd.read_csv(data_path)
 df_verma.index = step_time_hh
-df_rain.index = step_time_hh
 
-
-Precipitation=df_rain.values
-Precipitation=Precipitation.reshape(len(Precipitation))
+Precipitation=df_verma['Rain (mm)'].values
 
 params={}
 #############################################################################
