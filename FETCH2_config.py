@@ -1,8 +1,13 @@
 from pathlib import Path
+import pandas as pd
 
+fparams = {}
 #INPUT DATA
-BASE = Path.cwd()
-DATA = "Derek_data_up.csv"
+fparams['BASE'] = Path.cwd()
+fparams['DATA'] = "Derek_data_test30Min.csv"
+
+fparams['start_time'] = pd.to_datetime('2007-01-01 00:00:00') #begining of simulation
+fparams['end_time'] = pd.to_datetime('2007-01-01 00:30:00')   #end of simulation
 
 #############################################################################
 #MODEL PARAMETERS

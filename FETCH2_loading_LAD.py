@@ -10,7 +10,8 @@ import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
 
-from FETCH2_config import BASE, DATA, params
+from FETCH2_config import fparams, params
+from FETCH2_config import *
 
 #This code is a simple example replicating the results of the topic
 #3.3 Modeling LAD and capacitance from the paper:
@@ -33,11 +34,9 @@ from FETCH2_config import BASE, DATA, params
 
 
 ############################## Opening files as dataframes #######################
-data_path = BASE / DATA
+data_path = fparams['BASE'] / fparams['DATA']
 
-date1 = pd.to_datetime('2007-01-01 00:00:00') #begining of simulation
-date2=pd.to_datetime('2007-06-09 00:00:00')   #end of simulation
-step_time_hh = pd.Series(pd.date_range(date1, date2, freq='30T'))
+step_time_hh = pd.Series(pd.date_range(fparams['start_time'], fparams['end_time'], freq='30T'))
 
 df_verma = pd.read_csv(data_path)
 df_verma.index = step_time_hh
@@ -315,5 +314,5 @@ Head_bottom_H=np.flipud(Head_bottom_H) #model starts the simulation at the BOTTO
 #in case you want to create a pandas dataframe to your variables
 #############################################################################
 date1 = pd.to_datetime('2007-01-01 00:00:00') #begining of simulation
-date2=pd.to_datetime('2007-06-09  00:30:00')  #end of simulation adding +1 time step to math dimensions
+date2=pd.to_datetime('2007-01-01  01:00:00')  #end of simulation adding +1 time step to math dimensions
 step_time = pd.Series(pd.date_range(date1, date2, freq='30T'))
