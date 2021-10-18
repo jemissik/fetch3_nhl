@@ -157,9 +157,6 @@ def vanGenuchten(arg,params,z):
 
 ###############################################################################
 
-
-
-
 ###############################################################################
 
 def Picard(H_initial):
@@ -528,42 +525,6 @@ df_waterbal = pd.DataFrame(data={'theta_i':theta_i,
 ############################################################################
 df_time = pd.DataFrame(data=step_time.index.values,index=step_time)
 
-'''
- ##PLOTS
-
-plt.subplot(3, 1, 1)
-#bottom and top of the canopy
-plt.plot(step_time[:],H[nz_r,:],linewidth=0.8)
-plt.plot(step_time[:],H[nz-1,:],linewidth=0.8)
-plt.legend(['bottom of the canopy','top of the canopy'], loc=1, fontsize = 'small')
-plt.ylabel('$\Phi$ (MPa) - canopy')
-
-
-plt.subplot(3, 1, 2)
-#bottom and top of the roots
-plt.plot(step_time[:],H[nz_s,:],linewidth=0.8)
-plt.plot(step_time[:],H[nz_r-1,:],linewidth=0.8)
-plt.legend(['bottom of the roots','top of the roots'], loc=1, fontsize = 'small')
-plt.ylabel('$\Phi$ (MPa) - roots')
-
-
-plt.subplot(3, 1, 3)
-#bottom and top of the soil - bottom with roots
-plt.plot(step_time[:],H[nz_s-(nz_r-nz_s),:],linewidth=0.8)
-plt.plot(step_time[:],H[nz_s-1,:],linewidth=0.8)
-plt.legend([str(round(z[nz_s-(nz_r-nz_s)],2)),str(round(z[nz_s-1],2))], loc=1, fontsize = 'small')
-plt.ylabel('$\Phi$ (MPa) - soil')
-
-
-#bottom and top of the soil - bottom with roots
-plt.plot(step_time[:],H[nz_s-1,:],linewidth=0.8)
-plt.plot(step_time[:],H[0,:],linewidth=0.8)
-
-plt.legend(['top of the soil'], loc=1, fontsize = 'small')
-plt.ylabel('$\Phi$ (MPa) - soil')
-'''
-
-
 #########################################################
 
 
@@ -574,9 +535,6 @@ trans_h=dt*df_EP['trans'].resample('60T').sum() # hourly accumulated simulated t
 
 
 #output
-'''
-output_data = [H, K, , ]
-'''
 output_vars = {'H':H, 'K': K, 'S_stomata':S_stomata, 'theta':theta, 'S_kx':S_kx, 'S_kr':S_kr, 'C':C,
                'Kr_sink':Kr_sink, 'Capac':Capac, 'EVsink_ts':EVsink_ts,
                'THETA':THETA, 'infiltration':infiltration, 'trans_2d':trans_2d,'EVsink_total':EVsink_total}
