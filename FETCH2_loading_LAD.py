@@ -29,6 +29,10 @@ from FETCH2_config import params
 #Root water compensation sustains transpiration rates in an Australian woodland
 #Advances in Water Resources, Elsevier BV, 2014, 74, 91-101
 
+###########################################################
+#Load and format input data
+###########################################################
+
 #Input file
 working_dir = Path.cwd()
 data_path = working_dir / params['input_fname']
@@ -69,50 +73,57 @@ VPD = VPD.reindex(SW_in.index)
 VPD=VPD.interpolate(method='linear')*1000  #kPa to Pa
 VPD=VPD.fillna(0)
 
+###########################################################
+#Discretization
+###########################################################
 dz = params['dz']
 dt0 = params['dt0']
-##########################################
-#below-ground spatial discretization
-#######################################
-# TODO convert to function
-zmin=0     #[m] minimum depth of soil [bottom of soil]
-z_soil=np.arange(zmin,params['Soil_depth']+dz,dz)
-nz_s=len(z_soil)
-#TODO convert to function
-#measurements depths of soil [m]
-z_root=np.arange((params['Soil_depth']-params['Root_depth'])+zmin,params['Soil_depth']+dz,dz)
-nz_r=len(z_soil)+len(z_root)
 
-#############################################
-#above-ground spatial discretization
-#################################################
-#TODO convert to function
-z_Above=np.arange(zmin, params['Hspec']+dz, dz)  #[m]
-nz_Above=len(z_Above)
-z_upper=np.arange((z_soil[-1]+dz),(z_soil[-1]+params['Hspec']+dz),dz)
+def spatial_discretization():
+    ##########################################
+    #below-ground spatial discretization
+    #######################################
+    zmin=0     #[m] minimum depth of soil [bottom of soil]
+    z_soil=np.arange(zmin,params['Soil_depth']+dz,dz)
+    nz_s=len(z_soil)
 
-z=np.concatenate((z_soil,z_root,z_upper))
+    #measurements depths of soil [m]
+    z_root=np.arange((params['Soil_depth']-params['Root_depth'])+zmin,params['Soil_depth']+dz,dz)
+    nz_r=len(z_soil)+len(z_root)
 
-nz=len(z) #total number of nodes
+    #############################################
+    #above-ground spatial discretization
+    #################################################
+    z_Above=np.arange(zmin, params['Hspec']+dz, dz)  #[m]
+    nz_Above=len(z_Above)
+    z_upper=np.arange((z_soil[-1]+dz),(z_soil[-1]+params['Hspec']+dz),dz)
 
-####################################################################
-#CONFIGURATION OF SOIL DUPLEX
-#depths of layer/clay interface
-#####################################################################
-nz_sand=int(np.flatnonzero(z==params['sand_d'])) #node where sand layer finishes
-nz_clay=int(np.flatnonzero(z==params['clay_d'])) #node where clay layer finishes- sand starts
+    z=np.concatenate((z_soil,z_root,z_upper))
 
+    nz=len(z) #total number of nodes
+
+    ####################################################################
+    #CONFIGURATION OF SOIL DUPLEX
+    #depths of layer/clay interface
+    #####################################################################
+    nz_sand=int(np.flatnonzero(z==params['sand_d'])) #node where sand layer finishes
+    nz_clay=int(np.flatnonzero(z==params['clay_d'])) #node where clay layer finishes- sand starts
+    return z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay
+
+z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay = spatial_discretization()
 
 ########################################################
 #SETTING PRECIPITATION AS INFILTRATION BOUNDARY CONDITION
 #in case of set by user
 ###########################################################
+def calc_infiltration_rate(precipitation):
+    precipitation=precipitation/dt #dividing the value over half hour to seconds [mm/s]
+    rain=precipitation/params['Rho']  #[converting to m/s]
+    q_rain=np.interp(np.arange(0,tmax+dt0,dt0), t_data, rain) #interpolating
+    q_rain=np.nan_to_num(q_rain) #m/s precipitation rate= infiltration rate
+    return q_rain
 
-# TODO this should change depending on the input data length
-precipitation=precipitation/1800 #dividing the value over half hour to seconds [mm/s]
-rain=precipitation/params['Rho']  #[converting to m/s]
-q_rain=np.interp(np.arange(0,tmax+dt0,dt0), t_data, rain) #interpolating
-q_rain=np.nan_to_num(q_rain) #m/s precipitation rate= infiltration rate
+q_rain = calc_infiltration_rate(precipitation)
 
 ########################################################################
 #INTERPOLATING VARIABLES FOR PENMAN-MONTEITH TRANSPIRATION
@@ -208,18 +219,21 @@ for i in np.arange(0,len(VPD),1):
 #Simple LAD formulation to illustrate model capability
 #following Lalic et al 2014
 ####################
-#TODO convert to function
-z_LAD=z_Above[1:]
-LAD=np.zeros(shape=(int(params['Hspec']/dz)))  #[1/m]
+def calc_LAD(z_Above):
 
-#LAD function according to Lalic et al 2014
-for i in np.arange(0,len(z_LAD),1):
-    if  0.1<=z_LAD[i]<params['z_m']:
-        LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**6)*np.exp(6*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
-    if  params['z_m']<=z_LAD[i]<params['Hspec']:
-        LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**0.5)*np.exp(0.5*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
-    if z_LAD[i]==params['Hspec']:
-        LAD[i]=0
+    z_LAD=z_Above[1:]
+    LAD=np.zeros(shape=(int(params['Hspec']/dz)))  #[1/m]
+
+    #LAD function according to Lalic et al 2014
+    for i in np.arange(0,len(z_LAD),1):
+        if  0.1<=z_LAD[i]<params['z_m']:
+            LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**6)*np.exp(6*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
+        if  params['z_m']<=z_LAD[i]<params['Hspec']:
+            LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**0.5)*np.exp(0.5*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
+        if z_LAD[i]==params['Hspec']:
+            LAD[i]=0
+        return LAD
+LAD = calc_LAD(z_Above)
 
 #######################################################################
 #INITIAL CONDITIONS
