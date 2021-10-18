@@ -10,8 +10,7 @@ import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d
 
-from FETCH2_config import fparams, params
-from FETCH2_config import *
+from FETCH2_config import params
 
 #This code is a simple example replicating the results of the topic
 #3.3 Modeling LAD and capacitance from the paper:
@@ -30,107 +29,64 @@ from FETCH2_config import *
 #Root water compensation sustains transpiration rates in an Australian woodland
 #Advances in Water Resources, Elsevier BV, 2014, 74, 91-101
 
+#Input file
+working_dir = Path.cwd()
+data_path = working_dir / params['input_fname']
 
+#time constants - data resolution
+tmin = params['tmin'] # tmin [s]
+dt = params['dt'] #seconds - input data resolution
 
+start_time = pd.to_datetime(params['start_time'])
+end_time = pd.to_datetime(params['end_time'])
 
-############################## Opening files as dataframes #######################
-data_path = fparams['BASE'] / fparams['DATA']
+#read input data
+df = pd.read_csv(data_path)
+step_time_hh = pd.Series(pd.date_range(start_time, end_time, freq=str(dt)+'s'))
+df.index = step_time_hh
 
-step_time_hh = pd.Series(pd.date_range(fparams['start_time'], fparams['end_time'], freq='30T'))
-
-df_verma = pd.read_csv(data_path)
-df_verma.index = step_time_hh
-
-Precipitation=df_verma['Rain (mm)'].values
-
-
-
-
-#linear interpolation to make sure there are no gaps in the dataset
-
-#temperature
-Ta=df_verma['T(degC)']
-Ta=(Ta+ 273.15) #converting temperature from degree Celsius to Kelvin
-Ta=Ta.interpolate(method='linear')
-
-#incoming solar radiation
-S=df_verma['Radiation (W/m2)']
-S=S.interpolate(method='time')
-
-#Vapor pressure deficit
-VPD=df_verma['VPD (kPa)'][(df_verma['VPD (kPa)']>0)] #eliminating negative VPD
-VPD = VPD.reindex(S.index)
-VPD=VPD.interpolate(method='linear')*1000  #kPa to Pa
-VPD=VPD.fillna(0)
-
-###############################################################################
-#NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
-###############################################################################
-#The finite difference discretization constants
-dt0=20 #model temporal resolution
-dz=0.1 #model spatial resolution
-stop_tol=0.0001  #stop tollerance of equation converging
-
-
-###############################################################################
-#TIME CONSTANTS (data resolution)
-##########################Time constants#######################################
-
-tmin =int(0)                             # tmin [s]
-dt=1800 #seconds - input data resolution
-tmax = (len(Ta)*dt)
-t_data = np.arange(tmin,tmax,dt)         # data time grids for input data
+tmax = len(df) * dt
+t_data = np.arange(tmin, tmax, dt)         # data time grids for input data
 t_data=list(t_data)
 nt_data=len(t_data)                      #length of input data
 
-###############################################################################
+#variables to arrays
+precipitation = df['Rain (mm)'].values
+Ta_C = df['T(degC)']
+SW_in = df['Radiation (W/m2)']
+VPD = df['VPD (kPa)']
 
-#CONFIGURING SOIL BOUNDARY CONDITIONS
-#Here the user can choose the desired contition by setting the numbers as
-#described below
+#temperature
+Ta = Ta_C + 273.15 #converting temperature from degree Celsius to Kelvin
+Ta = Ta.interpolate(method = 'linear')
 
-#The configuration used follows Verma et al. 2014
+#incoming solar radiation
+SW_in = SW_in.interpolate(method = 'time')
 
-#############################################################################
+#vapor pressure deficit
+VPD=VPD[VPD > 0] #eliminating negative VPD
+VPD = VPD.reindex(SW_in.index)
+VPD=VPD.interpolate(method='linear')*1000  #kPa to Pa
+VPD=VPD.fillna(0)
 
-#Upper Boundary condition
-
-#1 = no flux (Neuman)
-#0 = infiltration
-
-
-#Bottom Boundary condition
-
-#2 = free drainage
-#1 = no flux (Neuman)
-#0 = constant potential (Dirichlet)
-
-UpperBC=0
-BottomBC=0
-
-
-#SOIL SPATIAL DISCRETIZATION
-Root_depth=3.2 #[m] depth of root collumn
-Soil_depth=5   #[m]depth of soil collumn
-
-
+dz = params['dz']
+dt0 = params['dt0']
 ##########################################
 #below-ground spatial discretization
 #######################################
-
+# TODO convert to function
 zmin=0     #[m] minimum depth of soil [bottom of soil]
-z_soil=np.arange(zmin,Soil_depth+dz,dz )
+z_soil=np.arange(zmin,params['Soil_depth']+dz,dz)
 nz_s=len(z_soil)
-
-#measurements dephts of soil [m]
-z_root=np.arange((Soil_depth-Root_depth)+zmin,Soil_depth+dz,dz )
+#TODO convert to function
+#measurements depths of soil [m]
+z_root=np.arange((params['Soil_depth']-params['Root_depth'])+zmin,params['Soil_depth']+dz,dz)
 nz_r=len(z_soil)+len(z_root)
-
 
 #############################################
 #above-ground spatial discretization
 #################################################
-
+#TODO convert to function
 z_Above=np.arange(zmin, params['Hspec']+dz, dz)  #[m]
 nz_Above=len(z_Above)
 z_upper=np.arange((z_soil[-1]+dz),(z_soil[-1]+params['Hspec']+dz),dz)
@@ -143,11 +99,8 @@ nz=len(z) #total number of nodes
 #CONFIGURATION OF SOIL DUPLEX
 #depths of layer/clay interface
 #####################################################################
-sand_d=5.0 #4.2----top soil #m
-clay_d=4.2 #0------4.2 #m
-
-nz_sand=int(np.flatnonzero(z==sand_d)) #node where sand layer finishes
-nz_clay=int(np.flatnonzero(z==clay_d)) #node where clay layer finishes- sand starts
+nz_sand=int(np.flatnonzero(z==params['sand_d'])) #node where sand layer finishes
+nz_clay=int(np.flatnonzero(z==params['clay_d'])) #node where clay layer finishes- sand starts
 
 
 ########################################################
@@ -155,8 +108,9 @@ nz_clay=int(np.flatnonzero(z==clay_d)) #node where clay layer finishes- sand sta
 #in case of set by user
 ###########################################################
 
-Precipitation=Precipitation/1800 #dividing the value over half hour to seconds [mm/s]
-rain=Precipitation/params['Rho']  #[converting to m/s]
+# TODO this should change depending on the input data length
+precipitation=precipitation/1800 #dividing the value over half hour to seconds [mm/s]
+rain=precipitation/params['Rho']  #[converting to m/s]
 q_rain=np.interp(np.arange(0,tmax+dt0,dt0), t_data, rain) #interpolating
 q_rain=np.nan_to_num(q_rain) #m/s precipitation rate= infiltration rate
 
@@ -165,33 +119,52 @@ q_rain=np.nan_to_num(q_rain) #m/s precipitation rate= infiltration rate
 #variables are in the data resolution (half-hourly) and are interpolated to model resolution
 ##########################################################################
 
-Ta=np.interp(np.arange(0,tmax+dt0,dt0), t_data, Ta)
+def interp_to_model_res(var):
+    return np.interp(np.arange(0, tmax + dt0, dt0), t_data, var)
 
-S=np.interp(np.arange(0,tmax+dt0,dt0), t_data, S)
+Ta = interp_to_model_res(Ta)
+SW_in = interp_to_model_res(SW_in)
+VPD = interp_to_model_res(VPD)
 
-VPD=np.interp(np.arange(0,tmax+dt0,dt0), t_data, VPD)
+def calc_esat(Ta):
+    return 611*np.exp((17.27*(Ta-273.15))/(Ta-35.85)) #Pascal
 
-e_sat=611*np.exp((17.27*(Ta-273.15))/(Ta-35.85)) #Pascal
+e_sat = calc_esat(Ta)
 
-delta=(4098/((Ta-35.85)**2))*e_sat
+def calc_delta(Ta, e_sat):
+    return (4098/((Ta-35.85)**2))*e_sat
+
+delta = calc_delta(Ta, e_sat)
 delta_2d=delta
 
-##############################################################
-#NET RADIATION
-#In this case NET radiation is set as 60% of total incoming solar radtiation
-#################################################################
-NET=S*0.6
+def calc_NETRAD(SW_in):
+    """
+    Calculate net radiation as 60% of total incoming solar radiation
+
+    Parameters
+    ----------
+    SW_in : [W m-2]
+        Total incoming solar radiation
+
+    Returns
+    -------
+    [W m-2]
+        Net radiation
+    """
+    return SW_in * 0.6
+
+NET = calc_NETRAD(SW_in)
 
 ###################################################################
 #STOMATA REDUCTIONS FUNCTIONS
 #for transpiration formulation
 #stomata conductance as a function of radiation, temp, VPD and Phi
 #################################################################3
-f_s=1-np.exp(-kr*S) #radiation
+f_s=1-np.exp(-params['kr']*SW_in) #radiation
 
-f_Ta=1-kt*(Ta-Topt)**2 #temperature
+f_Ta=1-params['kt']*(Ta-params['Topt'])**2 #temperature
 
-f_d=1/(1+VPD*kd)     #VPD
+f_d=1/(1+VPD*params['kd'])     #VPD
 
 #########################################################################3
 #2D stomata reduction functions and variables for canopy-distributed transpiration
@@ -230,17 +203,14 @@ for i in np.arange(0,len(VPD),1):
     VPD_2d[:,i]=VPD[i]
 
 #######################################################################
-#LEAF ARE DENSITY FORMULATION (LAD) [1/m]
+#LEAF AREA DENSITY FORMULATION (LAD) [1/m]
 #######################################################################
 #Simple LAD formulation to illustrate model capability
 #following Lalic et al 2014
 ####################
+#TODO convert to function
 z_LAD=z_Above[1:]
 LAD=np.zeros(shape=(int(params['Hspec']/dz)))  #[1/m]
-
-params['L_m']=0.4  #maximum value of LAD a canopy layer
-params['z_m']=11   #height in which L_m is found [m]
-
 
 #LAD function according to Lalic et al 2014
 for i in np.arange(0,len(z_LAD),1):
@@ -254,7 +224,7 @@ for i in np.arange(0,len(z_LAD),1):
 #######################################################################
 #INITIAL CONDITIONS
 #######################################################################
-
+# TODO make function for soil initial conditions
 #soil initial conditions as described in the paper [VERMA et al., 2014]
 initial_H=np.zeros(shape=nz)
 
@@ -262,10 +232,11 @@ initial_H=np.zeros(shape=nz)
 #from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
 #from 4,2 m [sand layer] cte value of -0.402 m
 #the conditions are specific for this case study and therefore the hardcoding below
+# TODO change hardcoding so that it is more configurable
 
-cte_clay=3 #depth from 0-3m initial condition of clay [and SWC] is constante
+cte_clay=3 #depth from 0-3m initial condition of clay [and SWC] is constant
 
-factor_soil=(-6.09-(-0.402))/(int((clay_d-cte_clay)/dz)) #factor for interpolation
+factor_soil=(-6.09-(-0.402))/(int((params['clay_d']-cte_clay)/dz)) #factor for interpolation
 
 #soil
 for i in np.arange(0,len(z_soil),1):
@@ -273,7 +244,7 @@ for i in np.arange(0,len(z_soil),1):
         initial_H[i]=-6.09
     if cte_clay<z_soil[i]<=z[nz_clay]:
         initial_H[i]=initial_H[i-1]-factor_soil #factor for interpolation
-    if clay_d<z_soil[i]<= z[nz_r-1]:
+    if params['clay_d']<z_soil[i]<= z[nz_r-1]:
         initial_H[i]=-0.402
 
 
@@ -313,6 +284,6 @@ Head_bottom_H=np.flipud(Head_bottom_H) #model starts the simulation at the BOTTO
 #INDEXING OF DATA  - create data frames using step_time as an index
 #in case you want to create a pandas dataframe to your variables
 #############################################################################
-date1 = pd.to_datetime('2007-01-01 00:00:00') #begining of simulation
-date2=pd.to_datetime('2007-01-01  01:00:00')  #end of simulation adding +1 time step to math dimensions
-step_time = pd.Series(pd.date_range(date1, date2, freq='30T'))
+date1 = start_time #begining of simulation
+date2 = end_time + pd.to_timedelta(dt, unit = 's')  #end of simulation adding +1 time step to math dimensions
+step_time = pd.Series(pd.date_range(date1, date2, freq=str(dt)+'s'))

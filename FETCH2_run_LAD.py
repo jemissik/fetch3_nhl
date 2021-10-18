@@ -14,12 +14,27 @@ import scipy
 from numpy.linalg import multi_dot
 
 #importing variables
-from FETCH2_config import fparams, params
-from FETCH2_loading_LAD import params, dt0, dt, tmax, dz, nz, nz_r, nz_s, z, z_soil, z_upper, Soil_depth, stop_tol, \
-    Root_depth, q_rain, step_time, step_time_hh, Head_bottom_H, H_initial, S, nz_sand, nz_clay, clay_d, \
-    f_Ta_2d, f_s_2d, f_d_2d, VPD_2d, NET_2d, delta_2d, \
-    LAD, hx50, ga, gama, lamb, Cp, gb, gsmax, nl, Emax, UpperBC, BottomBC,\
-    theta_1_clay, theta_2_clay,theta_1_sand, theta_2_sand
+from FETCH2_loading_LAD import params, working_dir, dt0, dt, tmax, dz, nz, nz_r, nz_s, z, z_soil, z_upper, \
+    nz_clay, nz_sand, q_rain, step_time, Head_bottom_H, H_initial, SW_in,  \
+    f_Ta_2d, f_s_2d, f_d_2d, VPD_2d, NET_2d, delta_2d, LAD
+
+##### these definitions are temporary until other parts of code are restructured
+hx50 = params['hx50']
+ga = params['ga']
+gama = params['gama']
+lamb = params['lamb']
+Cp = params['Cp']
+gb = params['gb']
+gsmax = params['gsmax']
+nl = params['nl']
+Emax = params['Emax']
+UpperBC = params['UpperBC']
+BottomBC = params['BottomBC']
+theta_1_clay = params['theta_1_clay']
+theta_2_clay = params['theta_2_clay']
+theta_1_sand = params['theta_1_sand']
+theta_2_sand = params['theta_2_sand']
+#####
 
 ############## inital condition #######################
 
@@ -101,7 +116,7 @@ def vanGenuchten(arg,params,z):
     #considering l = 0.5
 
     for i in np.arange(0,len(arg),1):
-        if z[i]<=clay_d : #clay_d=4.2m for verma
+        if z[i]<=params['clay_d'] : #clay_d=4.2m for verma
 
             if arg[i]<0:
             #Compute the volumetric moisture content
@@ -116,7 +131,7 @@ def vanGenuchten(arg,params,z):
 
             C[i]=((-params['alpha_1']*np.sign(arg[i])*params['m_1']*(params['theta_S1']-params['theta_R1']))/(1-params['m_1']))*Se[i]**(1/params['m_1'])*(1-Se[i]**(1/params['m_1']))**params['m_1']
 
-        if z[i]>clay_d: #sand
+        if z[i]>params['clay_d']: #sand
 
             if arg[i]<0:
              #Compute the volumetric moisture content
@@ -205,10 +220,10 @@ def Picard(H_initial):
 
     #root mass distribution following VERMA ET AL 2O14
 
-    z_dist=np.arange(0,Root_depth+dz,dz)
+    z_dist=np.arange(0,params['Root_depth']+dz,dz)
     z_dist=np.flipud(z_dist)
 
-    r_dist=(np.exp(params['qz']-((params['qz']*z_dist)/Root_depth))*params['qz']**2*(Root_depth-z_dist))/(Root_depth**2*(1+np.exp(params['qz'])*(-1+params['qz'])))
+    r_dist=(np.exp(params['qz']-((params['qz']*z_dist)/params['Root_depth']))*params['qz']**2*(params['Root_depth']-z_dist))/(params['Root_depth']**2*(1+np.exp(params['qz'])*(-1+params['qz'])))
 
 
 ####################################################################################################################################
@@ -340,7 +355,7 @@ def Picard(H_initial):
 
 ################################## SINK/SOURCE TERM ON THE SAME TIMESTEP #####################################
               #equation S.22 suplementary material
-            if Root_depth==Soil_depth:
+            if params['Root_depth']==params['Soil_depth']:
                 #diagonals
                 for k,e in zip(np.arange(0,nz_s,1),np.arange(0,(nz_r-nz_s),1)):
                     A[k,k]=A[k,k]-Kr[e] #soil ---  from 0:soil top
@@ -391,7 +406,7 @@ def Picard(H_initial):
             gc_2d[:,i]=((gs_2d[:,i]*gb)/(gs_2d[:,i]+gb))
 
 
-            if S[i]>5: #income radiation > 5 = daylight
+            if SW_in[i]>5: #income radiation > 5 = daylight
                 Pt_2d[:,i]=((NET_2d[:,i]*delta_2d[i]+Cp*VPD_2d[:,i]*ga)/(lamb*(delta_2d[i]*gc_2d[:,i]+gama*(ga+gc_2d[:,i]))))*gc_2d[:,i] #[m/s]
             else: #nighttime transpiration
                 Pt_2d[:,i]=Emax*f_Ta_2d[:,i]*f_d_2d[:,i]*f_leaf_2d[:,i] #[m/s]
@@ -431,7 +446,7 @@ def Picard(H_initial):
             deltam = np.dot(linalg.pinv2(A),R_MPFD)
 
 
-            if  np.max(np.abs(deltam[:])) < stop_tol:  #equation S.42
+            if  np.max(np.abs(deltam[:])) < params['stop_tol']:  #equation S.42
                 stop_flag = 1
                 hnp1mp1 = hnp1m + deltam
 
@@ -567,7 +582,7 @@ output_vars = {'H':H, 'K': K, 'S_stomata':S_stomata, 'theta':theta, 'S_kx':S_kx,
                'THETA':THETA, 'infiltration':infiltration, 'trans_2d':trans_2d,'EVsink_total':EVsink_total}
 
 for var in output_vars:
-    pd.DataFrame(output_vars[var]).to_csv(fparams['BASE'] / 'output' / (var + '.csv'), index = False, header=False)
+    pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
 
-df_waterbal.to_csv(fparams['BASE'] / 'output' / ('df_waterbal' + '.csv'), index=False, header=True)
-df_EP.to_csv(fparams['BASE'] / 'output' / ('df_EP' + '.csv'), index=False, header=False)
+df_waterbal.to_csv(working_dir / 'output' / ('df_waterbal' + '.csv'), index=False, header=True)
+df_EP.to_csv(working_dir / 'output' / ('df_EP' + '.csv'), index=False, header=False)

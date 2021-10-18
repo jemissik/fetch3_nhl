@@ -1,25 +1,62 @@
-from pathlib import Path
-import pandas as pd
+#PHYSICAL CONSTANTS
+params = {}
+params['Rho'] = 1000  ##[kg m-3]
+params['g'] = 9.8 # [m s-2]
+###############################################################################
+#INPUT DATA FILE PARAMETERS
+###############################################################################
+params['input_fname'] = "Derek_data_test30Min.csv"
+params['start_time'] = "2007-01-01 00:00:00" #begining of simulation
+params['end_time'] = "2007-01-01 00:30:00" #end of simulation
+params['dt'] = 1800  #seconds - input data resolution
+params['tmin'] = 0  #tmin [s]
 
-fparams = {}
-#INPUT DATA
-fparams['BASE'] = Path.cwd()
-fparams['DATA'] = "Derek_data_test30Min.csv"
-
-fparams['start_time'] = pd.to_datetime('2007-01-01 00:00:00') #begining of simulation
-fparams['end_time'] = pd.to_datetime('2007-01-01 00:30:00')   #end of simulation
+###############################################################################
+#NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
+###############################################################################
+#The finite difference discretization constants
+params['dt0'] = 20  #model temporal resolution [s]
+params['dz'] = 0.1  #model spatial resolution [m]
+params['stop_tol'] = 0.0001  #stop tolerance of equation converging
 
 #############################################################################
 #MODEL PARAMETERS
 #Values according to Verma et al., 2014
-
 ############################################################################
 
-params={}
+#CONFIGURING SOIL BOUNDARY CONDITIONS
+#Here the user can choose the desired contition by setting the numbers as
+#described below
 
-#OTHER PARAMETERS #TODO change these to constants
-params['Rho']=1000       #[kg/m3]
-params['g']=9.8          #[m/s2]
+#The configuration used follows Verma et al. 2014
+
+#############################################################################
+
+#Upper Boundary condition
+
+#1 = no flux (Neuman)
+#0 = infiltration
+
+
+#Bottom Boundary condition
+
+#2 = free drainage
+#1 = no flux (Neuman)
+#0 = constant potential (Dirichlet)
+
+params['UpperBC']=0
+params['BottomBC']=0
+
+#SOIL SPATIAL DISCRETIZATION
+params['Root_depth']=3.2 #[m] depth of root column
+params['Soil_depth']=5   #[m]depth of soil col umn
+
+####################################################################
+#CONFIGURATION OF SOIL DUPLEX
+#depths of layer/clay interface
+#####################################################################
+params['sand_d']=5.0 #4.2----top soil #m
+params['clay_d']=4.2 #0------4.2 #m
 
 #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
 
@@ -40,12 +77,11 @@ params['m_2']=1-(1/params['n_2'])
 params['Ksat_2']=3.45*10**(-5)
 
 #Soil stress parameters
-theta_1_clay=0.08
-theta_2_clay=0.12
+params['theta_1_clay']=0.08
+params['theta_2_clay']=0.12
 
-theta_1_sand=0.05
-theta_2_sand=0.09
-
+params['theta_1_sand']=0.05
+params['theta_2_sand']=0.09
 
 #ROOT PARAMETERS
 #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
@@ -53,7 +89,6 @@ params['Kr']=(7.2*10**(-10))/(params['Rho']*params['g']) #soil-to-root radial co
 params['qz']=9                                           #unitless - parameter for the root mass distribution - Verma et al., 2014
 params['Ksax']=(10**(-5))/(params['Rho']*params['g'])    #specific axial conductivity of roots  [ m/s]
 params['Aind_r']=1                                       #m2 root xylem/m2 ground]
-
 
 #XYLEM PARAMETERS
 params['kmax']=(10**(-5))/(params['Rho']*params['g'])    #conductivity of xylem  [ m2/sPa]
@@ -68,6 +103,14 @@ params['sat_xylem']=0.573                                #From bohrer et al 2005
 params['Hspec']=14                      #Height average of trees [m]
 params['LAI']=1.5                       #[-] Leaf area index
 params['Abasal']=8.62*10**(-4)          #[m2basal/m2-ground] xylem cross-sectional area and site surface ratio
+
+#######################################################################
+#LEAF AREA DENSITY FORMULATION (LAD) [1/m]
+#######################################################################
+params['L_m']=0.4  #maximum value of LAD a canopy layer
+params['z_m']=11   #height in which L_m is found [m]
+params['LAI']=1.5                #[-] Leaf area index
+
 #########################################################################3
 #PENMAN-MONTEITH EQUATION PARAMETERS
 ###########################################################################
@@ -75,20 +118,21 @@ params['Abasal']=8.62*10**(-4)          #[m2basal/m2-ground] xylem cross-section
 #1J= 1 kg m2/s2
 #therefore 1W/m2 = kg/s3
 
-kr=5*10**(-3)         #m2/W Jarvis radiation parameter
-kt=1.6*10**(-3)       #K-2  Jarvis temperature parameter
-Topt=289.15           #K   Jarvis temperature parameter (optimum temperature)
-kd=1.1*10**(-3)       #Pa-1 Jarvis vapor pressure deficit temperature
-hx50=-1274000         #Pa  Jarvis leaf water potential parameter
+params['gb']=2*10**(-2)          #m/s Leaf boundary layer conductance
+params['Cp']=1200                # J/m3 K Heat capacity of air
+params['ga']=2*10**(-2)          #m/s Aerodynamic conductance
+params['lamb']=2.51*10**9        #J/m3 latent heat of vaporization
+params['gama']=66.7              #Pa/K psychrometric constant
 
+#########################################################################3
+#JARVIS PARAMETERS
+###########################################################################
 
-
-nl=2                   #[-] Jarvis leaf water potential parameter
-gsmax=10*10**(-3)      #m/s Maximum leaf stomatal conductance
-gb=2*10**(-2)          #m/s Leaf boundary layer conductance
-LAI=1.5                #[-] Leaf area index
-Cp=1200                # J/m3 K Heat capacity of air
-ga=2*10**(-2)          #m/s Aerodynamic conductance
-lamb=2.51*10**9        #J/m3 latent heat of vaporization
-gama=66.7              #Pa/K psuchrometric constant
-Emax=1*10**(-9)        #m/s maximum nightime transpiration
+params['gsmax']=10*10**(-3)      #m/s Maximum leaf stomatal conductance
+params['kr']=5*10**(-3)         #m2/W Jarvis radiation parameter
+params['kt']=1.6*10**(-3)       #K-2  Jarvis temperature parameter
+params['Topt']=289.15           #K   Jarvis temperature parameter (optimum temperature)
+params['kd']=1.1*10**(-3)       #Pa-1 Jarvis vapor pressure deficit temperature
+params['hx50']=-1274000         #Pa  Jarvis leaf water potential parameter
+params['nl']=2                   #[-] Jarvis leaf water potential parameter
+params['Emax']=1*10**(-9)        #m/s maximum nightime transpiration
