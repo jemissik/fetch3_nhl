@@ -395,7 +395,7 @@ def Picard(H_initial):
 ########################################################################################################
 
             ##########TRANPIRATION FORMULATION #################
-
+            #TODO replace with function calls
             f_leaf_2d[:,i]=(1+(hn[nz_r:nz]/hx50)**nl)**(-1)
 
             gs_2d[:,i]=gsmax*f_d_2d[:,i]*f_Ta_2d[:,i]*f_s_2d[:,i]*f_leaf_2d[:,i]
@@ -543,4 +543,4 @@ for var in output_vars:
     pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
 
 df_waterbal.to_csv(working_dir / 'output' / ('df_waterbal' + '.csv'), index=False, header=True)
-df_EP.to_csv(working_dir / 'output' / ('df_EP' + '.csv'), index=False, header=False)
+df_EP.to_csv(working_dir / 'output' / ('df_EP' + '.csv'), index=False, header=True)

@@ -170,17 +170,23 @@ NET = calc_NETRAD(SW_in)
 #STOMATA REDUCTIONS FUNCTIONS
 #for transpiration formulation
 #stomata conductance as a function of radiation, temp, VPD and Phi
-#################################################################3
-f_s=1-np.exp(-params['kr']*SW_in) #radiation
+#################################################################
 
-f_Ta=1-params['kt']*(Ta-params['Topt'])**2 #temperature
+def jarvis_fs(SW_in):
+    return 1-np.exp(-params['kr']*SW_in) #radiation
+def jarvis_fTa(Ta):
+    return 1-params['kt']*(Ta-params['Topt'])**2 #temperature
+def jarvis_fd(VPD):
+    return 1/(1+VPD*params['kd'])     #VPD
 
-f_d=1/(1+VPD*params['kd'])     #VPD
+f_s=jarvis_fs(SW_in)
+f_Ta=jarvis_fTa(Ta)
+f_d=jarvis_fd(VPD)
 
 #########################################################################3
 #2D stomata reduction functions and variables for canopy-distributed transpiration
 #############################################################################
-
+#TODO convert to functions
 f_Ta_2d=np.zeros(shape=(len(z_upper),len(f_Ta)))
 for i in np.arange(0,len(f_Ta),1):
     f_Ta_2d[:,i]=f_Ta[i]
