@@ -12,6 +12,11 @@ params['dt'] = 1800  #seconds - input data resolution
 params['tmin'] = 0  #tmin [s]
 
 ###############################################################################
+#RUN OPTIONS
+###############################################################################
+params['print_run_progress'] = False #Print time steps calculated (printing slows down run)
+
+###############################################################################
 #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
 ###############################################################################
 #The finite difference discretization constants

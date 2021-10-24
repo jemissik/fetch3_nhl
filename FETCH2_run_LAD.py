@@ -20,7 +20,6 @@ from met_data import *
 from jarvis import *
 from canopy import *
 
-#from penman_monteith import *
 '''
 #importing variables
 from FETCH2_loading_LAD import params, working_dir, dt0, dt, tmax, dz, nz, nz_r, nz_s, z, z_soil, z_upper, \
@@ -67,7 +66,7 @@ def Porous_media_xylem(arg,params,i):
         if arg[i]>0:
             cavitation_xylem[i]=1
         else:
-            cavitation_xylem[i]=(1-1/(1+scipy.exp(params['ap']*(arg[i]-params['bp']))))
+            cavitation_xylem[i]=(1-1/(1+np.exp(params['ap']*(arg[i]-params['bp']))))
 
     #Index Ax/As - area of xylem per area of soil
     #kmax = m/s
@@ -90,7 +89,7 @@ def Porous_media_root(arg,params,dz,theta):
         if arg[i]>0:
             stress_kr[i]=1
         else:
-            stress_kr[i]=(1-1/(1+scipy.exp(params['ap']*(arg[i]-params['bp']))))  #CAVITATION CURVE FOR THE ROOT XYLEM
+            stress_kr[i]=(1-1/(1+np.exp(params['ap']*(arg[i]-params['bp']))))  #CAVITATION CURVE FOR THE ROOT XYLEM
 
 
     #Index Ar/As - area of root xylem per area of soil
@@ -443,9 +442,6 @@ def Picard(H_initial):
                 stop_flag = 1
                 hnp1mp1 = hnp1m + deltam
 
-                niter=niter+1
-
-                print("calculated time steps",niter)
                 #Bottom boundary condition at bottom of the soil
                 #setting for the next time step value for next cycle
                 if BottomBC==0:
@@ -472,7 +468,11 @@ def Picard(H_initial):
 
                     if UpperBC==0 and q_rain[i]>0:
                         infiltration[sav]=q_inf
+                niter=niter+1
 
+                if params['print_run_progress']:
+                    if (niter % 50) == 0:
+                        print("calculated time steps",niter)
 
             else:
                 hnp1mp1 =hnp1m + deltam
