@@ -13,11 +13,16 @@ from scipy import linalg
 import scipy
 from numpy.linalg import multi_dot
 
+from FETCH2_loading_LAD import *
+from met_data import *
+from jarvis import *
+from canopy import *
+'''
 #importing variables
 from FETCH2_loading_LAD import params, working_dir, dt0, dt, tmax, dz, nz, nz_r, nz_s, z, z_soil, z_upper, \
     nz_clay, nz_sand, q_rain, step_time, Head_bottom_H, H_initial, SW_in,  \
     f_Ta_2d, f_s_2d, f_d_2d, VPD_2d, NET_2d, delta_2d, LAD
-
+'''
 ##### these definitions are temporary until other parts of code are restructured
 hx50 = params['hx50']
 ga = params['ga']

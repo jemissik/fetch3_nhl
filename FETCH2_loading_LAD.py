@@ -11,6 +11,8 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 from FETCH2_config import params
+from met_data import *
+
 
 #This code is a simple example replicating the results of the topic
 #3.3 Modeling LAD and capacitance from the paper:
@@ -28,50 +30,6 @@ from FETCH2_config import params
 #Verma, P.; Loheide, S. P.; Eamus, D. & Daly, E.
 #Root water compensation sustains transpiration rates in an Australian woodland
 #Advances in Water Resources, Elsevier BV, 2014, 74, 91-101
-
-###########################################################
-#Load and format input data
-###########################################################
-
-#Input file
-working_dir = Path.cwd()
-data_path = working_dir / params['input_fname']
-
-#time constants - data resolution
-tmin = params['tmin'] # tmin [s]
-dt = params['dt'] #seconds - input data resolution
-
-start_time = pd.to_datetime(params['start_time'])
-end_time = pd.to_datetime(params['end_time'])
-
-#read input data
-df = pd.read_csv(data_path)
-step_time_hh = pd.Series(pd.date_range(start_time, end_time, freq=str(dt)+'s'))
-df.index = step_time_hh
-
-tmax = len(df) * dt
-t_data = np.arange(tmin, tmax, dt)         # data time grids for input data
-t_data=list(t_data)
-nt_data=len(t_data)                      #length of input data
-
-#variables to arrays
-precipitation = df['Rain (mm)'].values
-Ta_C = df['T(degC)']
-SW_in = df['Radiation (W/m2)']
-VPD = df['VPD (kPa)']
-
-#temperature
-Ta = Ta_C + 273.15 #converting temperature from degree Celsius to Kelvin
-Ta = Ta.interpolate(method = 'linear')
-
-#incoming solar radiation
-SW_in = SW_in.interpolate(method = 'time')
-
-#vapor pressure deficit
-VPD=VPD[VPD > 0] #eliminating negative VPD
-VPD = VPD.reindex(SW_in.index)
-VPD=VPD.interpolate(method='linear')*1000  #kPa to Pa
-VPD=VPD.fillna(0)
 
 ###########################################################
 #Discretization
@@ -112,134 +70,6 @@ def spatial_discretization():
 
 z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay = spatial_discretization()
 
-########################################################
-#SETTING PRECIPITATION AS INFILTRATION BOUNDARY CONDITION
-#in case of set by user
-###########################################################
-def calc_infiltration_rate(precipitation):
-    precipitation=precipitation/dt #dividing the value over half hour to seconds [mm/s]
-    rain=precipitation/params['Rho']  #[converting to m/s]
-    q_rain=np.interp(np.arange(0,tmax+dt0,dt0), t_data, rain) #interpolating
-    q_rain=np.nan_to_num(q_rain) #m/s precipitation rate= infiltration rate
-    return q_rain
-
-q_rain = calc_infiltration_rate(precipitation)
-
-########################################################################
-#INTERPOLATING VARIABLES FOR PENMAN-MONTEITH TRANSPIRATION
-#variables are in the data resolution (half-hourly) and are interpolated to model resolution
-##########################################################################
-
-def interp_to_model_res(var):
-    return np.interp(np.arange(0, tmax + dt0, dt0), t_data, var)
-
-Ta = interp_to_model_res(Ta)
-SW_in = interp_to_model_res(SW_in)
-VPD = interp_to_model_res(VPD)
-
-def calc_esat(Ta):
-    return 611*np.exp((17.27*(Ta-273.15))/(Ta-35.85)) #Pascal
-
-e_sat = calc_esat(Ta)
-
-def calc_delta(Ta, e_sat):
-    return (4098/((Ta-35.85)**2))*e_sat
-
-delta = calc_delta(Ta, e_sat)
-delta_2d=delta
-
-def calc_NETRAD(SW_in):
-    """
-    Calculate net radiation as 60% of total incoming solar radiation
-
-    Parameters
-    ----------
-    SW_in : [W m-2]
-        Total incoming solar radiation
-
-    Returns
-    -------
-    [W m-2]
-        Net radiation
-    """
-    return SW_in * 0.6
-
-NET = calc_NETRAD(SW_in)
-
-###################################################################
-#STOMATA REDUCTIONS FUNCTIONS
-#for transpiration formulation
-#stomata conductance as a function of radiation, temp, VPD and Phi
-#################################################################
-
-def jarvis_fs(SW_in):
-    return 1-np.exp(-params['kr']*SW_in) #radiation
-def jarvis_fTa(Ta):
-    return 1-params['kt']*(Ta-params['Topt'])**2 #temperature
-def jarvis_fd(VPD):
-    return 1/(1+VPD*params['kd'])     #VPD
-
-f_s=jarvis_fs(SW_in)
-f_Ta=jarvis_fTa(Ta)
-f_d=jarvis_fd(VPD)
-
-#########################################################################3
-#2D stomata reduction functions and variables for canopy-distributed transpiration
-#############################################################################
-#TODO convert to functions
-f_Ta_2d=np.zeros(shape=(len(z_upper),len(f_Ta)))
-for i in np.arange(0,len(f_Ta),1):
-    f_Ta_2d[:,i]=f_Ta[i]
-    if any(f_Ta_2d[:,i]<= 0):
-        f_Ta_2d[:,i]=0
-
-
-f_d_2d=np.zeros(shape=(len(z_upper),len(f_d)))
-for i in np.arange(0,len(f_d),1):
-    f_d_2d[:,i]=f_d[i]
-    if any(f_d_2d[:,i]<= 0):
-        f_d_2d[:,i]=0
-
-f_s_2d=np.zeros(shape=(len(z_upper),len(f_d)))
-for i in np.arange(0,len(f_s),1):
-    f_s_2d[:,i]=f_s[i]
-    if any(f_s_2d[:,i]<= 0):
-        f_s_2d[:,i]=0
-
-
-#2D INTERPOLATION NET RADIATION
-NET_2d=np.zeros(shape=(len(z_upper),len(NET)))
-for i in np.arange(0,len(NET),1):
-    NET_2d[:,i]=NET[i]
-    if any(NET_2d[:,i]<= 0):
-        NET_2d[:,i]=0
-
-#2D INTERPOLATION VPD
-VPD_2d=np.zeros(shape=(len(z_upper),len(VPD)))
-for i in np.arange(0,len(VPD),1):
-    VPD_2d[:,i]=VPD[i]
-
-#######################################################################
-#LEAF AREA DENSITY FORMULATION (LAD) [1/m]
-#######################################################################
-#Simple LAD formulation to illustrate model capability
-#following Lalic et al 2014
-####################
-def calc_LAD(z_Above):
-
-    z_LAD=z_Above[1:]
-    LAD=np.zeros(shape=(int(params['Hspec']/dz)))  #[1/m]
-
-    #LAD function according to Lalic et al 2014
-    for i in np.arange(0,len(z_LAD),1):
-        if  0.1<=z_LAD[i]<params['z_m']:
-            LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**6)*np.exp(6*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
-        if  params['z_m']<=z_LAD[i]<params['Hspec']:
-            LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**0.5)*np.exp(0.5*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
-        if z_LAD[i]==params['Hspec']:
-            LAD[i]=0
-        return LAD
-LAD = calc_LAD(z_Above)
 
 #######################################################################
 #INITIAL CONDITIONS

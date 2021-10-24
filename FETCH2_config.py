@@ -49,7 +49,7 @@ params['BottomBC']=0
 
 #SOIL SPATIAL DISCRETIZATION
 params['Root_depth']=3.2 #[m] depth of root column
-params['Soil_depth']=5   #[m]depth of soil col umn
+params['Soil_depth']=5   #[m]depth of soil column
 
 ####################################################################
 #CONFIGURATION OF SOIL DUPLEX
