@@ -7,9 +7,17 @@ params['g'] = 9.8 # [m s-2]
 ###############################################################################
 #INPUT DATA FILE PARAMETERS
 ###############################################################################
+
+#Short test simulation
 params['input_fname'] = "Derek_data_test30Min.csv"
 params['start_time'] = "2007-01-01 00:00:00" #begining of simulation
 params['end_time'] = "2007-01-01 00:30:00" #end of simulation
+
+#Full simulation
+#params['input_fname'] = "Derek_data_up.csv"
+#params['start_time'] = "2007-01-01 00:00:00" #begining of simulation
+#params['end_time'] = "2007-06-09 00:00:00" #end of simulation
+
 params['dt'] = 1800  #seconds - input data resolution
 params['tmin'] = 0  #tmin [s]
 
@@ -17,6 +25,7 @@ params['tmin'] = 0  #tmin [s]
 #RUN OPTIONS
 ###############################################################################
 params['print_run_progress'] = False #Option to print progress of time steps calculated (printing slows down run)
+params['print_freq'] = 50 #Interval of timesteps to print if print_run_progress = True
 
 ###############################################################################
 #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
@@ -74,7 +83,6 @@ params['cte_clay']=3 #depth from 0-3m initial condition of clay [and SWC] is con
 params['H_init_soilbottom'] = -6.09
 params['H_init_soilmid'] = -0.402
 params['H_init_canopytop'] = -23.3
-
 
 #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
 

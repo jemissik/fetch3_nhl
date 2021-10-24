@@ -27,6 +27,8 @@ from FETCH2_loading_LAD import params, working_dir, dt0, dt, tmax, dz, nz, nz_r,
     f_Ta_2d, f_s_2d, f_d_2d, VPD_2d, NET_2d, delta_2d, LAD
 '''
 ##### these definitions are temporary until other parts of code are restructured
+print_freq = params['print_freq']
+print_run_progress = params['print_run_progress']
 hx50 = params['hx50']
 ga = params['ga']
 gama = params['gama']
@@ -463,8 +465,8 @@ def Picard(H_initial):
                         infiltration[sav]=q_inf
                 niter=niter+1
 
-                if params['print_run_progress']:
-                    if (niter % 50) == 0:
+                if print_run_progress:
+                    if (niter % print_freq) == 0:
                         print("calculated time steps",niter)
 
             else:
