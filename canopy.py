@@ -18,5 +18,5 @@ def calc_LAD(z_Above):
             LAD[i]=params['L_m']*(((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))**0.5)*np.exp(0.5*(1-((params['Hspec']-params['z_m'])/(params['Hspec']-z_LAD[i]))))
         if z_LAD[i]==params['Hspec']:
             LAD[i]=0
-        return LAD
+    return LAD
 LAD = calc_LAD(z_Above)

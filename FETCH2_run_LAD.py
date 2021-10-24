@@ -4,6 +4,8 @@ Created on Mon Aug  5 11:10:31 2019
 
 @author: mdef0001
 """
+import time
+start = time.time()
 #importing libraries
 import numpy as np
 from numpy.core.numeric import True_
@@ -17,6 +19,8 @@ from FETCH2_loading_LAD import *
 from met_data import *
 from jarvis import *
 from canopy import *
+
+#from penman_monteith import *
 '''
 #importing variables
 from FETCH2_loading_LAD import params, working_dir, dt0, dt, tmax, dz, nz, nz_r, nz_s, z, z_soil, z_upper, \
@@ -399,25 +403,11 @@ def Picard(H_initial):
 
 ########################################################################################################
 
-            ##########TRANPIRATION FORMULATION #################
-            #TODO replace with function calls
-            #TODO move to jarvis as a function 
-            f_leaf_2d[:,i]=(1+(hn[nz_r:nz]/hx50)**nl)**(-1)
-
-            gs_2d[:,i]=gsmax*f_d_2d[:,i]*f_Ta_2d[:,i]*f_s_2d[:,i]*f_leaf_2d[:,i]
-
-            gc_2d[:,i]=((gs_2d[:,i]*gb)/(gs_2d[:,i]+gb))
-
-
-            if SW_in[i]>5: #income radiation > 5 = daylight
-                Pt_2d[:,i]=((NET_2d[:,i]*delta_2d[i]+Cp*VPD_2d[:,i]*ga)/(lamb*(delta_2d[i]*gc_2d[:,i]+gama*(ga+gc_2d[:,i]))))*gc_2d[:,i] #[m/s]
-            else: #nighttime transpiration
-                Pt_2d[:,i]=Emax*f_Ta_2d[:,i]*f_d_2d[:,i]*f_leaf_2d[:,i] #[m/s]
-
-
+            ##########TRANSPIRATION FORMULATION #################
+            Pt_2d[:,i] = calc_transpiration(SW_in[i], NET_2d[:,i], delta_2d[i], Cp, VPD_2d[:,i], lamb,
+                                            gb, ga, f_Ta_2d[:,i], f_s_2d[:,i], f_d_2d[:,i], jarvis_fleaf(hn[nz_r:nz]))
 
             #SINK/SOURCE ARRAY : concatenating all sinks and sources in a vector
-            Pt_2d[:,i]=Pt_2d[:,i]*LAD[:]  #m/s * 1/m = [1/s]
             S_S[:,i]=np.concatenate((TS,-Pt_2d[:,i])) #vector with sink and sources
 
 
@@ -550,3 +540,6 @@ for var in output_vars:
 
 df_waterbal.to_csv(working_dir / 'output' / ('df_waterbal' + '.csv'), index=False, header=True)
 df_EP.to_csv(working_dir / 'output' / ('df_EP' + '.csv'), index=False, header=True)
+
+
+print(f"run time: {time.time() - start} s")

@@ -85,9 +85,10 @@ def interpolate_2d(x, zdim):
     x_2d = np.zeros(shape=(zdim, len(x)))
     for i in np.arange(0,len(x),1):
         x_2d[:,i]=x[i]
-        if any(x_2d[:,i]<= 0):
-            x_2d[:,i]=0
     return x_2d
+
+def neg2zero(x):
+    return np.where(x < 0, 0, x)
 
 #######################################################################
 #INITIAL CONDITIONS
@@ -142,12 +143,15 @@ Head_bottom_H=-Head_bottom*params['g']*params['Rho']  #Pa
 Head_bottom_H=np.flipud(Head_bottom_H) #model starts the simulation at the BOTTOM of the soil
 
 
-####2d interpolation of met data 
+####2d interpolation of met data
 #2D INTERPOLATION NET RADIATION
 NET_2d = interpolate_2d(NET, len(z_upper))
 
 #2D INTERPOLATION VPD
 VPD_2d = interpolate_2d(VPD, len(z_upper))
+
+Ta_2d = interpolate_2d(Ta, len(z_upper))
+SW_in_2d = interpolate_2d(SW_in, len(z_upper))
 
 #################################################################################
 #INDEXING OF DATA  - create data frames using step_time as an index
