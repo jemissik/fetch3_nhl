@@ -44,6 +44,14 @@ theta_1_clay = params['theta_1_clay']
 theta_2_clay = params['theta_2_clay']
 theta_1_sand = params['theta_1_sand']
 theta_2_sand = params['theta_2_sand']
+Root_depth = params['Root_depth']
+qz = params['qz']
+theta_S2 = params['theta_S2']
+#Kr = params['Kr']
+Soil_depth = params['Soil_depth']
+Rho = params['Rho']
+g = params['g']
+stop_tol = params['stop_tol']
 #####
 
 ############## inital condition #######################
@@ -118,7 +126,7 @@ def vanGenuchten(arg,params,z):
 
     #arg = potential from Pascal to meters
     theta=np.zeros(shape=len(arg))
-    arg=((arg)/(params['g']*params['Rho']))   #m
+    arg=((arg)/(g*Rho))   #m
 
     Se=np.zeros(shape=len(arg))
     K=np.zeros(shape=len(arg))
@@ -145,22 +153,22 @@ def vanGenuchten(arg,params,z):
 
             if arg[i]<0:
              #Compute the volumetric moisture content
-                theta[i] = (params['theta_S2'] - params['theta_R2'])/((1 + (params['alpha_2']*abs(arg[i]))**params['n_2'])**params['m_2']) + params['theta_R2']  #m3/m3
+                theta[i] = (theta_S2 - params['theta_R2'])/((1 + (params['alpha_2']*abs(arg[i]))**params['n_2'])**params['m_2']) + params['theta_R2']  #m3/m3
             #Compute the effective saturation
-                Se[i] = ((theta[i] - params['theta_R2'])/(params['theta_S2'] - params['theta_R2'])) ## Unitless factor
+                Se[i] = ((theta[i] - params['theta_R2'])/(theta_S2 - params['theta_R2'])) ## Unitless factor
             #Compute the hydraulic conductivity
                 K[i]=params['Ksat_2']*Se[i]**(1/2)*(1 - (1 - Se[i]**(1/params['m_2']))**params['m_2'])**2   # van genuchten Eq.8 (m/s) #
             if arg[i]>=0:
-                theta[i]=params['theta_S2']
+                theta[i]=theta_S2
                 K[i]=params['Ksat_2']
 
-            C[i]=((-params['alpha_2']*np.sign(arg[i])*params['m_2']*(params['theta_S2']-params['theta_R2']))/(1-params['m_2']))*Se[i]**(1/params['m_2'])*(1-Se[i]**(1/params['m_2']))**params['m_2']
+            C[i]=((-params['alpha_2']*np.sign(arg[i])*params['m_2']*(theta_S2-params['theta_R2']))/(1-params['m_2']))*Se[i]**(1/params['m_2'])*(1-Se[i]**(1/params['m_2']))**params['m_2']
 
 
 
 
-    K=(K/(params['Rho']*params['g'])) # since H is in Pa
-    C=(C/(params['Rho']*params['g'])) # since H is in Pa
+    K=(K/(Rho*g)) # since H is in Pa
+    C=(C/(Rho*g)) # since H is in Pa
 
 
     return C, K,theta, Se
@@ -223,10 +231,10 @@ def Picard(H_initial):
 
     #root mass distribution following VERMA ET AL 2O14
 
-    z_dist=np.arange(0,params['Root_depth']+dz,dz)
+    z_dist=np.arange(0,Root_depth+dz,dz)
     z_dist=np.flipud(z_dist)
 
-    r_dist=(np.exp(params['qz']-((params['qz']*z_dist)/params['Root_depth']))*params['qz']**2*(params['Root_depth']-z_dist))/(params['Root_depth']**2*(1+np.exp(params['qz'])*(-1+params['qz'])))
+    r_dist=(np.exp(qz-((qz*z_dist)/Root_depth))*qz**2*(Root_depth-z_dist))/(Root_depth**2*(1+np.exp(qz)*(-1+qz)))
 
 
 ####################################################################################################################################
@@ -350,12 +358,12 @@ def Picard(H_initial):
             #equation S.53
             if UpperBC==0:
                 q_inf=min(q_rain[i],
-                                ((params['theta_S2']-theta[-1])*(dz/dt0))) #m/s
+                                ((theta_S2-theta[-1])*(dz/dt0))) #m/s
 
 
 ################################## SINK/SOURCE TERM ON THE SAME TIMESTEP #####################################
               #equation S.22 suplementary material
-            if params['Root_depth']==params['Soil_depth']:
+            if Root_depth==Soil_depth:
                 #diagonals
                 for k,e in zip(np.arange(0,nz_s,1),np.arange(0,(nz_r-nz_s),1)):
                     A[k,k]=A[k,k]-Kr[e] #soil ---  from 0:soil top
@@ -411,7 +419,7 @@ def Picard(H_initial):
 
             #% Compute the residual of MPFD (right hand side)
 
-            R_MPFD = (1/(dz**2))*(matrix2) + (1/dz)*params['Rho']*params['g']*(kbarplus - kbarminus) - (1/dt0)*np.dot((hnp1m - hn),C)+(S_S[:,i])
+            R_MPFD = (1/(dz**2))*(matrix2) + (1/dz)*Rho*g*(kbarplus - kbarminus) - (1/dt0)*np.dot((hnp1m - hn),C)+(S_S[:,i])
 
             #bottom boundary condition - known potential - \delta\Phi=0
             if BottomBC==0:
@@ -426,14 +434,14 @@ def Picard(H_initial):
                 R_MPFD[nz_s-1]=R_MPFD[nz_s-1]+(q_inf)/dz
 
             if BottomBC==2: #free drainage condition: F1-1/2 = K at the bottom of the soil
-                R_MPFD[0]=R_MPFD[0]-(kbarplus[0]*params['Rho']*params['g'])/dz
+                R_MPFD[0]=R_MPFD[0]-(kbarplus[0]*Rho*g)/dz
 
 
             #Compute deltam for iteration level m+1 : equations S.25 to S.41 (matrix)
             deltam = np.dot(linalg.pinv2(A),R_MPFD)
 
 
-            if  np.max(np.abs(deltam[:])) < params['stop_tol']:  #equation S.42
+            if  np.max(np.abs(deltam[:])) < stop_tol:  #equation S.42
                 stop_flag = 1
                 hnp1mp1 = hnp1m + deltam
 
