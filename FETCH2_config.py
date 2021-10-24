@@ -58,6 +58,16 @@ params['Soil_depth']=5   #[m]depth of soil column
 params['sand_d']=5.0 #4.2----top soil #m
 params['clay_d']=4.2 #0------4.2 #m
 
+#soil initial conditions as described in the paper [VERMA et al., 2014]
+#the initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
+#from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
+#from 4,2 m [sand layer] cte value of -0.402 m
+params['cte_clay']=3 #depth from 0-3m initial condition of clay [and SWC] is constant
+params['H_init_soilbottom'] = -6.09
+params['H_init_soilmid'] = -0.402
+params['H_init_canopytop'] = -23.3
+
+
 #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
 
 #CLAY

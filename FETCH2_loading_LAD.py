@@ -78,41 +78,35 @@ z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay 
 #soil initial conditions as described in the paper [VERMA et al., 2014]
 initial_H=np.zeros(shape=nz)
 
-#the initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
-#from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
-#from 4,2 m [sand layer] cte value of -0.402 m
-#the conditions are specific for this case study and therefore the hardcoding below
-# TODO change hardcoding so that it is more configurable
+cte_clay = params['cte_clay']
+H_init_soilbottom = params['H_init_soilbottom']
+H_init_soilmid = params['H_init_soilmid']
+H_init_canopytop = params['H_init_canopytop']
 
-cte_clay=3 #depth from 0-3m initial condition of clay [and SWC] is constant
-
-factor_soil=(-6.09-(-0.402))/(int((params['clay_d']-cte_clay)/dz)) #factor for interpolation
+factor_soil=(H_init_soilbottom-(H_init_soilmid))/(int((params['clay_d']-cte_clay)/dz)) #factor for interpolation
 
 #soil
 for i in np.arange(0,len(z_soil),1):
     if  0.0<=z_soil[i]<=cte_clay :
-        initial_H[i]=-6.09
+        initial_H[i]=H_init_soilbottom
     if cte_clay<z_soil[i]<=z[nz_clay]:
         initial_H[i]=initial_H[i-1]-factor_soil #factor for interpolation
     if params['clay_d']<z_soil[i]<= z[nz_r-1]:
-        initial_H[i]=-0.402
+        initial_H[i]=H_init_soilmid
+
+initial_H[nz_s-1]=H_init_soilmid
 
 
-initial_H[nz_s-1]=-0.402
-
-
-
-factor_xylem=(-23.3-(-6.09))/((z[-1]-z[nz_s])/dz)
+factor_xylem=(H_init_canopytop-(H_init_soilbottom))/((z[-1]-z[nz_s])/dz)
 
 #roots and xylem
-initial_H[nz_s]=-6.09
+initial_H[nz_s]=H_init_soilbottom
 for i in np.arange(nz_s+1,nz,1):
     initial_H[i]=initial_H[i-1]+factor_xylem #meters
 
 
 #putting initial condition in Pascal
 H_initial=initial_H*params['g']*params['Rho']  #Pascals
-
 
 
 ###########################################################################
