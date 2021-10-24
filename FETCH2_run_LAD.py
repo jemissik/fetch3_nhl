@@ -12,11 +12,11 @@ from numpy.core.numeric import True_
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import linalg
-import scipy
 from numpy.linalg import multi_dot
 
 from FETCH2_loading_LAD import *
 from met_data import *
+from initial_conditions import *
 from jarvis import *
 from canopy import *
 
@@ -206,11 +206,7 @@ def Picard(H_initial):
     EVsink_ts=np.zeros(shape=((nz_r-nz_s),dim))
     infiltration=np.zeros(shape=dim)
 
-
-    f_leaf_2d=np.zeros(shape=(len(z_upper),nt))
     Pt_2d=np.zeros(shape=(len(z_upper),nt))
-    gs_2d=np.zeros(shape=(len(z_upper),nt))
-    gc_2d=np.zeros(shape=(len(z_upper),nt))
 
     S_stomata=np.zeros(shape=(len(z[nz_r:nz]),nt))
     S_S=np.zeros(shape=(nz,nt))
@@ -247,9 +243,9 @@ def Picard(H_initial):
     #vector for adding potentials in B matrix
     TS=np.zeros(shape=(nz_r))
 
+    # Define an iteration counter
     niter = 0
     sav=0
-
 
     for i in np.arange(1,nt,1):
         #use nt for entire period
@@ -265,9 +261,6 @@ def Picard(H_initial):
 
         # Define a dummy stopping variable
         stop_flag = 0
-
-        # Define an iteration counter
-
 
         while(stop_flag==0):
         #=========================== above-ground xylem ========================
@@ -478,9 +471,6 @@ def Picard(H_initial):
                 hnp1mp1 =hnp1m + deltam
                 hnp1m = hnp1mp1
 
-
-
-
     return H*(10**(-6)), K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink,EVsink_ts,THETA, infiltration,trans_2d
 
 H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink,EVsink_ts, THETA, infiltration,trans_2d = Picard(H_initial)  #calling the function
@@ -517,8 +507,10 @@ df_waterbal = pd.DataFrame(data={'theta_i':theta_i,
 #summing during all time steps and multiplying by 1000 = mm  #
 #the dt factor is accounting for the time step - to the TOTAl and not the rate
 
-
+#end of simulation adding +1 time step to match dimensions
+step_time = pd.Series(pd.date_range(start_time, end_time + pd.to_timedelta(dt, unit = 's'), freq=str(dt)+'s'))
 ############################################################################
+
 df_time = pd.DataFrame(data=step_time.index.values,index=step_time)
 
 #########################################################

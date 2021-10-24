@@ -1,7 +1,9 @@
-#PHYSICAL CONSTANTS
 params = {}
+
+#PHYSICAL CONSTANTS
 params['Rho'] = 1000  ##[kg m-3]
 params['g'] = 9.8 # [m s-2]
+
 ###############################################################################
 #INPUT DATA FILE PARAMETERS
 ###############################################################################
@@ -14,7 +16,7 @@ params['tmin'] = 0  #tmin [s]
 ###############################################################################
 #RUN OPTIONS
 ###############################################################################
-params['print_run_progress'] = False #Print time steps calculated (printing slows down run)
+params['print_run_progress'] = False #Option to print progress of time steps calculated (printing slows down run)
 
 ###############################################################################
 #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
@@ -63,6 +65,7 @@ params['Soil_depth']=5   #[m]depth of soil column
 params['sand_d']=5.0 #4.2----top soil #m
 params['clay_d']=4.2 #0------4.2 #m
 
+#SOIL INITIAL CONDITIONS
 #soil initial conditions as described in the paper [VERMA et al., 2014]
 #the initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
 #from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m

@@ -46,13 +46,6 @@ def jarvis_fleaf(hn):
 def calc_gs(f_Ta, f_d, f_s, f_leaf):
     return gsmax * f_d * f_Ta * f_s * f_leaf
 
-#########################################################################3
-#2D stomata reduction functions and variables for canopy-distributed transpiration
-#############################################################################
-f_Ta_2d = jarvis_fTa(Ta_2d)
-f_d_2d = jarvis_fd(VPD_2d)
-f_s_2d = jarvis_fs(SW_in_2d)
-
 def calc_gc(gs, gb):
     return (gs * gb) / (gs + gb)
 
@@ -72,3 +65,10 @@ def calc_transpiration(SW_in, NET, delta, Cp, VPD, lamb, gb, ga, f_Ta, f_s, f_d,
     else: #nighttime transpiration
         transpiration = night_trans(f_Ta, f_d, f_leaf)
     return transpiration * LAD #m/s * 1/m = [1/s]
+
+#########################################################################3
+#2D stomata reduction functions and variables for canopy-distributed transpiration
+#############################################################################
+f_Ta_2d = jarvis_fTa(Ta_2d)
+f_d_2d = jarvis_fd(VPD_2d)
+f_s_2d = jarvis_fs(SW_in_2d)
