@@ -70,6 +70,24 @@ def spatial_discretization():
 
 z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay = spatial_discretization()
 
+# Function to do to 2d interpolation
+def interpolate_2d(x, zdim):
+    """
+    Interpolates input to 2d for canopy-distributed values
+
+    Parameters
+    ----------
+    x : [type]
+        input
+    zdim : [type]
+        length of z dimension
+    """
+    x_2d = np.zeros(shape=(zdim, len(x)))
+    for i in np.arange(0,len(x),1):
+        x_2d[:,i]=x[i]
+        if any(x_2d[:,i]<= 0):
+            x_2d[:,i]=0
+    return x_2d
 
 #######################################################################
 #INITIAL CONDITIONS
@@ -123,6 +141,13 @@ Head_bottom=((((params['theta_R1']-params['theta_S1'])/(params['theta_R1']-(soil
 Head_bottom_H=-Head_bottom*params['g']*params['Rho']  #Pa
 Head_bottom_H=np.flipud(Head_bottom_H) #model starts the simulation at the BOTTOM of the soil
 
+
+####2d interpolation of met data 
+#2D INTERPOLATION NET RADIATION
+NET_2d = interpolate_2d(NET, len(z_upper))
+
+#2D INTERPOLATION VPD
+VPD_2d = interpolate_2d(VPD, len(z_upper))
 
 #################################################################################
 #INDEXING OF DATA  - create data frames using step_time as an index

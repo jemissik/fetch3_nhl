@@ -401,6 +401,7 @@ def Picard(H_initial):
 
             ##########TRANPIRATION FORMULATION #################
             #TODO replace with function calls
+            #TODO move to jarvis as a function 
             f_leaf_2d[:,i]=(1+(hn[nz_r:nz]/hx50)**nl)**(-1)
 
             gs_2d[:,i]=gsmax*f_d_2d[:,i]*f_Ta_2d[:,i]*f_s_2d[:,i]*f_leaf_2d[:,i]
