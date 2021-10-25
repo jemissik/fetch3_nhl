@@ -22,10 +22,12 @@ params['dt'] = 1800  #seconds - input data resolution
 params['tmin'] = 0  #tmin [s]
 
 ###############################################################################
-#RUN OPTIONS
+#RUN OPTIONS - printing
 ###############################################################################
-params['print_run_progress'] = False #Option to print progress of time steps calculated (printing slows down run)
-params['print_freq'] = 50 #Interval of timesteps to print if print_run_progress = True
+# Printing slows down model run
+# Options to turn printing off or specify print frequency
+params['print_run_progress'] = False  # Turn on/off printing for progress of time steps calculated
+params['print_freq'] = 50  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
 
 ###############################################################################
 #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
