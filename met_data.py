@@ -42,7 +42,7 @@ def interp_to_model_res(var):
 
 #Input file
 working_dir = Path.cwd()
-data_path = working_dir / params['input_fname']
+data_path = working_dir / 'data' / params['input_fname']
 
 #time constants - data resolution
 tmin = params['tmin'] # tmin [s]
