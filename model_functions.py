@@ -156,7 +156,7 @@ def vanGenuchten(arg,params,z):
 
 ###############################################################################
 
-def Picard(H_initial):
+def Picard(H_initial, Head_bottom_H):
     #picard iteration solver, as described in the supplementary material
     #solution following Celia et al., 1990
 
@@ -461,3 +461,64 @@ def Picard(H_initial):
                 hnp1m = hnp1mp1
 
     return H*(10**(-6)), K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink,EVsink_ts,THETA, infiltration,trans_2d
+
+#Calculating water balance from model outputs
+def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink, EVsink_ts, THETA,
+                       infiltration,trans_2d, dt, dz):
+    ####################### Water balance ###################################
+
+    theta_i=sum(THETA[:,1]*dz)
+    theta_t=sum(THETA[:,-1]*dz)
+    theta_tot=theta_i-theta_t  #(m)
+    theta_tot=theta_tot*1000  #(mm)
+
+    infilt_tot=sum(infiltration)*dt*1000 #mm
+    if UpperBC==0:
+        theta_tot=(theta_tot)+infilt_tot
+    ############################
+
+    EVsink_total=np.zeros(shape=(len(EVsink_ts[0])))
+    for i in np.arange(1,len(EVsink_ts[0]),1):
+        EVsink_total[i]=sum(-EVsink_ts[:,i]*dz)  #(1/s) over the simulation times dz [m]= m
+
+    root_water=sum(EVsink_total)*1000*dt #mm
+    #############################
+
+    transpiration_tot=sum(sum(trans_2d))*1000*dt*dz ##mm
+
+    df_waterbal = pd.DataFrame(data={'theta_i':theta_i,
+                'theta_t':theta_t, 'theta_tot':theta_tot, 'infilt_tot':infilt_tot,
+                    'root_water':root_water, 'transpiration_tot':transpiration_tot}, index = [0])
+
+    ####################### Format model outputs ###################################
+    #summing during all time steps and multiplying by 1000 = mm  #
+    #the dt factor is accounting for the time step - to the TOTAl and not the rate
+
+    #end of simulation adding +1 time step to match dimensions
+    step_time = pd.Series(pd.date_range(start_time, end_time + pd.to_timedelta(dt, unit = 's'), freq=str(dt)+'s'))
+    ############################################################################
+
+    #df_time = pd.DataFrame(data=step_time.index.values,index=step_time)
+
+    #########################################################
+
+    d = {'trans':(sum(trans_2d[:,:]*dz)*1000)} #mm/s
+    df_EP = pd.DataFrame(data=d,index=step_time[:])
+
+    trans_h = dt*df_EP['trans'].resample('60T').sum() # hourly accumulated simulated transpiration
+
+    output_vars = {'H':H, 'K': K, 'S_stomata':S_stomata, 'theta':theta, 'S_kx':S_kx, 'S_kr':S_kr, 'C':C,
+            'Kr_sink':Kr_sink, 'Capac':Capac, 'S_sink': S_sink, 'EVsink_ts':EVsink_ts, 'trans_h':trans_h,
+            'THETA':THETA, 'infiltration':infiltration, 'trans_2d':trans_2d,'EVsink_total':EVsink_total}
+
+    return output_vars, df_waterbal, df_EP
+
+####################### Save model outputs ###################################
+def save_output(output_vars, df_waterbal, df_EP):
+    #Writes model outputs to csv files
+    
+    for var in output_vars:
+        pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
+
+    df_waterbal.to_csv(working_dir / 'output' / ('df_waterbal' + '.csv'), index=False, header=True)
+    df_EP.to_csv(working_dir / 'output' / ('df_EP' + '.csv'), index=False, header=True)
