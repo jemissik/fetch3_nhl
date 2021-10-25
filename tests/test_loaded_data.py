@@ -29,7 +29,7 @@ def test_output_data_should_be_the_same_as_previously_stored_data():
     # Given previous ran data
 
     # When we run the model
-    from FETCH2_run_LAD import Picard
+    from main import Picard
 
     # Then the output data and the previous data should be the same
     for file in files:

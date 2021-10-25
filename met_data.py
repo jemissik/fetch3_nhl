@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-from FETCH2_config import params
+from model_config import params
 from FETCH2_loading_LAD import *
 
 dt0 = params['dt0']

@@ -1,4 +1,4 @@
-from FETCH2_config import *
+from model_config import *
 from FETCH2_loading_LAD import *
 from met_data import *
 from canopy import *

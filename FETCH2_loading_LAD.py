@@ -7,7 +7,7 @@ Created on Wed Mar 20 07:07:38 2019
 """
 import numpy as np
 
-from FETCH2_config import params
+from model_config import params
 
 #This code is a simple example replicating the results of the topic
 #3.3 Modeling LAD and capacitance from the paper:
