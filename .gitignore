@@ -1,5 +1,7 @@
+# Model output
 output/
-speed_test/
+# Output from speed testing
+speed_test/output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
