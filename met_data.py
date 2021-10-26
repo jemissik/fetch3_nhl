@@ -2,10 +2,8 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-from model_config import params
+from model_config import dt0, input_fname, start_time, end_time, tmin, dt, Rho
 from FETCH2_loading_LAD import *
-
-dt0 = params['dt0']
 
 # Helper functions
 def calc_NETRAD(SW_in):
@@ -25,7 +23,7 @@ def calc_NETRAD(SW_in):
     return SW_in * 0.6
 def calc_infiltration_rate(precipitation):
     precipitation=precipitation/dt #dividing the value over half hour to seconds [mm/s]
-    rain=precipitation/params['Rho']  #[converting to m/s]
+    rain=precipitation/Rho  #[converting to m/s]
     q_rain=np.interp(np.arange(0,tmax+dt0,dt0), t_data, rain) #interpolating
     q_rain=np.nan_to_num(q_rain) #m/s precipitation rate= infiltration rate
     return q_rain
@@ -42,14 +40,10 @@ def interp_to_model_res(var):
 
 #Input file
 working_dir = Path.cwd()
-data_path = working_dir / 'data' / params['input_fname']
+data_path = working_dir / 'data' / input_fname
 
-#time constants - data resolution
-tmin = params['tmin'] # tmin [s]
-dt = params['dt'] #seconds - input data resolution
-
-start_time = pd.to_datetime(params['start_time'])
-end_time = pd.to_datetime(params['end_time'])
+start_time = pd.to_datetime(start_time)
+end_time = pd.to_datetime(end_time)
 
 #read input data
 df = pd.read_csv(data_path)

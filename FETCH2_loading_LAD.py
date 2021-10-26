@@ -7,7 +7,7 @@ Created on Wed Mar 20 07:07:38 2019
 """
 import numpy as np
 
-from model_config import params
+from model_config import dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d
 
 #This code is a simple example replicating the results of the topic
 #3.3 Modeling LAD and capacitance from the paper:
@@ -29,26 +29,25 @@ from model_config import params
 ###########################################################
 #Discretization
 ###########################################################
-dz = params['dz']
 
-def spatial_discretization():
+def spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d):
     ##########################################
     #below-ground spatial discretization
     #######################################
     zmin=0     #[m] minimum depth of soil [bottom of soil]
-    z_soil=np.arange(zmin,params['Soil_depth']+dz,dz)
+    z_soil=np.arange(zmin,Soil_depth + dz, dz)
     nz_s=len(z_soil)
 
     #measurements depths of soil [m]
-    z_root=np.arange((params['Soil_depth']-params['Root_depth'])+zmin,params['Soil_depth']+dz,dz)
+    z_root=np.arange((Soil_depth - Root_depth) + zmin, Soil_depth + dz, dz)
     nz_r=len(z_soil)+len(z_root)
 
     #############################################
     #above-ground spatial discretization
     #################################################
-    z_Above=np.arange(zmin, params['Hspec']+dz, dz)  #[m]
+    z_Above=np.arange(zmin, Hspec + dz, dz)  #[m]
     nz_Above=len(z_Above)
-    z_upper=np.arange((z_soil[-1]+dz),(z_soil[-1]+params['Hspec']+dz),dz)
+    z_upper=np.arange((z_soil[-1] + dz),(z_soil[-1] + Hspec + dz), dz)
 
     z=np.concatenate((z_soil,z_root,z_upper))
 
@@ -58,8 +57,8 @@ def spatial_discretization():
     #CONFIGURATION OF SOIL DUPLEX
     #depths of layer/clay interface
     #####################################################################
-    nz_sand=int(np.flatnonzero(z==params['sand_d'])) #node where sand layer finishes
-    nz_clay=int(np.flatnonzero(z==params['clay_d'])) #node where clay layer finishes- sand starts
+    nz_sand=int(np.flatnonzero(z==sand_d)) #node where sand layer finishes
+    nz_clay=int(np.flatnonzero(z==clay_d)) #node where clay layer finishes- sand starts
     return z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay
 
 # Function to do to 2d interpolation
@@ -83,4 +82,4 @@ def interpolate_2d(x, zdim):
 def neg2zero(x):
     return np.where(x < 0, 0, x)
 
-z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay = spatial_discretization()
+z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay = spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d)
