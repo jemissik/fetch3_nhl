@@ -1,8 +1,7 @@
 #importing libraries
 import numpy as np
-from numpy.core.numeric import True_
+#from numpy.core.numeric import True_
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy import linalg
 from numpy.linalg import multi_dot
 
@@ -516,7 +515,7 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
 ####################### Save model outputs ###################################
 def save_output(output_vars, df_waterbal, df_EP):
     #Writes model outputs to csv files
-    
+
     for var in output_vars:
         pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
 
