@@ -488,6 +488,9 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
 def save_output(output_vars, df_waterbal, df_EP):
     #Writes model outputs to csv files
 
+    # make output directory if one doesn't exist
+    (working_dir /'output').mkdir(exist_ok=True)
+
     for var in output_vars:
         pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
 
