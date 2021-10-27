@@ -478,9 +478,10 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
 
     trans_h = dt*df_EP['trans'].resample('60T').sum() # hourly accumulated simulated transpiration
 
-    output_vars = {'H':H, 'K': K, 'S_stomata':S_stomata, 'theta':theta, 'S_kx':S_kx, 'S_kr':S_kr, 'C':C,
-            'Kr_sink':Kr_sink, 'Capac':Capac, 'S_sink': S_sink, 'EVsink_ts':EVsink_ts, 'trans_h':trans_h,
-            'THETA':THETA, 'infiltration':infiltration, 'trans_2d':trans_2d,'EVsink_total':EVsink_total}
+    output_vars = {'H':H.transpose(), 'K': K.transpose(), 'S_stomata':S_stomata, 'theta':theta, 'S_kx':S_kx.transpose(),
+                   'S_kr':S_kr.transpose(), 'C':C, 'Kr_sink':Kr_sink.transpose(), 'Capac':Capac.transpose(), 'S_sink': S_sink.transpose(),
+                   'EVsink_ts':EVsink_ts.transpose(), 'trans_h':trans_h,'THETA':THETA.transpose(), 'infiltration':infiltration,
+                   'trans_2d':trans_2d.transpose(),'EVsink_total':EVsink_total}
 
     return output_vars, df_waterbal, df_EP
 
