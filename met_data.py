@@ -48,6 +48,9 @@ end_time = pd.to_datetime(cfg.end_time)
 #read input data
 df = pd.read_csv(data_path)
 step_time_hh = pd.Series(pd.date_range(start_time, end_time, freq=str(cfg.dt)+'s'))
+
+# Select data for length of run
+df = df.iloc[0:len(step_time_hh)]
 df.index = step_time_hh
 
 tmax = len(df) * cfg.dt

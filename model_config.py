@@ -11,12 +11,12 @@ g = 9.8 # [m s-2]
 ###############################################################################
 
 #Short test simulation
-input_fname = "Derek_data_test30Min.csv"
+#input_fname = "Derek_data_test30Min.csv"
 start_time = "2007-01-01 00:00:00" #begining of simulation
-end_time = "2007-01-01 00:30:00" #end
+end_time = "2007-01-01 01:30:00" #end
 
 #Full Simulation
-#input_fname = "Derek_data_up.csv"
+input_fname = "Derek_data_up.csv"
 #start_time = "2007-01-01 00:00:00" #begining of simulation
 #end_time = "2007-06-09 00:00:00" #end of simulation
 

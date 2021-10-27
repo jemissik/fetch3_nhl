@@ -492,4 +492,4 @@ def save_output(output_vars, df_waterbal, df_EP):
         pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
 
     df_waterbal.to_csv(working_dir / 'output' / ('df_waterbal' + '.csv'), index=False, header=True)
-    df_EP.to_csv(working_dir / 'output' / ('df_EP' + '.csv'), index=False, header=True)
+    df_EP.to_csv(working_dir / 'output' / ('df_EP' + '.csv'), index=True, header=True)
