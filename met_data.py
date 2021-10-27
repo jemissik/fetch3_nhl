@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-from model_config import dt0, input_fname, start_time, end_time, tmin, dt, Rho
+import model_config as cfg
 from FETCH2_loading_LAD import *
 
 # Helper functions
@@ -21,9 +21,9 @@ def calc_NETRAD(SW_in):
         Net radiation
     """
     return SW_in * 0.6
-def calc_infiltration_rate(precipitation):
-    precipitation=precipitation/dt #dividing the value over half hour to seconds [mm/s]
-    rain=precipitation/Rho  #[converting to m/s]
+def calc_infiltration_rate(precipitation, tmax, dt0):
+    precipitation=precipitation/cfg.dt #dividing the value over half hour to seconds [mm/s]
+    rain=precipitation/cfg.Rho  #[converting to m/s]
     q_rain=np.interp(np.arange(0,tmax+dt0,dt0), t_data, rain) #interpolating
     q_rain=np.nan_to_num(q_rain) #m/s precipitation rate= infiltration rate
     return q_rain
@@ -31,7 +31,7 @@ def calc_esat(Ta):
     return 611*np.exp((17.27*(Ta-273.15))/(Ta-35.85)) #Pascal
 def calc_delta(Ta, e_sat):
     return (4098/((Ta-35.85)**2))*e_sat
-def interp_to_model_res(var):
+def interp_to_model_res(var, tmax, dt0):
     return np.interp(np.arange(0, tmax + dt0, dt0), t_data, var)
 
 ###########################################################
@@ -40,18 +40,18 @@ def interp_to_model_res(var):
 
 #Input file
 working_dir = Path.cwd()
-data_path = working_dir / 'data' / input_fname
+data_path = working_dir / 'data' / cfg.input_fname
 
-start_time = pd.to_datetime(start_time)
-end_time = pd.to_datetime(end_time)
+start_time = pd.to_datetime(cfg.start_time)
+end_time = pd.to_datetime(cfg.end_time)
 
 #read input data
 df = pd.read_csv(data_path)
-step_time_hh = pd.Series(pd.date_range(start_time, end_time, freq=str(dt)+'s'))
+step_time_hh = pd.Series(pd.date_range(start_time, end_time, freq=str(cfg.dt)+'s'))
 df.index = step_time_hh
 
-tmax = len(df) * dt
-t_data = np.arange(tmin, tmax, dt)         # data time grids for input data
+tmax = len(df) * cfg.dt
+t_data = np.arange(cfg.tmin, tmax, cfg.dt)         # data time grids for input data
 t_data=list(t_data)
 nt_data=len(t_data)                      #length of input data
 
@@ -79,7 +79,7 @@ VPD=VPD.fillna(0)
 #in case of set by user
 ###########################################################
 
-q_rain = calc_infiltration_rate(precipitation)
+q_rain = calc_infiltration_rate(precipitation, tmax, cfg.dt0)
 
 ########################################################################
 #INTERPOLATING VARIABLES FOR PENMAN-MONTEITH TRANSPIRATION
@@ -87,9 +87,9 @@ q_rain = calc_infiltration_rate(precipitation)
 ##########################################################################
 
 
-Ta = interp_to_model_res(Ta)
-SW_in = interp_to_model_res(SW_in)
-VPD = interp_to_model_res(VPD)
+Ta = interp_to_model_res(Ta, tmax, cfg.dt0)
+SW_in = interp_to_model_res(SW_in, tmax, cfg.dt0)
+VPD = interp_to_model_res(VPD, tmax, cfg.dt0)
 
 e_sat = calc_esat(Ta)
 delta_2d = calc_delta(Ta, e_sat)
