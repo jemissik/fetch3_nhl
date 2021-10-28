@@ -1,32 +1,14 @@
-from model_config import *
-from FETCH2_loading_LAD import *
-from met_data import *
-from canopy import *
+import numpy as np
+
+import model_config as cfg
+from FETCH2_loading_LAD import neg2zero
+from met_data import Ta_2d, VPD_2d, SW_in_2d
 
 ###################################################################
 #STOMATA REDUCTIONS FUNCTIONS
 #for transpiration formulation
 #stomata conductance as a function of radiation, temp, VPD and Phi
 #################################################################
-
-# Jarvis parameters
-# gsmax = params['gsmax']
-# kr = params['kr']
-# kt = params['kt']
-# Topt = params['Topt']
-# kd = params['kd']
-# hx50 = params['hx50']
-# nl = params['nl']
-
-# #Penman-Monteith parameters
-# gb = params['gb']
-# Cp = params['Cp']
-# ga = params['ga']
-# lamb = params['lamb']
-# gama = params['gama']
-
-#nighttime transpiration parameter
-#Emax = params['Emax']
 
 def jarvis_fs(SW_in, kr):
     fs = 1-np.exp(-kr*SW_in) #radiation
@@ -49,19 +31,19 @@ def calc_gs(gsmax, f_Ta, f_d, f_s, f_leaf):
 def calc_gc(gs, gb):
     return (gs * gb) / (gs + gb)
 
-def pm_trans(NET, delta, Cp, VPD, lamb, gc, ga):
-    return ((NET * delta + Cp * VPD * ga) / (lamb * (delta * gc + gama * (ga + gc)))) * gc #[m/s]
+def pm_trans(NET, delta, Cp, VPD, lamb, gama, gc, ga):
+    return ((NET * delta + Cp * VPD * ga) / (lamb * (delta * gc + cfg.gama * (ga + gc)))) * gc #[m/s]
 
 def night_trans(Emax, f_Ta, f_d, f_leaf):
     # Eqn S.64
     return Emax * f_Ta * f_d * f_leaf #[m/s]
 
-def calc_transpiration(SW_in, NET, delta, Cp, VPD, lamb, gb, ga, gsmax, Emax, f_Ta, f_s, f_d, f_leaf, LAD):
+def calc_transpiration(SW_in, NET, delta, Cp, VPD, lamb, gama, gb, ga, gsmax, Emax, f_Ta, f_s, f_d, f_leaf, LAD):
 
     if SW_in > 5: #income radiation > 5 = daylight
         gs = calc_gs(gsmax, f_Ta, f_d, f_s, f_leaf)
         gc = calc_gc(gs, gb)
-        transpiration = pm_trans(NET, delta, Cp, VPD, lamb, gc, ga)
+        transpiration = pm_trans(NET, delta, Cp, VPD, lamb, gama, gc, ga)
     else: #nighttime transpiration
         transpiration = night_trans(Emax, f_Ta, f_d, f_leaf)
     return transpiration * LAD #m/s * 1/m = [1/s]

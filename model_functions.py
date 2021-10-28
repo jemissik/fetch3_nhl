@@ -4,20 +4,20 @@ import pandas as pd
 from scipy import linalg
 from numpy.linalg import multi_dot
 
-from FETCH2_loading_LAD import *
-from met_data import *
-from initial_conditions import *
-from jarvis import *
-from canopy import *
+from FETCH2_loading_LAD import z_soil, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
+from met_data import VPD_2d, NET_2d, delta_2d, SW_in, q_rain, tmax, start_time, end_time, working_dir
+from jarvis import jarvis_fleaf, calc_transpiration, f_Ta_2d, f_d_2d, f_s_2d
+from canopy import LAD
+import model_config as cfg
 
 
 ##############Temporal discritization according to MODEL resolution
-t_num = np.arange(0,tmax+dt0,dt0)         #[s]
+t_num = np.arange(0,tmax+cfg.dt0,cfg.dt0)         #[s]
 nt = len(t_num)  #number of time steps
 ########################################
 
 #function for stem xylem: K and C
-def Porous_media_xylem(arg,params,i):
+def Porous_media_xylem(arg, ap, bp, kmax, Aind_x, p, sat_xylem, Phi_0):
 
     #arg= potential [Pa]
     cavitation_xylem=np.zeros(shape=(len(arg)))
@@ -26,22 +26,22 @@ def Porous_media_xylem(arg,params,i):
         if arg[i]>0:
             cavitation_xylem[i]=1
         else:
-            cavitation_xylem[i]=(1-1/(1+np.exp(cfg.ap*(arg[i]-cfg.bp))))
+            cavitation_xylem[i]=(1-1/(1+np.exp(ap*(arg[i]-bp))))
 
     #Index Ax/As - area of xylem per area of soil
     #kmax = m/s
-    K=cfg.kmax*cfg.Aind_x*cavitation_xylem
+    K=kmax*Aind_x*cavitation_xylem
 
     #CAPACITANCE FUNCTION AS IN BOHRER ET AL 2005
     C=np.zeros(shape=len(z[nz_r:nz]))
 
-    C=((cfg.Aind_x*cfg.p*cfg.sat_xylem)/(cfg.Phi_0))*((cfg.Phi_0-arg)/cfg.Phi_0)**(-(cfg.p+1))
+    C=((Aind_x*p*sat_xylem)/(Phi_0))*((Phi_0-arg)/Phi_0)**(-(p+1))
 
     return C,K, cavitation_xylem
 ########################################################################################
 
 #function for root xylem: K and C
-def Porous_media_root(arg,params,dz,theta):
+def Porous_media_root(arg, ap, bp, Ksax, Aind_r, p, sat_xylem, Phi_0):
      #arg= potential (Pa)
     stress_kr=np.zeros(shape=(len(arg)))
 
@@ -49,14 +49,14 @@ def Porous_media_root(arg,params,dz,theta):
         if arg[i]>0:
             stress_kr[i]=1
         else:
-            stress_kr[i]=(1-1/(1+np.exp(cfg.ap*(arg[i]-cfg.bp))))  #CAVITATION CURVE FOR THE ROOT XYLEM
+            stress_kr[i]=(1-1/(1+np.exp(ap*(arg[i]-bp))))  #CAVITATION CURVE FOR THE ROOT XYLEM
 
 
     #Index Ar/As - area of root xylem per area of soil
     #considered 1 following VERMA ET AL 2014 {for this case}
 
     #Keax = effective root axial conductivity
-    K=cfg.Ksax*cfg.Aind_r*stress_kr #[m2/s Pa]
+    K=Ksax*Aind_r*stress_kr #[m2/s Pa]
 
     #KEEPING CAPACITANCE CONSTANT - using value according to VERMA ET AL., 2014
     C=np.zeros(shape=nz_r-nz_s)
@@ -65,18 +65,18 @@ def Porous_media_root(arg,params,dz,theta):
     #CAPACITANCE FUNCTION AS IN BOHRER ET AL 2005
 
     #considering axial area rollowing basal area [cylinder]
-    C=((cfg.Aind_r*cfg.p*cfg.sat_xylem)/(cfg.Phi_0))*((cfg.Phi_0-arg)/cfg.Phi_0)**(-(cfg.p+1))
+    C=((Aind_r*p*sat_xylem)/(Phi_0))*((Phi_0-arg)/Phi_0)**(-(p+1))
 
     return C, K, stress_kr
 
 ###############################################################################
 
 #vanGenuchten for soil K and C
-def vanGenuchten(arg,params,z):
+def vanGenuchten(arg, z, g, Rho, clay_d, theta_S1, theta_R1, alpha_1, n_1, m_1, Ksat_1, theta_S2, theta_R2, alpha_2, n_2, m_2, Ksat_2, dtO):
 
     #arg = potential from Pascal to meters
     theta=np.zeros(shape=len(arg))
-    arg=((arg)/(cfg.g*cfg.Rho))   #m
+    arg=((arg)/(g*Rho))   #m
 
     Se=np.zeros(shape=len(arg))
     K=np.zeros(shape=len(arg))
@@ -84,41 +84,41 @@ def vanGenuchten(arg,params,z):
     #considering l = 0.5
 
     for i in np.arange(0,len(arg),1):
-        if z[i]<=cfg.clay_d : #clay_d=4.2m for verma
+        if z[i]<=clay_d : #clay_d=4.2m for verma
 
             if arg[i]<0:
             #Compute the volumetric moisture content
-                theta[i] = (cfg.theta_S1 - cfg.theta_R1)/((1 + (cfg.alpha_1*abs(arg[i]))**cfg.n_1)**cfg.m_1) + cfg.theta_R1  #m3/m3
+                theta[i] = (theta_S1 - theta_R1)/((1 + (alpha_1*abs(arg[i]))**n_1)**m_1) + theta_R1  #m3/m3
             #Compute the effective saturation
-                Se[i] = ((theta[i] - cfg.theta_R1)/(cfg.theta_S1 - cfg.theta_R1)) ## Unitless factor
+                Se[i] = ((theta[i] - theta_R1)/(theta_S1 - theta_R1)) ## Unitless factor
             #Compute the hydraulic conductivity
-                K[i]=cfg.Ksat_1*Se[i]**(1/2)*(1 - (1 - Se[i]**(1/cfg.m_1))**cfg.m_1)**2   # van genuchten Eq.8 (m/s) #
+                K[i]=Ksat_1*Se[i]**(1/2)*(1 - (1 - Se[i]**(1/m_1))**m_1)**2   # van genuchten Eq.8 (m/s) #
             if arg[i]>=0:
-                theta[i]=cfg.theta_S1
-                K[i]=cfg.Ksat_1
+                theta[i]=theta_S1
+                K[i]=Ksat_1
 
-            C[i]=((-cfg.alpha_1*np.sign(arg[i])*cfg.m_1*(cfg.theta_S1-cfg.theta_R1))/(1-cfg.m_1))*Se[i]**(1/cfg.m_1)*(1-Se[i]**(1/cfg.m_1))**cfg.m_1
+            C[i]=((-alpha_1*np.sign(arg[i])*m_1*(theta_S1-theta_R1))/(1-m_1))*Se[i]**(1/m_1)*(1-Se[i]**(1/m_1))**m_1
 
-        if z[i]>cfg.clay_d: #sand
+        if z[i]>clay_d: #sand
 
             if arg[i]<0:
              #Compute the volumetric moisture content
-                theta[i] = (cfg.theta_S2 - cfg.theta_R2)/((1 + (cfg.alpha_2*abs(arg[i]))**cfg.n_2)**cfg.m_2) + cfg.theta_R2  #m3/m3
+                theta[i] = (theta_S2 - theta_R2)/((1 + (alpha_2*abs(arg[i]))**n_2)**m_2) + theta_R2  #m3/m3
             #Compute the effective saturation
-                Se[i] = ((theta[i] - cfg.theta_R2)/(cfg.theta_S2 - cfg.theta_R2)) ## Unitless factor
+                Se[i] = ((theta[i] - theta_R2)/(theta_S2 - theta_R2)) ## Unitless factor
             #Compute the hydraulic conductivity
-                K[i]=cfg.Ksat_2*Se[i]**(1/2)*(1 - (1 - Se[i]**(1/cfg.m_2))**cfg.m_2)**2   # van genuchten Eq.8 (m/s) #
+                K[i]=Ksat_2*Se[i]**(1/2)*(1 - (1 - Se[i]**(1/m_2))**m_2)**2   # van genuchten Eq.8 (m/s) #
             if arg[i]>=0:
-                theta[i]=cfg.theta_S2
-                K[i]=cfg.Ksat_2
+                theta[i]=theta_S2
+                K[i]=Ksat_2
 
-            C[i]=((-cfg.alpha_2*np.sign(arg[i])*cfg.m_2*(cfg.theta_S2-cfg.theta_R2))/(1-cfg.m_2))*Se[i]**(1/cfg.m_2)*(1-Se[i]**(1/cfg.m_2))**cfg.m_2
-
-
+            C[i]=((-alpha_2*np.sign(arg[i])*m_2*(theta_S2-theta_R2))/(1-m_2))*Se[i]**(1/m_2)*(1-Se[i]**(1/m_2))**m_2
 
 
-    K=(K/(Rho*cfg.g)) # since H is in Pa
-    C=(C/(cfg.Rho*cfg.g)) # since H is in Pa
+
+
+    K=(K/(Rho*g)) # since H is in Pa
+    C=(C/(Rho*g)) # since H is in Pa
 
 
     return C, K,theta, Se
@@ -181,7 +181,7 @@ def Picard(H_initial, Head_bottom_H):
 
     #root mass distribution following VERMA ET AL 2O14
 
-    z_dist=np.arange(0,cfg.Root_depth+dz,dz)
+    z_dist=np.arange(0,cfg.Root_depth+cfg.dz,cfg.dz)
     z_dist=np.flipud(z_dist)
 
     r_dist=(np.exp(cfg.qz-((cfg.qz*z_dist)/cfg.Root_depth))*cfg.qz**2*(cfg.Root_depth-z_dist))/(cfg.Root_depth**2*(1+np.exp(cfg.qz)*(-1+cfg.qz)))
@@ -227,13 +227,17 @@ def Picard(H_initial, Head_bottom_H):
              # Get C,K,for soil, roots, stem
 
             #VanGenuchten relationships applied for the soil nodes
-            cnp1m[0:nz_s], knp1m[0:nz_s],theta[:], Se[:,i]=vanGenuchten(hnp1m[0:nz_s],params,z_soil)
+            cnp1m[0:nz_s], knp1m[0:nz_s],theta[:], Se[:,i]=vanGenuchten(hnp1m[0:nz_s],z_soil, cfg.g, cfg.Rho, cfg.clay_d, cfg.theta_S1,
+                                                                        cfg.theta_R1, cfg.alpha_1, cfg.n_1, cfg.m_1, cfg.Ksat_1, cfg.theta_S2,
+                                                                        cfg.theta_R2, cfg.alpha_2, cfg.n_2, cfg.m_2, cfg.Ksat_2, cfg.dt0)
 
             #Equations for C, K for the root nodes
-            cnp1m[nz_s:nz_r],knp1m[nz_s:nz_r],stress_kr[:] = Porous_media_root(hnp1m[nz_s:nz_r],params,dz,theta[nz_s-(nz_r-nz_s):nz_s])
+            cnp1m[nz_s:nz_r],knp1m[nz_s:nz_r],stress_kr[:] = Porous_media_root(hnp1m[nz_s:nz_r], cfg.ap, cfg.bp, cfg.Ksax,
+                                                                               cfg.Aind_r, cfg.p, cfg.sat_xylem, cfg.Phi_0)
 
             #Equations for C, K for stem nodes
-            cnp1m[nz_r:nz],knp1m[nz_r:nz], stress_kx[:] = Porous_media_xylem(hnp1m[nz_r:nz],params,i)
+            cnp1m[nz_r:nz],knp1m[nz_r:nz], stress_kx[:] = Porous_media_xylem(hnp1m[nz_r:nz], cfg.ap, cfg.bp, cfg.kmax, cfg.Aind_x,
+                                                                             cfg.p, cfg.sat_xylem, cfg.Phi_0)
 
 
             #% Compute the individual elements of the A matrix for LHS
@@ -300,7 +304,7 @@ def Picard(H_initial, Head_bottom_H):
 
 #######################################################################
             #tridiagonal matrix
-            A = (1/dt0)*C - (1/(dz**2))*(np.dot(Kbarplus,DeltaPlus) - np.dot(Kbarminus,DeltaMinus))
+            A = (1/cfg.dt0)*C - (1/(cfg.dz**2))*(np.dot(Kbarplus,DeltaPlus) - np.dot(Kbarminus,DeltaMinus))
 
 
 
@@ -308,7 +312,7 @@ def Picard(H_initial, Head_bottom_H):
             #equation S.53
             if cfg.UpperBC==0:
                 q_inf=min(q_rain[i],
-                                ((cfg.theta_S2-theta[-1])*(dz/dt0))) #m/s
+                                ((cfg.theta_S2-theta[-1])*(cfg.dz/cfg.dt0))) #m/s
 
 
 ################################## SINK/SOURCE TERM ON THE SAME TIMESTEP #####################################
@@ -356,7 +360,7 @@ def Picard(H_initial, Head_bottom_H):
 ########################################################################################################
 
             ##########TRANSPIRATION FORMULATION #################
-            Pt_2d[:,i] = calc_transpiration(SW_in[i], NET_2d[:,i], delta_2d[i], cfg.Cp, VPD_2d[:,i], cfg.lamb,
+            Pt_2d[:,i] = calc_transpiration(SW_in[i], NET_2d[:,i], delta_2d[i], cfg.Cp, VPD_2d[:,i], cfg.lamb, cfg.gama,
                                             cfg.gb, cfg.ga, cfg.gsmax, cfg.Emax, f_Ta_2d[:,i], f_s_2d[:,i], f_d_2d[:,i],
                                             jarvis_fleaf(hn[nz_r:nz], cfg.hx50, cfg.nl), LAD)
             #SINK/SOURCE ARRAY : concatenating all sinks and sources in a vector
@@ -369,7 +373,7 @@ def Picard(H_initial, Head_bottom_H):
 
             #% Compute the residual of MPFD (right hand side)
 
-            R_MPFD = (1/(dz**2))*(matrix2) + (1/dz)* cfg.Rho * cfg.g *(kbarplus - kbarminus) - (1/dt0)*np.dot((hnp1m - hn),C)+(S_S[:,i])
+            R_MPFD = (1/(cfg.dz**2))*(matrix2) + (1/cfg.dz)* cfg.Rho * cfg.g *(kbarplus - kbarminus) - (1/cfg.dt0)*np.dot((hnp1m - hn),C)+(S_S[:,i])
 
             #bottom boundary condition - known potential - \delta\Phi=0
             if cfg.BottomBC==0:
@@ -381,10 +385,10 @@ def Picard(H_initial, Head_bottom_H):
 
 
             if cfg.UpperBC==0:  #adding the infiltration on the most superficial soil layer [1/s]
-                R_MPFD[nz_s-1]=R_MPFD[nz_s-1]+(q_inf)/dz
+                R_MPFD[nz_s-1]=R_MPFD[nz_s-1]+(q_inf)/cfg.dz
 
             if cfg.BottomBC==2: #free drainage condition: F1-1/2 = K at the bottom of the soil
-                R_MPFD[0]=R_MPFD[0]-(kbarplus[0]*cfg.Rho*cfg.g)/dz
+                R_MPFD[0]=R_MPFD[0]-(kbarplus[0]*cfg.Rho*cfg.g)/cfg.dz
 
 
             #Compute deltam for iteration level m+1 : equations S.25 to S.41 (matrix)
@@ -438,8 +442,8 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
                        infiltration,trans_2d, dt, dz):
     ####################### Water balance ###################################
 
-    theta_i=sum(THETA[:,1]*dz)
-    theta_t=sum(THETA[:,-1]*dz)
+    theta_i=sum(THETA[:,1]*cfg.dz)
+    theta_t=sum(THETA[:,-1]*cfg.dz)
     theta_tot=theta_i-theta_t  #(m)
     theta_tot=theta_tot*1000  #(mm)
 

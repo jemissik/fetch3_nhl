@@ -37,6 +37,5 @@ def test_output_data_should_be_the_same_as_previously_stored_data():
         previous_df = pd.read_csv(data_dir / file)
         output_df = pd.read_csv(output_dir / file)
 
-        #drop last timestep
-        output_df = output_df.drop(output_df.index[-1], axis = 0)
+        output_df = output_df.drop(output_df.index[-1], axis = 0) #drop last timestep
         assert_frame_equal(previous_df.loc[output_df.index], output_df), file  # Selects length of saved data to match length of run

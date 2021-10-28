@@ -1,5 +1,3 @@
-params = {}
-
 ###############################################################################
 # PHYSICAL CONSTANTS
 ###############################################################################
@@ -10,13 +8,11 @@ g = 9.8 # [m s-2]
 #INPUT DATA FILE PARAMETERS
 ###############################################################################
 
-#Short test simulation
-#input_fname = "Derek_data_test30Min.csv"
+input_fname = "Derek_data_up.csv"
 start_time = "2007-01-01 00:00:00" #begining of simulation
 end_time = "2007-01-01 01:30:00" #end
 
 #Full Simulation
-input_fname = "Derek_data_up.csv"
 #start_time = "2007-01-01 00:00:00" #begining of simulation
 #end_time = "2007-06-09 00:00:00" #end of simulation
 
@@ -146,7 +142,7 @@ L_m=0.4  #maximum value of LAD a canopy layer
 z_m=11   #height in which L_m is found [m]
 LAI=1.5                #[-] Leaf area index
 
-#########################################################################3
+###########################################################################
 #PENMAN-MONTEITH EQUATION PARAMETERS
 ###########################################################################
 #W m^-2 is the same as J s^-1 m^-2

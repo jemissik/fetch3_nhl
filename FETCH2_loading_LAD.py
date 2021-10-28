@@ -61,6 +61,10 @@ def spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d):
     nz_clay=int(np.flatnonzero(z==clay_d)) #node where clay layer finishes- sand starts
     return z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay
 
+
+#############################################
+# Helper functions 
+#################################################
 # Function to do to 2d interpolation
 def interpolate_2d(x, zdim):
     """
@@ -78,7 +82,6 @@ def interpolate_2d(x, zdim):
         x_2d[:,i]=x[i]
     return x_2d
 
-#helper function
 def neg2zero(x):
     return np.where(x < 0, 0, x)
 

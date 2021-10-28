@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-from model_functions import *
+from FETCH2_loading_LAD import nz_s, nz_r,z, nz
+from met_data import start_time, end_time
 import model_config as cfg
 
 fdata = 'output/H.csv'

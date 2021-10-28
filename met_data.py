@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 import model_config as cfg
-from FETCH2_loading_LAD import *
+from FETCH2_loading_LAD import z_upper, interpolate_2d
 
 # Helper functions
 def calc_NETRAD(SW_in):
