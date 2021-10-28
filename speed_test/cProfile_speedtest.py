@@ -6,12 +6,13 @@
 
 # from FETCH2_run_LAD import *
 from model_functions import *
+from initial_conditions import initial_conditions
 
 import cProfile
 import pstats
 
 with cProfile.Profile() as pr:
-    Picard(H_initial)
+    Picard(*initial_conditions())
 
 stats = pstats.Stats(pr)
 stats.sort_stats(pstats.SortKey.TIME)
