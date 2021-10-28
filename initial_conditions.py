@@ -1,6 +1,6 @@
 import model_config as cfg
 from met_data import q_rain
-from FETCH2_loading_LAD import nz, dz, z, nz_s, nz_r, nz_clay, z_soil
+from model_setup import nz, dz, z, nz_s, nz_r, nz_clay, z_soil
 
 import numpy as np
 #######################################################################

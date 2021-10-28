@@ -1,7 +1,7 @@
 import numpy as np
 
 import model_config as cfg
-from FETCH2_loading_LAD import neg2zero
+from model_setup import neg2zero
 from met_data import Ta_2d, VPD_2d, SW_in_2d
 
 ###################################################################

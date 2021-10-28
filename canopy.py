@@ -1,5 +1,5 @@
 import model_config as cfg
-from FETCH2_loading_LAD import z_Above
+from model_setup import z_Above
 
 import numpy as np
 #######################################################################
