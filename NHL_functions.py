@@ -51,16 +51,16 @@ def calc_Kg(Tair):
     Outputs:
     Kg: temperature-dependent conductance coefficient [kPa m3 kg-1]
     """
-
-    Kg = 115.8 * 0.4226 * Tair  #TODO is it .4226 or .4336, the appendix and code don't agree
+    #TODO check eqn
+    Kg = 115.8 + 0.4226 * Tair  #TODO is it .4226 or .4336, the appendix and code don't agree
     return Kg
 
-def calc_mixing_length(z, h, alpha = 0.4/3):
+def calc_mixing_length(z, h, alpha = 0.1):
     """
     Calculates the mixing length for each height in z
     Based on Poggi et al 2004
     Zero-plane displacement height is taken as (2/3)*h, appropriate for dense canopies (Katul et al 2004)
-    Default value for alpha = 0.4/3
+    Default value for alpha = 0.4/3 #TODO need to chagne back- matlab version had 0.1
     TODO: Update documentation with references
     TODO: alpha = 0.4/3, based on Katul...  what do we use here?
 
@@ -270,26 +270,27 @@ def calc_zenith_angle(doy, lat, long, time_offset, time_of_day):
     declination_angle_rad = np.arcsin(0.39785 * np.sin(np.deg2rad(278.97 + 0.9856 * doy + 1.9165 * np.sin(np.deg2rad(356.6 + 0.9856 * doy)))))
 
     # Calculate the equation of time, Eqn 11.4, Campbell & Norman
-    f = np.deg2rad(279.575 + 0.98565) # in radians
+    f = np.deg2rad(279.575 + 0.98565 * doy) # in radians. NOTE: typo in my version of Campbell & Norman book
     ET = (-104.7 * np.sin(f) + 596.2 * np.sin(2 * f) + 4.3 * np.sin (3 * f) - 12.7 * np.sin(4 * f) - 429.3 * np.cos (f) - 2.0 * np.cos(2 * f) + 19.3 * np.cos(3 * f))/3600
 
     # Calculate the longitude correction
     # + 1/15 of an hour for each degree east of standard meridian
     # - 1/15 of an hour for each degree west of standard meridian
-    long_correction = (long - standard_meridian) * 1/15
+    #long_correction = (long - standard_meridian) * 1/15
+    long_correction = 0  #TODO Need to fix! broken to match matlab code
 
     # Calculate the time of solar noon (t0), Eqn 11.3, Campbell & Norman
-    t0 = 12 - long_correction - ET
+    t0 = 12 - long_correction + ET #TODO- should be -ET, changed to match MATLAB
 
     # Calculate the zenith angle, Eqn 11.1, Campbell & Norman
     lat_rad = np.deg2rad(lat)
     zenith_angle_rad = np.arccos(np.sin(lat_rad) * np.sin(declination_angle_rad)
-                                 + np.cos(lat_rad) * np.cos(declination_angle_rad) * np.cos(np.pi/12 * (time_of_day - t0)))
+                                 + np.cos(lat_rad) * np.cos(declination_angle_rad) * np.cos(np.deg2rad(15 * (time_of_day - t0))))
     zenith_angle_deg = np.rad2deg(zenith_angle_rad)
 
     return zenith_angle_deg
 
-def calc_rad_attenuation(PAR, LAI_z, Cf = 0.85, x = 1, **kwargs):
+def calc_rad_attenuation(PAR, LAD, dz, alpha, Cf = 0.85, x = 1, **kwargs):
     """
     Calculates the vertical attenuation of radiation through the canopy
 
@@ -307,15 +308,19 @@ def calc_rad_attenuation(PAR, LAI_z, Cf = 0.85, x = 1, **kwargs):
     P0 : attenuation fraction of PAR penetrating the canopy at each level z [unitless]
     Qp : absorbed photosynthetically active radiation at each level within the canopy
     # TODO MATLAB version has both LAI and LAD in parameters, only LAD is used. What are the correct units?
-    # TODO MATLAB version flips the arrays... why? needs to be done here?
     """
     zenith_angle = calc_zenith_angle(**kwargs)
     # Calculate the light extinction coefficient (unitless)
-    k = (((x**2 + np.tan(np.deg2rad(zenith_angle)) ** 2) ** 0.5) * np.cos(np.deg2rad(zenith_angle))) / (x + 1.744 * (x + 1.182) ** 0.773)
+    #k = (((x**2 + np.tan(np.deg2rad(zenith_angle)) ** 2) ** 0.5) * np.cos(np.deg2rad(zenith_angle))) / (x + 1.744 * (x + 1.182) ** 0.773)
 
-    LAI_cumulative = LAI_z[::-1].cumsum()[::-1] # Cumulative sum from top of canopy
+    #TODO: from MATLAB code, not sure where it comes from
+    xn1=np.sqrt(alpha * alpha + (np.cos(np.deg2rad(zenith_angle))) ** 2)
+    xd1=(alpha + 1.774 * np.cos(np.deg2rad(zenith_angle)) * (alpha + 1.182) **(-0.733))
+    k = xn1/xd1
+
+    LAI_cumulative = (LAD*dz)[::-1].cumsum()[::-1] # Cumulative sum from top of canopy
     # Calculate P0 and Qp
-    P0 = np.exp(k * LAI_cumulative * Cf)
+    P0 = np.exp(-k * LAI_cumulative * Cf)
     Qp = P0 * PAR
 
     return P0, Qp
@@ -348,7 +353,7 @@ def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
         [stomatal conductance]
     """
 
-    gs = g0 + m * A/((c_s - gamma_star) * (1 - VPD/D0))
+    gs = g0 + m * abs(A)/((c_s - gamma_star) * (1 - VPD/D0)) #TODO check abs(A)
     return gs
 
 def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
@@ -571,7 +576,7 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, **kwargs):
 
     return C, Fc, S
 
-def calc_LAI_vertical(LAD, z_h_LAD, dz, h): #TODO make sure it can't output negative LAI
+def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h): #TODO make sure it can't output negative LAI
     """
     Creates vertical leaf area distribution
 
@@ -588,22 +593,32 @@ def calc_LAI_vertical(LAD, z_h_LAD, dz, h): #TODO make sure it can't output nega
 
     Returns
     -------
-    LAD distribution on new vertical grid
-        normalized LAD interpolated on z.
-        sum of LAD distribution * dz should be approximately 1. (Not exact due to interpolation)
+    LAD on new vertical grid [m2leaf m-2crown m-1stem]
+
 
     """
-    z_LAD = z_h_LAD * h  # Heights for LAD points
+    z_LAD = z_h_LADnorm * h  # Heights for LAD points
+    dz_LAD = z_LAD[1] - z_LAD[0]
     zmin = z_LAD[0]
     z = np.arange(zmin, h, dz)  # New array for vertical resolution
 
+    #Calculate LAD
+    LAD = LADnorm * tot_LAI_crown / dz_LAD  #[m2leaf m-2crown m-1stem]
+
     # Interpolate LAD to new vertical resolution
-    spl = splrep(z_LAD, LAD)
-    LAD_z = splev(z, spl)  # LAD interpolated to new vertical grid
+    ''' To use spline for interpolation
+    spl = splrep(z_LAD, LADnorm)
+    LADnorm_z = splev(z, spl)  # LAD interpolated to new vertical grid
+    '''
+    f = interp1d(z_LAD, LAD)
+    LAD_z = f(z)
+
+    # scale so new integrated LAD matches the original total LAI per crown (corrects for interpolation error)
+    LAD_z = LAD_z * tot_LAI_crown / sum(LAD_z*dz)
 
     return LAD_z
 
-def calc_NHL(dz, h, Cd, U_top, PAR, Ca, Vcmax25, alpha_p, total_LAI_sp, plot_area, total_crown_area_sp, mean_crown_area_sp, LAD, z_h_LAD, RH, Tair, Press, Cf=0.85, x=1, **kwargs):
+def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total_LAI_sp, plot_area, total_crown_area_sp, mean_crown_area_sp, LADnorm, z_h_LADnorm, RH, Tair, Press, Cf=0.85, x=1, **kwargs):
     """
     Calculate NHL transpiration
 
@@ -639,41 +654,42 @@ def calc_NHL(dz, h, Cd, U_top, PAR, Ca, Vcmax25, alpha_p, total_LAI_sp, plot_are
     VPD = calc_vpd_kPa(RH, Tair = Tair)
 
     #Set up vertical grid
-    zmin = z_h_LAD[0] * h
-    z = np.arange(zmin, h, dz)
+    zmin = z_h_LADnorm[0] * h  # [m]
+    z = np.arange(zmin, h, dz)  # [m]
 
     # Calculate leaf area for each vertical layer (for one tree)
     tot_LAI_crown = total_LAI_sp * plot_area / total_crown_area_sp  # LAI per crown area [m2_leaf m-2_crown]
     leaf_area_tree = tot_LAI_crown * mean_crown_area_sp  # Total leaf area for one tree [m2_leaf]
 
     # Distrubute leaves vertically, and assign leaf area to stem
-    LAD_z = calc_LAI_vertical(LAD, z_h_LAD, dz, h)
-    leaf_area_dz = LAD_z * leaf_area_tree * dz # total leaf area in layer dz [m2 leaf]
-    LAI_z = LAD_z * tot_LAI_crown
+    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h) #[m2leaf m-2crown m-1stem]
+    leaf_area_dz = LAD * mean_crown_area_sp * dz # total leaf area in layer dz [m2 leaf]
 
     # Calculate wind speed at each layer
-    U, Km = solve_Uz(z, dz, Cd , LAI_z , U_top, h = h)  #TODO Is this the right leaf area to use?
+    U, Km = solve_Uz(z, dz, Cd , LAD , U_top, h = h)  #TODO Is this the right leaf area to use?
+
+    # Adjust the diffusivity and velocity by Ustar
+    U = U * ustar
+    Km = Km * ustar
 
     # Calculate radiation at each layer
-    P0, Qp = calc_rad_attenuation(PAR, LAI_z, Cf, x, **kwargs)
+    P0, Qp = calc_rad_attenuation(PAR, LAD, dz, alpha_gs, Cf, x, **kwargs)
 
     # Solve conductances
     A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD = VPD, uz = U)
 
-
-
     #Calculate the total transpiration for layer dz [ kg H2O s-1 m-1_stem]
     # transpiration per unit leaf area * total leaf area for layer z /dz
-    NHL_trans_sp_stem = calc_transpiration_leaf(VPD, Tair, geff, Press) * leaf_area_dz / dz
-
+    NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)
+    NHL_trans_sp_stem = NHL_trans_leaf * leaf_area_dz / dz
     # Integrate vertically to calculate total transpiration for one tree/crown [kg H2O s-1]
     NHL_tot_trans_sp_tree = np.sum(NHL_trans_sp_stem) * dz
 
     # Calculate transpiration per unit crown area [ kg H2O s-1 m-2_crown]
     #total transpiration for one tree / mean crown area per tree for species
-    NHL_trans_sp_crownarea = NHL_tot_trans_sp_tree / mean_crown_area_sp
+    NHL_trans_sp_crownarea = sum(NHL_trans_leaf * LAD * dz)
 
-    # Calculate transpiration per unit ground area
+    # Calculate transpiration per unit ground area [kg s-1 m-2_ground]
     # transpiration per crown area * crown area / plot area
     NHL_trans_sp_groundarea = NHL_trans_sp_crownarea * total_crown_area_sp / plot_area
 

@@ -8,7 +8,7 @@ from NHL_functions import *
 # Example script to run model for the 2011 test data
 
 ####PARAMETERS#####
-Cd = 0.1  # TODO Drag coefficient
+Cd = 0.2  # TODO Drag coefficient
 alpha = 0.1  # TODO Mixing length constant
 
 ###Read in and format the data
@@ -38,8 +38,8 @@ met_data['Time'] = (t + t0)/3600  # TODO What is this time shift for?
 params = pd.DataFrame(np.reshape(mat['params'], (-1, 3)), index = species_list, columns = ['Vcmax25', 'alpha', 'alpha_p'])
 
 # LAD data
-LAD = pd.DataFrame(mat['LAD'])
-LAD.columns = ['z_h'] + species_list
+LAD_norm = pd.DataFrame(mat['LAD'])
+LAD_norm.columns = ['z_h'] + species_list
 
 # TODO - Overwriting the LAI data in the input file
 total_LAI_sp_orig = total_LAI_sp.copy()
@@ -60,6 +60,8 @@ Vcmax25 = params.loc[species, 'Vcmax25']
 alpha_gs = params.loc[species, 'alpha']
 alpha_p = params.loc[species, 'alpha_p']
 
+#Overwrite parameters - in matlab physiological module
+
 #TODO temp - can just pass in directly to NHL
 total_LAI_spn = total_LAI_sp[species]
 total_crown_area_spn = total_crown_area_sp[species]
@@ -67,7 +69,7 @@ mean_crown_area_spn = mean_crown_area_sp[species]
 
 i = 0
 NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea = calc_NHL(
-    dz, height_sp[species], Cd, met_data.U_top[i], met_data.PAR[i], met_data.CO2[i], Vcmax25, alpha_p,
-    total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD[species], LAD.z_h,
+    dz, height_sp[species], Cd, met_data.U_top[i], met_data.Ustar[i], met_data.PAR[i], met_data.CO2[i], Vcmax25, alpha_gs, alpha_p,
+    total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm[species], LAD_norm.z_h,
     met_data.RH[i], met_data.Ta_top[i], met_data.Press[i], doy = met_data.DOY[i], lat = latitude,
     long = longitude, time_offset = -5, time_of_day = met_data.Time[i]) #TODO need to fix time!
