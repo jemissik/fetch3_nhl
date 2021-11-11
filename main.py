@@ -61,6 +61,7 @@ alpha_gs = params.loc[species, 'alpha']
 alpha_p = params.loc[species, 'alpha_p']
 
 #Overwrite parameters - in matlab physiological module
+# alpha_p = 0.8
 
 #TODO temp - can just pass in directly to NHL
 total_LAI_spn = total_LAI_sp[species]
@@ -68,7 +69,7 @@ total_crown_area_spn = total_crown_area_sp[species]
 mean_crown_area_spn = mean_crown_area_sp[species]
 
 i = 0
-NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea = calc_NHL(
+NHL_trans_leaf, NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea = calc_NHL(
     dz, height_sp[species], Cd, met_data.U_top[i], met_data.Ustar[i], met_data.PAR[i], met_data.CO2[i], Vcmax25, alpha_gs, alpha_p,
     total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm[species], LAD_norm.z_h,
     met_data.RH[i], met_data.Ta_top[i], met_data.Press[i], doy = met_data.DOY[i], lat = latitude,

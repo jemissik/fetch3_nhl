@@ -1,44 +1,53 @@
+from pathlib import Path
+import pandas as pd
+
 import numpy as np
 from scipy.interpolate import interp1d, splrep, splev
 
 def calc_esat(Tair):
-	'''
+    '''
     Calculates the saturation vapor pressure using the Clausius-Clapeyron equation
 
-	Inputs:
-	Tair: Air temperature [degrees C]
+    Inputs:
+    Tair: Air temperature [degrees C]
 
-	Outputs:
-	The saturation vapor pressure [kPa]
-	'''
+    Outputs:
+    The saturation vapor pressure [kPa]
+    '''
+    #constants
+    # e0 = 0.611 #kPa
+    # T0 = 273 #K
+    # Rv = 461 #J K-1 kg -1, gas constant for water vapor
+    # Lv = 2.5 * 10**6 #J kg-1
 
-	#constants
-	e0 = 0.611 #kPa
-	T0 = 273 #K
-	Rv = 461 #J K-1 kg -1, gas constant for water vapor
-	Lv = 2.5 * 10**6 #J kg-1
+    # Tair = Tair + 273.15 #convert temperature to Kelvin
+    # es = e0 * np.exp((Lv/Rv)*(1/T0 - 1/Tair))
 
-	Tair = Tair + 273.15 #convert temperature to Kelvin
+    #version from MATLAB code
+    a = 0.611 #kPa
+    b = 17.502 #unitless
+    c = 240.97 #C
 
-	return e0 * np.exp((Lv/Rv)*(1/T0 - 1/Tair))
+    es = a * np.exp((b*Tair)/(Tair + c)) #Kpa
+    return es
 
-def calc_vpd_kPa(RH, **kwargs):
-	'''
+def calc_vpd_kPa(RH, Tair):
+    '''
     Calculates vapor pressure deficit from air temperature and relative humidity.
 
-	Inputs:
-	RH: relative humidity [%]
+    Inputs:
+    RH: relative humidity [%]
     **kwargs : Additional keyword arguments to be passed to calc_esat
 
-	Outputs:
-	Vapor pressure deficit [kPa]
-	'''
+    Outputs:
+    Vapor pressure deficit [kPa]
+    '''
 
-	#calculate esat
-	es = calc_esat(**kwargs)
-	eactual = RH*es/100
+    #calculate esat
+    es = calc_esat(Tair)
+    eactual = RH*es/100
 
-	return (es - eactual)
+    return (es - eactual)
 
 def calc_Kg(Tair):
     """
@@ -501,7 +510,7 @@ def calc_respiration(Tair):
     Re = RE10 * Q10 **((Tair - Tr)/Tr)
     return Re
 
-def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, **kwargs):
+def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, VPD,**kwargs):
     """
     [summary]
 
@@ -566,7 +575,7 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, **kwargs):
         eps1 = 0.1
         C = (eps1 * Cn + (1 - eps1) * C)
         Ca = C
-        #A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, VPD, Qp, Ca, U, Vcmax25, alpha_p, d = 0.0015, D0 = 3)
+        A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs)
         S = -A * a_s / CF
 
     # Fluxes are computed in umol/m2/s; Sources are computed in umol/m3/s
@@ -693,4 +702,22 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     # transpiration per crown area * crown area / plot area
     NHL_trans_sp_groundarea = NHL_trans_sp_crownarea * total_crown_area_sp / plot_area
 
-    return NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea
+    output_vars = {'A':A, 'LAD': LAD, 'Ci': Ci, 'Cs':Cs, 'gb':gb, 'geff':geff, 'gs':gs, 'Km':Km, 'P0':P0, 'Qp':Qp,
+                   'U':U, 'NHL_trans_leaf': NHL_trans_leaf, 'NHL_trans_sp_stem':NHL_trans_sp_stem, 'NHL_tot_trans_sp_tree':[NHL_tot_trans_sp_tree],
+                   'NHL_trans_sp_crownarea':[NHL_trans_sp_crownarea], 'NHL_trans_sp_groundarea':[NHL_trans_sp_groundarea]}
+
+    write_outputs(output_vars)
+
+    return NHL_trans_leaf, NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea
+
+def write_outputs(output_vars):
+
+    #Writes model outputs to csv files
+
+    working_dir = Path.cwd()
+
+    # make output directory if one doesn't exist
+    (working_dir /'output').mkdir(exist_ok=True)
+
+    for var in output_vars:
+        pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
