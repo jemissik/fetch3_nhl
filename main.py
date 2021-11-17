@@ -69,12 +69,6 @@ total_LAI_spn = total_LAI_sp[species]
 total_crown_area_spn = total_crown_area_sp[species]
 mean_crown_area_spn = mean_crown_area_sp[species]
 
-z_LAD = LAD_norm.z_h * height_sp[species]  # Heights for LAD points
-dz_LAD = z_LAD[1] - z_LAD[0]
-zmin = z_LAD[0]
-z = np.arange(zmin, height_sp[species], dz)  # New array for vertical resolution
-
-
 hr = t/60/60
 hr = hr % 24
 
@@ -83,51 +77,11 @@ n = 20
 met_data = met_data.loc[0:n-1, :]
 t2 = t[0:n]
 
-# NHL_trans_leaf_all = np.empty((len(met_data), len(z)))
-# NHL_trans_sp_stem_all = np.empty((len(met_data), len(z)))
-# NHL_tot_trans_sp_tree_all = np.empty((len(met_data), 1))
-# NHL_trans_sp_crownarea_all = np.empty((len(met_data), len(z)))
-# NHL_trans_sp_groundarea_all = np.empty((len(met_data), len(z)))
-# zenith_angle_all = np.empty((len(met_data), 1))
-# Qp_all = np.empty((len(met_data), len(z)))
+ds, tot_trans, zen = calc_NHL_timesteps(dz, height_sp[species], Cd, met_data, Vcmax25, alpha_gs, alpha_p,
+            total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm[species], LAD_norm.z_h,
+            latitude, longitude, time_offset = -5)
 
-# empty_array = np.empty((len(met_data), len(z)))
+write_outputs_netcdf(ds)
+write_outputs({'tot_trans':tot_trans, 'zenith':zen})
 
-# ds = xr.Dataset(data_vars=dict(
-#     NHL_trans_leaf=(["time", "z"], empty_array),
-#     Qp=(["time", "z"], empty_array),
-# ),
-#                 coords=dict(
-#                     z=(["z"], z),
-#                     time=t2,
-#                     ),
-#                 attrs=dict(description="Model output"),
-#                 )
-
-for i in range(0,len(t2)):
-    if i%50==0:
-        print('Calculating step ' + str(i))
-    NHL_trans_leaf1, NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea, zenith_angle, Qp = calc_NHL(
-        dz, height_sp[species], Cd, met_data.U_top[i], met_data.Ustar[i], met_data.PAR[i], met_data.CO2[i], Vcmax25, alpha_gs, alpha_p,
-        total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm[species], LAD_norm.z_h,
-        met_data.RH[i], met_data.Ta_top[i], met_data.Press[i], doy = met_data.DOY[i], lat = latitude,
-        long = longitude, time_offset = -5, time_of_day = met_data.Time[i]) #TODO need to fix time!
-    NHL_trans_leaf_all[i, :] = NHL_trans_leaf1
-    NHL_trans_sp_stem_all[i, :] = NHL_trans_sp_stem
-    NHL_tot_trans_sp_tree_all[i,:] = NHL_tot_trans_sp_tree
-    NHL_trans_sp_crownarea_all[i,:] = NHL_trans_sp_crownarea
-    NHL_trans_sp_groundarea_all[i,:] = NHL_trans_sp_groundarea
-    zenith_angle_all[i,:] = zenith_angle
-    Qp_all[i,:] = Qp
-    # print(NHL_trans_leaf.shape)
-    # print(ds.NHL_trans_leaf.loc[dict(time = t2[i])].shape)
-    # ind = xr.DataArray([i], dims=["time"])
-    # ds.NHL_trans_leaf[ind] = xr.DataArray(NHL_trans_leaf1, dims=["ht"], coords=[z])
-    # ds.Qp.loc[dict(time = t2[i])] = Qp
-
-
-output_vars = {'NHL_trans_leaf_all':NHL_trans_leaf_all, 'NHL_trans_sp_stem_all': NHL_trans_sp_stem_all,
-               'NHL_tot_trans_sp_tree_all': NHL_tot_trans_sp_tree_all, 'NHL_trans_sp_crownarea_all': NHL_trans_sp_crownarea_all,
-               'NHL_trans_sp_groundarea_all':NHL_trans_sp_groundarea_all, 'zenith_angle_all':zenith_angle_all, 'Qp_all': Qp_all}
-
-write_outputs(output_vars)
+df = pd.DataFrame(data={'tot_trans':tot_trans, 'zenith':zen, 'time': met_data.Time} )

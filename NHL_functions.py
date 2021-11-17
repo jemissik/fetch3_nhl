@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+import xarray as xr
 
 import numpy as np
 from scipy.interpolate import interp1d, splrep, splev
@@ -703,13 +704,62 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     # transpiration per crown area * crown area / plot area
     NHL_trans_sp_groundarea = NHL_trans_sp_crownarea * total_crown_area_sp / plot_area
 
-    output_vars = {'A':A, 'LAD': LAD, 'Ci': Ci, 'Cs':Cs, 'gb':gb, 'geff':geff, 'gs':gs, 'Km':Km, 'P0':P0, 'Qp':Qp,
-                   'U':U, 'NHL_trans_leaf': NHL_trans_leaf, 'NHL_trans_sp_stem':NHL_trans_sp_stem, 'NHL_tot_trans_sp_tree':[NHL_tot_trans_sp_tree],
-                   'NHL_trans_sp_crownarea':[NHL_trans_sp_crownarea], 'NHL_trans_sp_groundarea':[NHL_trans_sp_groundarea]}
+    # output_vars = {'A':A, 'LAD': LAD, 'Ci': Ci, 'Cs':Cs, 'gb':gb, 'geff':geff, 'gs':gs, 'Km':Km, 'P0':P0, 'Qp':Qp,
+    #                'U':U, 'NHL_trans_leaf': NHL_trans_leaf, 'NHL_trans_sp_stem':NHL_trans_sp_stem, 'NHL_tot_trans_sp_tree':[NHL_tot_trans_sp_tree],
+    #                'NHL_trans_sp_crownarea':[NHL_trans_sp_crownarea], 'NHL_trans_sp_groundarea':[NHL_trans_sp_groundarea]}
 
-    write_outputs(output_vars)
+    # write_outputs(output_vars)
 
-    return NHL_trans_leaf, NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea, zenith_angle, Qp
+    #Add data to dataset
+    ds = xr.Dataset(data_vars=dict(
+        U = (["z"], U),
+        Km = (["z"],Km),
+        P0 = (["z"], P0),
+        Qp = (["z"], Qp),
+        A = (["z"], A),
+        gs = (["z"], gs),
+        Ci = (["z"], Ci),
+        Cs = (["z"], Cs),
+        gb = (["z"], gb),
+        geff = (["z"], geff),
+
+        NHL_trans_leaf=(["z"], NHL_trans_leaf),
+        NHL_trans_sp_stem = (["z"], NHL_trans_sp_stem),
+        NHL_trans_sp_crownarea = (["z"], NHL_trans_sp_crownarea),
+        NHL_trans_sp_groundarea = (["z"], NHL_trans_sp_groundarea)
+        ),
+        coords=dict(z=(["z"], z)),
+        attrs=dict(description="Model output")
+        )
+
+    return ds, NHL_tot_trans_sp_tree, zenith_angle
+
+def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
+            total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
+            lat, long, time_offset = -5):
+
+    zmin = z_h_LADnorm[0] * h  # [m]
+    z = np.arange(zmin, h, dz)  # [m]
+
+    NHL_tot_trans_sp_tree_all = np.empty((len(met_data)))
+    zenith_angle_all = np.empty((len(met_data)))
+
+
+    datasets = []
+    for i in range(0,len(met_data)):
+        if i%50==0:
+            print('Calculating step ' + str(i))
+        ds, NHL_tot_trans_sp_tree, zenith_angle = calc_NHL(
+            dz, h, Cd, met_data.U_top[i], met_data.Ustar[i], met_data.PAR[i], met_data.CO2[i], Vcmax25, alpha_gs, alpha_p,
+            total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
+            met_data.RH[i], met_data.Ta_top[i], met_data.Press[i], doy = met_data.DOY[i], lat = lat,
+            long= long, time_offset = -5, time_of_day = met_data.Time[i]) #TODO need to fix time!
+
+        NHL_tot_trans_sp_tree_all[i] = NHL_tot_trans_sp_tree
+        zenith_angle_all[i] = zenith_angle
+        datasets.append(ds)
+    d2 = xr.concat(datasets, pd.Index(met_data.Time, name="time"))
+    return d2, NHL_tot_trans_sp_tree_all, zenith_angle_all
 
 def write_outputs(output_vars):
 
@@ -722,3 +772,15 @@ def write_outputs(output_vars):
 
     for var in output_vars:
         pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
+
+def write_outputs_netcdf(ds):
+
+    #Writes model outputs to netcdf files
+
+    working_dir = Path.cwd()
+
+    # make output directory if one doesn't exist
+    (working_dir /'output').mkdir(exist_ok=True)
+
+    #save dataset
+    ds.to_netcdf(working_dir / 'output' /  'out.nc')
