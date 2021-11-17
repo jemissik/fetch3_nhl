@@ -26,7 +26,6 @@ files = [
 data_dir = Path("tests/data")
 output_dir = Path("output")
 
-
 def test_output_data_should_be_the_same_as_previously_stored_data():
     # Given previous ran data
 
@@ -47,3 +46,19 @@ def test_output_data_should_be_the_same_as_previously_stored_data():
 
         # output_df = output_df.drop(output_df.index[-1], axis = 0) #drop last timestep
         assert_frame_equal(mat, output_df, check_exact=False, rtol = 1e-3), file  # Selects length of saved data to match length of run
+
+        def full_run_should_match_matlab_output():
+
+            #Given output from MATLAB version
+
+            #When we run the model
+            from main import NHL_trans_sp_stem
+
+            #Then the python output and the MATLAB output should be the same
+            #Testing just for one species now
+
+            mat = scipy.io.loadmat(data_dir / ('full/NHL_pergnd.mat'))
+            #Testing just for one species now
+            E_mat = pd.DataFrame(mat['Output']['E'][0,0])
+
+            output_df = pd.read_csv(output_dir / ('NHL_trans_sp_groundarea_all.csv'))

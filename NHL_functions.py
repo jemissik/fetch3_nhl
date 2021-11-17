@@ -332,7 +332,7 @@ def calc_rad_attenuation(PAR, LAD, dz, alpha, Cf = 0.85, x = 1, **kwargs):
     P0 = np.exp(-k * LAI_cumulative * Cf)
     Qp = P0 * PAR
 
-    return P0, Qp
+    return P0, Qp, zenith_angle # TODO can remove zenith angle from output after debugging is finished
 
 def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
     """
@@ -682,7 +682,7 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     Km = Km * ustar
 
     # Calculate radiation at each layer
-    P0, Qp = calc_rad_attenuation(PAR, LAD, dz, alpha_gs, Cf, x, **kwargs)
+    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, alpha_gs, Cf, x, **kwargs)
 
     # Solve conductances
     A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD = VPD, uz = U)
@@ -696,7 +696,8 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
 
     # Calculate transpiration per unit crown area [ kg H2O s-1 m-2_crown]
     #total transpiration for one tree / mean crown area per tree for species
-    NHL_trans_sp_crownarea = sum(NHL_trans_leaf * LAD * dz)
+    # NHL_trans_sp_crownarea = sum(NHL_trans_leaf * LAD * dz)
+    NHL_trans_sp_crownarea = NHL_trans_leaf * LAD * dz
 
     # Calculate transpiration per unit ground area [kg s-1 m-2_ground]
     # transpiration per crown area * crown area / plot area
@@ -708,7 +709,7 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
 
     write_outputs(output_vars)
 
-    return NHL_trans_leaf, NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea
+    return NHL_trans_leaf, NHL_trans_sp_stem, NHL_tot_trans_sp_tree, NHL_trans_sp_crownarea, NHL_trans_sp_groundarea, zenith_angle, Qp
 
 def write_outputs(output_vars):
 
