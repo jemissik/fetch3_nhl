@@ -73,13 +73,18 @@ hr = t/60/60
 hr = hr % 24
 
 #trim met data for a shorter run
-n = 20
-met_data = met_data.loc[0:n-1, :]
-t2 = t[0:n]
+# n = 20
+# met_data = met_data.loc[7218:7218]
+
 
 ds, tot_trans, zen = calc_NHL_timesteps(dz, height_sp[species], Cd, met_data, Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm[species], LAD_norm.z_h,
             latitude, longitude, time_offset = -5)
+
+# ds, tot_trans, zen = calc_NHL(dz, height_sp[species], Cd, met_data, Vcmax25, alpha_gs, alpha_p,
+#             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm[species], LAD_norm.z_h,
+#             latitude, longitude, time_offset = -5)
+
 
 write_outputs_netcdf(ds)
 write_outputs({'tot_trans':tot_trans, 'zenith':zen})

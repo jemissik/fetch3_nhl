@@ -363,7 +363,7 @@ def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
         [stomatal conductance]
     """
 
-    gs = g0 + m * abs(A)/((c_s - gamma_star) * (1 - VPD/D0)) #TODO check abs(A)
+    gs = g0 + m * abs(A)/((c_s - gamma_star) * (1 + VPD/D0)) #TODO check abs(A)
     return gs
 
 def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
@@ -440,6 +440,7 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
         #Calculate photosynthesis
         Aj = calc_Aj(alpha_p, e_m, Qp, Ci, gamma_star, Rd)
         Ac = np.full(len(Aj),calc_Ac(Vcmax, Ci, gamma_star, Kc, o, Ko, Rd))
+
         A = np.minimum(Ac, Aj)
 
         # Calculate stomatal conductance
@@ -750,10 +751,10 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
         if i%50==0:
             print('Calculating step ' + str(i))
         ds, NHL_tot_trans_sp_tree, zenith_angle = calc_NHL(
-            dz, h, Cd, met_data.U_top[i], met_data.Ustar[i], met_data.PAR[i], met_data.CO2[i], Vcmax25, alpha_gs, alpha_p,
+            dz, h, Cd, met_data.U_top.iloc[i], met_data.Ustar.iloc[i], met_data.PAR.iloc[i], met_data.CO2.iloc[i], Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
-            met_data.RH[i], met_data.Ta_top[i], met_data.Press[i], doy = met_data.DOY[i], lat = lat,
-            long= long, time_offset = -5, time_of_day = met_data.Time[i]) #TODO need to fix time!
+            met_data.RH.iloc[i], met_data.Ta_top.iloc[i], met_data.Press.iloc[i], doy = met_data.DOY.iloc[i], lat = lat,
+            long= long, time_offset = -5, time_of_day = met_data.Time.iloc[i]) #TODO need to fix time!
 
         NHL_tot_trans_sp_tree_all[i] = NHL_tot_trans_sp_tree
         zenith_angle_all[i] = zenith_angle
