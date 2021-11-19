@@ -1,0 +1,3 @@
+[submodule "nhl-transpiration"]
+	path = nhl-transpiration
+	url = https://github.com/jemissik/nhl-transpiration.git
