@@ -762,6 +762,33 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
     d2 = xr.concat(datasets, pd.Index(met_data.Time, name="time"))
     return d2, NHL_tot_trans_sp_tree_all, zenith_angle_all
 
+def calc_stem_wp_response(stem_wp, wp_s50, c3):
+    """
+    Calculates the restriction for NHL transpiration
+    due to the hydrodynamic effects of xylem water potential.
+    From eqn 2 of Mirfenderesgi et al 2016
+
+    Parameters
+    ----------
+    stem_wp : [type]
+        Stem water pressure (function of z and time)
+    wp_s50 : [type]
+        Empirical shape parameter describing the inflection point
+        of the leaf stem water potential response curve
+    c3 : [type]
+        Shape parameter for stomatal response
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
+    wp_response = np.exp(-((-stem_wp)/wp_s50)**c3)
+    return wp_response
+
+def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn):
+    return nhl_transpiration * stem_wp_fn
+
 def write_outputs(output_vars):
 
     #Writes model outputs to csv files
