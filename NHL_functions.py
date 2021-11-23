@@ -799,7 +799,7 @@ def write_outputs(output_vars):
     (working_dir /'output').mkdir(exist_ok=True)
 
     for var in output_vars:
-        pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
+        pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / ('nhl_' + var + '.csv'), index = False, header=False)
 
 def write_outputs_netcdf(ds):
 
@@ -811,4 +811,4 @@ def write_outputs_netcdf(ds):
     (working_dir /'output').mkdir(exist_ok=True)
 
     #save dataset
-    ds.to_netcdf(working_dir / 'output' /  'out.nc')
+    ds.to_netcdf(working_dir / 'output' /  'nhl_out.nc')
