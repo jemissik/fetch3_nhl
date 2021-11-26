@@ -7,6 +7,7 @@ from numpy.linalg import multi_dot
 from model_setup import z_soil, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
 from met_data import VPD_2d, NET_2d, delta_2d, SW_in, q_rain, tmax, start_time, end_time, working_dir
 from transpiration import jarvis_fleaf, calc_transpiration, f_Ta_2d, f_d_2d, f_s_2d
+# from nhl_transpiration.NHL_functions import calc_NHL, calc_stem_wp_response, calc_transpiration_nhl
 from canopy import LAD
 import model_config as cfg
 
