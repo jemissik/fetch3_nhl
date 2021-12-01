@@ -21,7 +21,8 @@ start = time.time()
 met_data = pd.read_csv(Path.cwd() / 'data' / ncfg.met_data, parse_dates=[0]) #TODO parse timestamps for met data
 LAD_data = pd.read_csv(Path.cwd() / 'data' / ncfg.LAD_norm)
 
-
+met_data = met_data[(met_data.Timestamp >= pd.to_datetime(ncfg.start_time)) &
+                    (met_data.Timestamp <= pd.to_datetime(ncfg.end_time))].reset_index(drop=True)
 total_LAI_sp = np.array([1.1,1.45,0.84,0.044])*1.176*1.1 # vector, total leaf area index for each species [m2-leaf/m2-ground]
 
 # TODO bs factor - will need to be altered. Overwriting the actual total crown area for each species
@@ -50,7 +51,9 @@ ds2 = ds.assign_coords({'time': pd.to_timedelta(pd.to_datetime(ds.time.values) -
 # New time and space coordinates matching model resolution
 # model_ts = pd.date_range(start = met_data.Timestamp[0], end = met_data.Timestamp.iloc[-1], freq = str(ncfg.dt0) + 's')
 # model_ts = pd.date_range(start = ncfg.start_time, end = ncfg.end_time, freq = str(ncfg.dt0) + 's')
-model_ts = np.arange(ds2.time.values[0], ds2.time.values[-1] + ncfg.dt0, ncfg.dt0)
+# model_ts = np.arange(ds2.time.values[0], ds2.time.values[-1] +  + ncfg.met_dt, ncfg.dt0)
+model_ts = np.arange(0, len(ds.time) * ncfg.met_dt + ncfg.dt0, ncfg.dt0)
+
 model_z = np.arange(0, ncfg.height_sp + ncfg.dz, ncfg.dz)
 
 #NHL transpiration in units of m s-1 * LAD  = kg H2O s-1 m-1stem m-2ground

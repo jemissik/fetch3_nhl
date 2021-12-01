@@ -4,8 +4,8 @@ species = 'ES'
 #Replicated from FETCH3 config
 dt0 = 20  #model temporal resolution [s]
 dz = 0.1  #model spatial resolution [m]
-start_time = "2011-05-01 00:00:00" #begining of simulation
-end_time = "2011-05-14 23:30:00" #end
+start_time = "2011-05-01 10:00:00" #begining of simulation
+end_time = "2011-05-01 13:30:00" #end
 
 #in FETCH3 (but values match UMBS)
 height_sp = 22
@@ -34,3 +34,4 @@ c3 = 12.3 #value for oak from Mirfenderesgi
 
 LAD_norm = 'LAD_data.csv'
 met_data = 'UMBS_flux_2011.csv'
+met_dt = 1800 #Half hourly data
