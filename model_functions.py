@@ -6,10 +6,19 @@ from numpy.linalg import multi_dot
 
 from model_setup import z_soil, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
 from met_data import VPD_2d, NET_2d, delta_2d, SW_in, q_rain, tmax, start_time, end_time, working_dir
-from transpiration import jarvis_fleaf, calc_transpiration, f_Ta_2d, f_d_2d, f_s_2d
-# from nhl_transpiration.NHL_functions import calc_NHL, calc_stem_wp_response, calc_transpiration_nhl
+
 from canopy import LAD
 import model_config as cfg
+
+#Imports for PM transpiration
+if cfg.transpiration_scheme == 0:
+    from transpiration import jarvis_fleaf, calc_transpiration, f_Ta_2d, f_d_2d, f_s_2d
+
+#Imports for NHL transpiration
+elif cfg.transpiration_scheme ==1:
+    import nhl_transpiration.nhl_config as ncfg
+    from nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
+    from nhl_transpiration.main import NHL_modelres
 
 
 ##############Temporal discritization according to MODEL resolution
@@ -361,9 +370,16 @@ def Picard(H_initial, Head_bottom_H):
 ########################################################################################################
 
             ##########TRANSPIRATION FORMULATION #################
-            Pt_2d[:,i] = calc_transpiration(SW_in[i], NET_2d[:,i], delta_2d[i], cfg.Cp, VPD_2d[:,i], cfg.lamb, cfg.gama,
-                                            cfg.gb, cfg.ga, cfg.gsmax, cfg.Emax, f_Ta_2d[:,i], f_s_2d[:,i], f_d_2d[:,i],
-                                            jarvis_fleaf(hn[nz_r:nz], cfg.hx50, cfg.nl), LAD)
+
+            #For PM transpiration
+            if cfg.transpiration_scheme == 0: #0: PM transpiration scheme
+                Pt_2d[:,i] = calc_transpiration(SW_in[i], NET_2d[:,i], delta_2d[i], cfg.Cp, VPD_2d[:,i], cfg.lamb, cfg.gama,
+                                                cfg.gb, cfg.ga, cfg.gsmax, cfg.Emax, f_Ta_2d[:,i], f_s_2d[:,i], f_d_2d[:,i],
+                                                jarvis_fleaf(hn[nz_r:nz], cfg.hx50, cfg.nl), LAD)
+            # For NHL transpiration
+            elif cfg.transpiration_scheme == 1:  #1: NHL transpiration scheme
+                Pt_2d[:,i] = calc_transpiration_nhl(NHL_modelres[i], calc_stem_wp_response(hn[nz_r:nz]), ncfg.wp_s50, ncfg.c3)
+
             #SINK/SOURCE ARRAY : concatenating all sinks and sources in a vector
             S_S[:,i]=np.concatenate((TS,-Pt_2d[:,i])) #vector with sink and sources
 

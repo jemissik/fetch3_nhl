@@ -28,6 +28,11 @@ print_run_progress = False  # Turn on/off printing for progress of time steps ca
 print_freq = 50  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
 
 ###############################################################################
+#TRANSPIRATION OPTIONS - NHL OR PM
+###############################################################################
+transpiration_scheme = 1 # 0: PM transpiration; 1: NHL transpiration
+
+###############################################################################
 #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
 ###############################################################################
 #The finite difference discretization constants
