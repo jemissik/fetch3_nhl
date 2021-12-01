@@ -29,5 +29,8 @@ alpha_p = 1
 Cf = 0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
 x = 1  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
 
+wp_s50 = -9.1 * 10**5 #value for oak from Mirfenderesgi
+c3 = 12.3 #value for oak from Mirfenderesgi
+
 LAD_norm = 'LAD_data.csv'
 met_data = 'UMBS_flux_2011.csv'
