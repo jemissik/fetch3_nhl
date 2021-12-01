@@ -8,9 +8,11 @@ g = 9.8 # [m s-2]
 #INPUT DATA FILE PARAMETERS
 ###############################################################################
 
-input_fname = "Derek_data_up.csv"
-start_time = "2007-01-01 00:00:00" #begining of simulation
-end_time = "2007-01-01 01:30:00" #end
+# input_fname = "Derek_data_up.csv"
+input_fname = "UMBS_flux_2011.csv"
+
+start_time = "2011-05-01 10:00:00" #begining of simulation
+end_time = "2011-05-01 13:30:00" #end
 
 #Full Simulation
 #start_time = "2007-01-01 00:00:00" #begining of simulation
@@ -136,7 +138,7 @@ p=20                                           #From bohrer et al 2005
 sat_xylem=0.573                                #From bohrer et al 2005
 
 #TREE PARAMETERS
-Hspec=14                      #Height average of trees [m]
+Hspec=22                      #Height average of trees [m]
 LAI=1.5                       #[-] Leaf area index
 Abasal=8.62*10**(-4)          #[m2basal/m2-ground] xylem cross-sectional area and site surface ratio
 
