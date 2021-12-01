@@ -60,5 +60,5 @@ NHL_modelres = da.interp(z = model_z, time = model_ts, assume_sorted = True, kwa
 #write NHL output to netcdf
 NHL_modelres.to_netcdf('output/nhl_modelres_trans_out.nc')
 
-NHL_modelres = NHL_modelres.data
+NHL_modelres = NHL_modelres.data.transpose()
 print(f"run time: {time.time() - start} s")  # end run clock
