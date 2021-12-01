@@ -689,10 +689,9 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     # Solve conductances
     A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD = VPD, uz = U)
 
-    #Calculate the total transpiration for layer dz [ kg H2O s-1 m-1_stem]
-    # transpiration per unit leaf area * total leaf area for layer z /dz
-    NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)
-    NHL_trans_sp_stem = NHL_trans_leaf * leaf_area_dz / dz
+    # Calculate the transpiration per m-1 [ kg H2O s-1 m-1_stem]
+    NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)  #[kg H2O m-2leaf s-1]
+    NHL_trans_sp_stem = NHL_trans_leaf * LAD  # [kg H2O s-1 m-1stem m-2ground]
     # Integrate vertically to calculate total transpiration for one tree/crown [kg H2O s-1]
     NHL_tot_trans_sp_tree = np.sum(NHL_trans_sp_stem) * dz
 
@@ -751,15 +750,15 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
         if i%50==0:
             print('Calculating step ' + str(i))
         ds, NHL_tot_trans_sp_tree, zenith_angle = calc_NHL(
-            dz, h, Cd, met_data.U_top.iloc[i], met_data.Ustar.iloc[i], met_data.PAR.iloc[i], met_data.CO2.iloc[i], Vcmax25, alpha_gs, alpha_p,
+            dz, h, Cd, met_data.WS_F.iloc[i], met_data.USTAR.iloc[i], met_data.PPFD_IN.iloc[i], met_data.CO2_F.iloc[i], Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
-            met_data.RH.iloc[i], met_data.Ta_top.iloc[i], met_data.Press.iloc[i], doy = met_data.DOY.iloc[i], lat = lat,
-            long= long, time_offset = -5, time_of_day = met_data.Time.iloc[i]) #TODO need to fix time!
+            met_data.RH.iloc[i], met_data.TA_F.iloc[i], met_data.PA_F.iloc[i], doy = met_data.Timestamp.iloc[i].dayofyear, lat = lat,
+            long= long, time_offset = -5, time_of_day = met_data.Timestamp[i].hour + met_data.Timestamp[i].minute/60) #TODO need to fix time!
 
         NHL_tot_trans_sp_tree_all[i] = NHL_tot_trans_sp_tree
         zenith_angle_all[i] = zenith_angle
         datasets.append(ds)
-    d2 = xr.concat(datasets, pd.Index(met_data.Time, name="time"))
+    d2 = xr.concat(datasets, pd.Index(met_data.Timestamp, name="time"))
     return d2, NHL_tot_trans_sp_tree_all, zenith_angle_all
 
 def calc_stem_wp_response(stem_wp, wp_s50, c3):
