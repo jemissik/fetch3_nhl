@@ -610,7 +610,8 @@ def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h): #TODO make su
     """
     z_LAD = z_h_LADnorm * h  # Heights for LAD points
     dz_LAD = z_LAD[1] - z_LAD[0]
-    zmin = z_LAD[0]
+    # zmin = z_LAD[0]
+    zmin = 0 #TODO
     z = np.arange(zmin, h, dz)  # New array for vertical resolution
 
     #Calculate LAD
@@ -621,7 +622,7 @@ def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h): #TODO make su
     spl = splrep(z_LAD, LADnorm)
     LADnorm_z = splev(z, spl)  # LAD interpolated to new vertical grid
     '''
-    f = interp1d(z_LAD, LAD)
+    f = interp1d(z_LAD, LAD, bounds_error = False, fill_value='extrapolate')
     LAD_z = f(z)
 
     # scale so new integrated LAD matches the original total LAI per crown (corrects for interpolation error)
@@ -665,7 +666,8 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     VPD = calc_vpd_kPa(RH, Tair = Tair)
 
     #Set up vertical grid
-    zmin = z_h_LADnorm[0] * h  # [m]
+    # zmin = z_h_LADnorm[0] * h  # [m]
+    zmin = 0 #TODO
     z = np.arange(zmin, h, dz)  # [m]
 
     # Calculate leaf area for each vertical layer (for one tree)
@@ -732,13 +734,14 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
         attrs=dict(description="Model output")
         )
 
-    return ds, NHL_tot_trans_sp_tree, zenith_angle
+    return ds, NHL_tot_trans_sp_tree, LAD, zenith_angle
 
 def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
             lat, long, time_offset = -5):
 
-    zmin = z_h_LADnorm[0] * h  # [m]
+    # zmin = z_h_LADnorm[0] * h  # [m]
+    zmin = 0 #TODO
     z = np.arange(zmin, h, dz)  # [m]
 
     NHL_tot_trans_sp_tree_all = np.empty((len(met_data)))
@@ -749,7 +752,7 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
     for i in range(0,len(met_data)):
         if i%50==0:
             print('Calculating step ' + str(i))
-        ds, NHL_tot_trans_sp_tree, zenith_angle = calc_NHL(
+        ds, NHL_tot_trans_sp_tree, LAD, zenith_angle = calc_NHL(
             dz, h, Cd, met_data.WS_F.iloc[i], met_data.USTAR.iloc[i], met_data.PPFD_IN.iloc[i], met_data.CO2_F.iloc[i], Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
             met_data.RH.iloc[i], met_data.TA_F.iloc[i], met_data.PA_F.iloc[i], doy = met_data.Timestamp.iloc[i].dayofyear, lat = lat,
@@ -759,7 +762,7 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
         zenith_angle_all[i] = zenith_angle
         datasets.append(ds)
     d2 = xr.concat(datasets, pd.Index(met_data.Timestamp, name="time"))
-    return d2, NHL_tot_trans_sp_tree_all, zenith_angle_all
+    return d2, NHL_tot_trans_sp_tree_all, LAD, zenith_angle_all
 
 def calc_stem_wp_response(stem_wp, wp_s50, c3):
     """
@@ -770,10 +773,10 @@ def calc_stem_wp_response(stem_wp, wp_s50, c3):
     Parameters
     ----------
     stem_wp : [type]
-        Stem water pressure (function of z and time)
+        Stem water potential (function of z and time) [Pa]
     wp_s50 : [type]
         Empirical shape parameter describing the inflection point
-        of the leaf stem water potential response curve
+        of the leaf stem water potential response curve [Pa]
     c3 : [type]
         Shape parameter for stomatal response
 
@@ -782,11 +785,11 @@ def calc_stem_wp_response(stem_wp, wp_s50, c3):
     [type]
         [description]
     """
-    wp_response = np.exp(-((-stem_wp)/wp_s50)**c3)
+    wp_response = np.exp(-((stem_wp)/wp_s50)**c3)  # TODO: deleted - in front of stem_wp, assuming eqn in paper was using positive water potential
     return wp_response
 
-def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn):
-    return nhl_transpiration * stem_wp_fn
+def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn, LAD):
+    return nhl_transpiration * stem_wp_fn * LAD
 
 def write_outputs(output_vars):
 
