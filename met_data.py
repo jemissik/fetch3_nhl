@@ -22,7 +22,7 @@ def interp_to_model_res(var, tmax, dt0):
 
 #Input file
 working_dir = Path.cwd()
-data_path = working_dir / 'nhl_transpiration/data' / cfg.input_fname
+data_path = working_dir / 'data' / cfg.input_fname
 
 start_time = pd.to_datetime(cfg.start_time)
 end_time = pd.to_datetime(cfg.end_time)

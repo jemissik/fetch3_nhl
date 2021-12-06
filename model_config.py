@@ -26,7 +26,7 @@ tmin = 0  #tmin [s]
 ###############################################################################
 # Printing slows down model run
 # Options to turn printing off or specify print frequency
-print_run_progress = False  # Turn on/off printing for progress of time steps calculated
+print_run_progress = True  # Turn on/off printing for progress of time steps calculated
 print_freq = 50  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
 
 ###############################################################################
@@ -145,9 +145,13 @@ Abasal=8.62*10**(-4)          #[m2basal/m2-ground] xylem cross-sectional area an
 #######################################################################
 #LEAF AREA DENSITY FORMULATION (LAD) [1/m]
 #######################################################################
+lad_scheme = 1  #0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
+LAI=1.5                #[-] Leaf area index
+
+#parameters if using penman-monteith transpiration scheme, based on Lalic et al 2014
+#if using NHL transpiration scheme, LAD is calculated in NHL module
 L_m=0.4  #maximum value of LAD a canopy layer
 z_m=11   #height in which L_m is found [m]
-LAI=1.5                #[-] Leaf area index
 
 ###########################################################################
 #PENMAN-MONTEITH EQUATION PARAMETERS

@@ -5,20 +5,21 @@ from scipy import linalg
 from numpy.linalg import multi_dot
 
 from model_setup import z_soil, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
-from met_data import VPD_2d, NET_2d, delta_2d, SW_in, q_rain, tmax, start_time, end_time, working_dir
+from met_data import q_rain, tmax, start_time, end_time, working_dir
 
-from canopy import LAD
 import model_config as cfg
 
 #Imports for PM transpiration
 if cfg.transpiration_scheme == 0:
+    from met_data import VPD_2d, NET_2d, delta_2d, SW_in
     from transpiration import jarvis_fleaf, calc_transpiration, f_Ta_2d, f_d_2d, f_s_2d
+    from canopy import LAD
 
 #Imports for NHL transpiration
-elif cfg.transpiration_scheme ==1:
+elif cfg.transpiration_scheme == 1:
     import nhl_transpiration.nhl_config as ncfg
     from nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
-    from nhl_transpiration.main import NHL_modelres
+    from nhl_transpiration.main import NHL_modelres, LAD
 
 
 ##############Temporal discritization according to MODEL resolution
@@ -378,7 +379,8 @@ def Picard(H_initial, Head_bottom_H):
                                                 jarvis_fleaf(hn[nz_r:nz], cfg.hx50, cfg.nl), LAD)
             # For NHL transpiration
             elif cfg.transpiration_scheme == 1:  #1: NHL transpiration scheme
-                Pt_2d[:,i] = calc_transpiration_nhl(NHL_modelres[i], calc_stem_wp_response(hn[nz_r:nz]), ncfg.wp_s50, ncfg.c3)
+                Pt_2d[:,i] = calc_transpiration_nhl(NHL_modelres[:,i],
+                                                    calc_stem_wp_response(hn[nz_r:nz], ncfg.wp_s50, ncfg.c3).transpose(), LAD)
 
             #SINK/SOURCE ARRAY : concatenating all sinks and sources in a vector
             S_S[:,i]=np.concatenate((TS,-Pt_2d[:,i])) #vector with sink and sources
