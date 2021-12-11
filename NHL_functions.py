@@ -1,9 +1,8 @@
 from pathlib import Path
 import pandas as pd
 import xarray as xr
-
 import numpy as np
-from scipy.interpolate import interp1d, splrep, splev
+from scipy.interpolate import interp1d
 
 def calc_esat(Tair):
     '''
@@ -38,7 +37,7 @@ def calc_vpd_kPa(RH, Tair):
 
     Inputs:
     RH: relative humidity [%]
-    **kwargs : Additional keyword arguments to be passed to calc_esat
+    Tair: air temperature [deg C]
 
     Outputs:
     Vapor pressure deficit [kPa]
@@ -55,6 +54,7 @@ def calc_Kg(Tair):
     Calculate the temperature-dependent conductance coefficient
     From Ewers et al 2007
     Equation A.2 from Mirfenderesgi et al 2016
+    
     Inputs:
     Tair : air temperature [deg C]
 
@@ -307,7 +307,6 @@ def calc_rad_attenuation(PAR, LAD, dz, alpha, Cf = 0.85, x = 1, **kwargs):
     Inputs:
     ----------
     PAR : photosynthetically active radiation at canopy top [umol m-2 s-1]
-    zenith_angle
     LAI : Normalized leaf area index at each height in z
     Cf : Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
     x : Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
@@ -804,8 +803,16 @@ def write_outputs(output_vars):
         pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / ('nhl_' + var + '.csv'), index = False, header=False)
 
 def write_outputs_netcdf(ds):
+    """
+    Writes model output to netcdf file
 
-    #Writes model outputs to netcdf files
+    Parameters
+    ----------
+    ds : [xarray dataset]
+        [description]
+    """
+
+
 
     working_dir = Path.cwd()
 

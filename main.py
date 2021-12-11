@@ -1,10 +1,5 @@
-# TODO modify paths for running from FETCH rather than the nhl directory
-
 import numpy as np
-import scipy.io
 import pandas as pd
-import matplotlib.pyplot as plt
-import xarray as xr
 from pathlib import Path
 
 import nhl_transpiration.nhl_config as ncfg
@@ -20,6 +15,8 @@ start = time.time()
 
 met_data = pd.read_csv(Path.cwd() / 'nhl_transpiration/data' / ncfg.met_data, parse_dates=[0])
 LAD_data = pd.read_csv(Path.cwd() / 'nhl_transpiration/data' / ncfg.LAD_norm)
+
+# To run in NHL directory
 # met_data = pd.read_csv(Path.cwd() / 'data' / ncfg.met_data, parse_dates=[0])
 # LAD_data = pd.read_csv(Path.cwd() / 'data' / ncfg.LAD_norm)
 
