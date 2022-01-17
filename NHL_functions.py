@@ -15,20 +15,13 @@ def calc_esat(Tair):
     The saturation vapor pressure [kPa]
     '''
     #constants
-    # e0 = 0.611 #kPa
-    # T0 = 273 #K
-    # Rv = 461 #J K-1 kg -1, gas constant for water vapor
-    # Lv = 2.5 * 10**6 #J kg-1
+    e0 = 0.611 #kPa
+    T0 = 273 #K
+    Rv = 461 #J K-1 kg -1, gas constant for water vapor
+    Lv = 2.5 * 10**6 #J kg-1
 
-    # Tair = Tair + 273.15 #convert temperature to Kelvin
-    # es = e0 * np.exp((Lv/Rv)*(1/T0 - 1/Tair))
-
-    #version from MATLAB code
-    a = 0.611 #kPa
-    b = 17.502 #unitless
-    c = 240.97 #C
-
-    es = a * np.exp((b*Tair)/(Tair + c)) #Kpa
+    Tair = Tair + 273.15 #convert temperature to Kelvin
+    es = e0 * np.exp((Lv/Rv)*(1/T0 - 1/Tair))
     return es
 
 def calc_vpd_kPa(RH, Tair):
@@ -54,15 +47,14 @@ def calc_Kg(Tair):
     Calculate the temperature-dependent conductance coefficient
     From Ewers et al 2007
     Equation A.2 from Mirfenderesgi et al 2016
-    
+
     Inputs:
     Tair : air temperature [deg C]
 
     Outputs:
     Kg: temperature-dependent conductance coefficient [kPa m3 kg-1]
     """
-    #TODO check eqn
-    Kg = 115.8 + 0.4226 * Tair  #TODO is it .4226 or .4336, the appendix and code don't agree
+    Kg = 115.8 + 0.4226 * Tair
     return Kg
 
 def calc_mixing_length(z, h, alpha = 0.1):
@@ -70,9 +62,6 @@ def calc_mixing_length(z, h, alpha = 0.1):
     Calculates the mixing length for each height in z
     Based on Poggi et al 2004
     Zero-plane displacement height is taken as (2/3)*h, appropriate for dense canopies (Katul et al 2004)
-    Default value for alpha = 0.4/3 #TODO need to chagne back- matlab version had 0.1
-    TODO: Update documentation with references
-    TODO: alpha = 0.4/3, based on Katul...  what do we use here?
 
     Inputs:
     -------
@@ -93,7 +82,6 @@ def calc_mixing_length(z, h, alpha = 0.1):
                                  [lambda z: 0.2 * z + 2 * dz, alpha * h, lambda z: 0.4 * (z - d) + alpha * h])
     return mixing_length
 
-def calc_uz(Uz, ustar):
     """
     Calculates the wind speed at canopy height z adjusted by the friction velocity
     Eqn A.5 from Mirfenderesgi et al 2016
@@ -111,10 +99,6 @@ def calc_uz(Uz, ustar):
 def thomas_tridiagonal (aa, bb, cc, dd):
     """
     Thomas algorithm for solving tridiagonal matrix
-    TODO Add documentation
-    Inputs:
-
-    Outputs:
     """
 
     #initialize arrays
@@ -141,14 +125,14 @@ def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
     """
     Solves the momentum equation to calculate the vertical wind profile.
     Applies no-slip boundary condition: wind speed  =  0 at surface (z = 0).
-    Model for turbulent diffusivity of momentum is from Poggi 2004, eqn 6 (TODO doesn't match Mirfenderesgi)
+    Model for turbulent diffusivity of momentum is from Poggi 2004, eqn 6
 
     Inputs:
     _______
     z : vector of heights [m]
     mixing_length : mixing length [d] at each height in z
     Cd : drag coefficient [unitless], assumed to be 0.2 (Katul et al 2004)
-    TODO a_s: leaf surface area [m2]
+    a_s: leaf surface area [m2]
     U_top : Measured wind speed at top of canopy [m s-1]
     **kwargs to be passed to calc_mixing_length
 
@@ -185,7 +169,7 @@ def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
         a1 = -Km
         dKm = np.concatenate(([Km[1]-Km[0]], np.diff(Km)))  # Use Km[1]-Km[0] for first 2 elements of dKm
         a2 = -dKm/dz
-        a3 = Cd * a_s * np.abs(U)  # TODO should it be abs(u)? it isn't in MATLAB version
+        a3 = Cd * a_s * np.abs(U)
 
         # Set the elements of the tridiagonal matrix
         upd = (a1 / (dz * dz) + a2 / (2 * dz))
@@ -214,8 +198,6 @@ def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
 def calc_gb(uz, d = 0.0015):
     """
     Calculates the leaf boundary layer conductance and resistance, assuming laminar boundary layer
-    TODO See Monteith & Unsworth 2013? or another source?
-    TODO Need to make separate functions for water vapor and CO2
 
     Inputs:
     ________
@@ -224,15 +206,15 @@ def calc_gb(uz, d = 0.0015):
 
     Outputs:
     ________________
-    gb: leaf boundary layer conductance [TODO units??]
-    rb: leaf boundary layer resistance [TODO units??]
+    gb: leaf boundary layer conductance
+    rb: leaf boundary layer resistance
 
     References
     ----------
     Monteith J, Unsworth M. Principles of environmental physics: plants, animals, and the atmosphere. Academic Press; 2013 Jul 26.
 
     """
-    rb = (395 * 29 / 1150) * (d / (np.sqrt(uz ** 2) + 0.001)) ** 0.5  #TODO change sqrt (u^2) part
+    rb = (395 * 29 / 1150) * (d / (np.sqrt(uz ** 2) + 0.001)) ** 0.5
     gb = 1/rb
     return gb, rb
 
@@ -286,11 +268,10 @@ def calc_zenith_angle(doy, lat, long, time_offset, time_of_day):
     # Calculate the longitude correction
     # + 1/15 of an hour for each degree east of standard meridian
     # - 1/15 of an hour for each degree west of standard meridian
-    #long_correction = (long - standard_meridian) * 1/15
-    long_correction = 0  #TODO Need to fix! broken to match matlab code
+    long_correction = (long - standard_meridian) * 1/15
 
     # Calculate the time of solar noon (t0), Eqn 11.3, Campbell & Norman
-    t0 = 12 - long_correction + ET #TODO- should be -ET, changed to match MATLAB
+    t0 = 12 - long_correction - ET
 
     # Calculate the zenith angle, Eqn 11.1, Campbell & Norman
     lat_rad = np.deg2rad(lat)
@@ -316,13 +297,9 @@ def calc_rad_attenuation(PAR, LAD, dz, alpha, Cf = 0.85, x = 1, **kwargs):
     -------
     P0 : attenuation fraction of PAR penetrating the canopy at each level z [unitless]
     Qp : absorbed photosynthetically active radiation at each level within the canopy
-    # TODO MATLAB version has both LAI and LAD in parameters, only LAD is used. What are the correct units?
     """
     zenith_angle = calc_zenith_angle(**kwargs)
     # Calculate the light extinction coefficient (unitless)
-    #k = (((x**2 + np.tan(np.deg2rad(zenith_angle)) ** 2) ** 0.5) * np.cos(np.deg2rad(zenith_angle))) / (x + 1.744 * (x + 1.182) ** 0.773)
-
-    #TODO: from MATLAB code, not sure where it comes from
     xn1=np.sqrt(alpha * alpha + (np.cos(np.deg2rad(zenith_angle))) ** 2)
     xd1=(alpha + 1.774 * np.cos(np.deg2rad(zenith_angle)) * (alpha + 1.182) **(-0.733))
     k = xn1/xd1
@@ -332,12 +309,11 @@ def calc_rad_attenuation(PAR, LAD, dz, alpha, Cf = 0.85, x = 1, **kwargs):
     P0 = np.exp(-k * LAI_cumulative * Cf)
     Qp = P0 * PAR
 
-    return P0, Qp, zenith_angle # TODO can remove zenith angle from output after debugging is finished
+    return P0, Qp, zenith_angle
 
 def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
     """
-    [Calculates gs according to Leuning 1995
-    TODO check units for gs of CO2 vs H2O.. is there some multiplier?]
+    Calculates gs according to Leuning 1995
 
     Parameters
     ----------
@@ -352,7 +328,7 @@ def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
     gamma_star : [umol mol-1]
         [CO2 compensation point]
     VPD : [kPa]
-        [VPD TODO Should be the humidity deficit at the leaf surface]
+        [VPD]
     D0 : [kPa]
         [reference vapor pressure, assumed to be 3.0 kPa]
 
@@ -362,7 +338,7 @@ def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
         [stomatal conductance]
     """
 
-    gs = g0 + m * abs(A)/((c_s - gamma_star) * (1 + VPD/D0)) #TODO check abs(A)
+    gs = g0 + m * abs(A)/((c_s - gamma_star) * (1 + VPD/D0))
     return gs
 
 def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
@@ -453,7 +429,7 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
         Ci = Ci2
         count += 1
 
-    geff = calc_geff(gb, gs)  # TODO The same conductance is used for gb,co2 and gb,h2o. need to fix.
+    geff = calc_geff(gb, gs)
 
     A[0] = A[1]
     Ci[0] = Ci[1]
@@ -486,7 +462,7 @@ def calc_transpiration_leaf(VPD, Tair, geff, Press):
     """
     Kg = calc_Kg(Tair)  #kPa m3 kg-1
     rhov = 44.6 * Press / 101.3 * 273.15 / (Tair + 273.15)  # water vapor density, mol m-3
-    transpiration_leaf = 0.4 * (geff * VPD) / (Kg * rhov)  # kg s-1 m-2_leaf  TODO where does the 0.4 come from?
+    transpiration_leaf = 0.4 * (geff * VPD) / (Kg * rhov)  # kg s-1 m-2_leaf
 
     return transpiration_leaf
 
@@ -512,30 +488,6 @@ def calc_respiration(Tair):
     return Re
 
 def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, VPD,**kwargs):
-    """
-    [summary]
-
-    Parameters
-    ----------
-    z : [type]
-        [description]
-    Kc : [type]
-        [description]
-    Ca : [type]
-        [description]
-    S_initial : [type]
-        [description]
-    Re : [type]
-        [description]
-    a_s : [type]
-        [description]
-    **kwargs for solve_leaf_physiology
-
-    Returns
-    -------
-    [type]
-        [description]
-    """
 
     CF = 1.15 * 1000 / 29
     Re = Re / CF
@@ -586,7 +538,7 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, V
 
     return C, Fc, S
 
-def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h): #TODO make sure it can't output negative LAI
+def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h):
     """
     Creates vertical leaf area distribution
 
@@ -609,18 +561,13 @@ def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h): #TODO make su
     """
     z_LAD = z_h_LADnorm * h  # Heights for LAD points
     dz_LAD = z_LAD[1] - z_LAD[0]
-    # zmin = z_LAD[0]
-    zmin = 0 #TODO
+    zmin = 0
     z = np.arange(zmin, h, dz)  # New array for vertical resolution
 
     #Calculate LAD
     LAD = LADnorm * tot_LAI_crown / dz_LAD  #[m2leaf m-2crown m-1stem]
 
     # Interpolate LAD to new vertical resolution
-    ''' To use spline for interpolation
-    spl = splrep(z_LAD, LADnorm)
-    LADnorm_z = splev(z, spl)  # LAD interpolated to new vertical grid
-    '''
     f = interp1d(z_LAD, LAD, bounds_error = False, fill_value='extrapolate')
     LAD_z = f(z)
 
@@ -642,15 +589,10 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     plot_area : [m2]
         [Total plot area]
     total_crown_area_sp : [m2]
-        [description]
     mean_crown_area_sp : [m2]
-        [description]
     LAD : [m2_leaf m-1]
-        [description]
     VPD : [kPa]
-        [description]
     Tair : [deg C]
-        [description]
     geff : mol m-2_leaf s-1
         effective leaf conductance
     Press : [kPa]
@@ -658,27 +600,24 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
 
     Returns
     -------
-    [type]
-        [description]
+    NHL transpiration
     """
+
     # Calculate VPD
     VPD = calc_vpd_kPa(RH, Tair = Tair)
 
     #Set up vertical grid
-    # zmin = z_h_LADnorm[0] * h  # [m]
-    zmin = 0 #TODO
+    zmin = 0
     z = np.arange(zmin, h, dz)  # [m]
 
     # Calculate leaf area for each vertical layer (for one tree)
     tot_LAI_crown = total_LAI_sp * plot_area / total_crown_area_sp  # LAI per crown area [m2_leaf m-2_crown]
-    leaf_area_tree = tot_LAI_crown * mean_crown_area_sp  # Total leaf area for one tree [m2_leaf]
 
     # Distrubute leaves vertically, and assign leaf area to stem
     LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h) #[m2leaf m-2crown m-1stem]
-    leaf_area_dz = LAD * mean_crown_area_sp * dz # total leaf area in layer dz [m2 leaf]
 
     # Calculate wind speed at each layer
-    U, Km = solve_Uz(z, dz, Cd , LAD , U_top, h = h)  #TODO Is this the right leaf area to use?
+    U, Km = solve_Uz(z, dz, Cd , LAD , U_top, h = h)
 
     # Adjust the diffusivity and velocity by Ustar
     U = U * ustar
@@ -693,23 +632,6 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     # Calculate the transpiration per m-1 [ kg H2O s-1 m-1_stem]
     NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)  #[kg H2O m-2leaf s-1]
     NHL_trans_sp_stem = NHL_trans_leaf * LAD  # [kg H2O s-1 m-1stem m-2ground]
-    # Integrate vertically to calculate total transpiration for one tree/crown [kg H2O s-1]
-    NHL_tot_trans_sp_tree = np.sum(NHL_trans_sp_stem) * dz
-
-    # Calculate transpiration per unit crown area [ kg H2O s-1 m-2_crown]
-    #total transpiration for one tree / mean crown area per tree for species
-    # NHL_trans_sp_crownarea = sum(NHL_trans_leaf * LAD * dz)
-    NHL_trans_sp_crownarea = NHL_trans_leaf * LAD * dz
-
-    # Calculate transpiration per unit ground area [kg s-1 m-2_ground]
-    # transpiration per crown area * crown area / plot area
-    NHL_trans_sp_groundarea = NHL_trans_sp_crownarea * total_crown_area_sp / plot_area
-
-    # output_vars = {'A':A, 'LAD': LAD, 'Ci': Ci, 'Cs':Cs, 'gb':gb, 'geff':geff, 'gs':gs, 'Km':Km, 'P0':P0, 'Qp':Qp,
-    #                'U':U, 'NHL_trans_leaf': NHL_trans_leaf, 'NHL_trans_sp_stem':NHL_trans_sp_stem, 'NHL_tot_trans_sp_tree':[NHL_tot_trans_sp_tree],
-    #                'NHL_trans_sp_crownarea':[NHL_trans_sp_crownarea], 'NHL_trans_sp_groundarea':[NHL_trans_sp_groundarea]}
-
-    # write_outputs(output_vars)
 
     #Add data to dataset
     ds = xr.Dataset(data_vars=dict(
@@ -726,21 +648,18 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
 
         NHL_trans_leaf=(["z"], NHL_trans_leaf),
         NHL_trans_sp_stem = (["z"], NHL_trans_sp_stem),
-        NHL_trans_sp_crownarea = (["z"], NHL_trans_sp_crownarea),
-        NHL_trans_sp_groundarea = (["z"], NHL_trans_sp_groundarea)
         ),
         coords=dict(z=(["z"], z)),
         attrs=dict(description="Model output")
         )
 
-    return ds, NHL_tot_trans_sp_tree, LAD, zenith_angle
+    return ds, LAD, zenith_angle
 
 def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
             lat, long, time_offset = -5):
 
-    # zmin = z_h_LADnorm[0] * h  # [m]
-    zmin = 0 #TODO
+    zmin = 0
     z = np.arange(zmin, h, dz)  # [m]
 
     NHL_tot_trans_sp_tree_all = np.empty((len(met_data)))
@@ -751,17 +670,16 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
     for i in range(0,len(met_data)):
         if i%50==0:
             print('Calculating step ' + str(i))
-        ds, NHL_tot_trans_sp_tree, LAD, zenith_angle = calc_NHL(
+        ds, LAD, zenith_angle = calc_NHL(
             dz, h, Cd, met_data.WS_F.iloc[i], met_data.USTAR.iloc[i], met_data.PPFD_IN.iloc[i], met_data.CO2_F.iloc[i], Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
             met_data.RH.iloc[i], met_data.TA_F.iloc[i], met_data.PA_F.iloc[i], doy = met_data.Timestamp.iloc[i].dayofyear, lat = lat,
-            long= long, time_offset = -5, time_of_day = met_data.Timestamp[i].hour + met_data.Timestamp[i].minute/60) #TODO need to fix time!
+            long= long, time_offset = time_offset, time_of_day = met_data.Timestamp[i].hour + met_data.Timestamp[i].minute/60)
 
-        NHL_tot_trans_sp_tree_all[i] = NHL_tot_trans_sp_tree
         zenith_angle_all[i] = zenith_angle
         datasets.append(ds)
     d2 = xr.concat(datasets, pd.Index(met_data.Timestamp, name="time"))
-    return d2, NHL_tot_trans_sp_tree_all, LAD, zenith_angle_all
+    return d2, LAD, zenith_angle_all
 
 def calc_stem_wp_response(stem_wp, wp_s50, c3):
     """
@@ -784,7 +702,7 @@ def calc_stem_wp_response(stem_wp, wp_s50, c3):
     [type]
         [description]
     """
-    wp_response = np.exp(-((stem_wp)/wp_s50)**c3)  # TODO: deleted - in front of stem_wp, assuming eqn in paper was using positive water potential
+    wp_response = np.exp(-((stem_wp)/wp_s50)**c3)
     return wp_response
 
 def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn, LAD):
@@ -809,7 +727,6 @@ def write_outputs_netcdf(ds):
     Parameters
     ----------
     ds : [xarray dataset]
-        [description]
     """
 
 
