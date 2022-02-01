@@ -12,7 +12,7 @@ g = 9.8 # [m s-2]
 input_fname = "UMBS_flux_2011.csv"
 
 start_time = "2011-05-01 10:00:00" #begining of simulation
-end_time = "2011-05-01 13:30:00" #end
+end_time = "2011-05-01 10:30:00" #end
 
 #Full Simulation
 #start_time = "2007-01-01 00:00:00" #begining of simulation

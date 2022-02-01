@@ -1,10 +1,12 @@
 #importing libraries
 import numpy as np
 import pandas as pd
+import xarray as xr
 from scipy import linalg
 from numpy.linalg import multi_dot
 
-from model_setup import z_soil, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
+from model_setup import z_soil, z_root, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
+
 from met_data import q_rain, tmax, start_time, end_time, working_dir
 
 import model_config as cfg
@@ -499,24 +501,96 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
     d = {'trans':(sum(trans_2d[:,:]*dz)*1000)} #mm/s
     df_EP = pd.DataFrame(data=d,index=step_time[:])
 
-    trans_h = dt*df_EP['trans'].resample('60T').sum() # hourly accumulated simulated transpiration
+    ds_EP = xr.Dataset(data_vars=dict(
 
-    output_vars = {'H':H.transpose(), 'K': K.transpose(), 'S_stomata':S_stomata, 'theta':theta, 'S_kx':S_kx.transpose(),
-                   'S_kr':S_kr.transpose(), 'C':C, 'Kr_sink':Kr_sink.transpose(), 'Capac':Capac.transpose(), 'S_sink': S_sink.transpose(),
-                   'EVsink_ts':EVsink_ts.transpose(), 'trans_h':trans_h,'THETA':THETA.transpose(), 'infiltration':infiltration,
-                   'trans_2d':trans_2d.transpose(),'EVsink_total':EVsink_total}
+    TVeg=(["time"], df_EP.trans.values),
+    Infiltration=(["time"], infiltration)
+    ),
+    coords=dict(t=(["time"], df_EP.index)),
+    attrs=dict(description="Model output")
+    )
 
-    return output_vars, df_waterbal, df_EP
+    # trans_h = dt*df_EP['trans'].resample('60T').sum() # hourly accumulated simulated transpiration
+
+    # output_vars = {'H':H.transpose(), 'K': K.transpose(), 'S_stomata':S_stomata, 'theta':theta, 'S_kx':S_kx.transpose(),
+    #                'S_kr':S_kr.transpose(), 'C':C, 'Kr_sink':Kr_sink.transpose(), 'Capac':Capac.transpose(), 'S_sink': S_sink.transpose(),
+    #                'EVsink_ts':EVsink_ts.transpose(), 'trans_h':trans_h,'THETA':THETA.transpose(), 'infiltration':infiltration,
+    #                'trans_2d':trans_2d.transpose(),'EVsink_total':EVsink_total}
+
+    #datasets for output vars
+    ds_EP = xr.Dataset(data_vars=dict(
+
+    TVeg=(["time"], df_EP.trans.values),
+    Infiltration=(["time"], infiltration)
+    ),
+    coords=dict(t=(["time"], df_EP.index)),
+    attrs=dict(description="Model output")
+    )
+
+    #soil
+    ds_soil = xr.Dataset(
+        {
+            "THETA": (["time", "z"], THETA.transpose()),
+        },
+        coords={
+            "time": df_EP.index,
+            "z": z_soil,
+        })
+    #root TODO
+    ds_root = xr.Dataset(
+        {
+            "Kr_sink": (["time", "z"], Kr_sink.transpose()),
+            "S_kr": (["time", "z"], S_kr.transpose()),
+            "S_sink": (["time", "z"], S_sink.transpose()),
+            "EVsink_ts": (["time", "z"], EVsink_ts.transpose()),
+        },
+        coords={
+            "time": df_EP.index,
+            "z": z_root,
+        })
+    #canopy
+    ds_canopy = xr.Dataset(
+        {
+            "S_kx": (["time", "z"], S_kx.transpose()),
+            "trans_2d": (["time", "z"], trans_2d.transpose()),
+        },
+        coords={
+            "time": df_EP.index,
+            "z": z_upper,
+        })
+    #whole system
+    ds_all = xr.Dataset(
+        {
+            "H": (["time", "z"], H.transpose()),
+            "K": (["time", "z"], K.transpose()),
+            "Capac": (["time", "z"], Capac.transpose()),
+        },
+        coords={
+            "time": df_EP.index,
+            "z": z,
+        })
+
+    return df_waterbal, df_EP, {'ds_EP': ds_EP, 'ds_soil': ds_soil, 'ds_root': ds_root, 'ds_canopy': ds_canopy, 'ds_all':ds_all}
 
 ####################### Save model outputs ###################################
-def save_output(output_vars, df_waterbal, df_EP):
+def save_csv(df_waterbal, df_EP):
     #Writes model outputs to csv files
 
     # make output directory if one doesn't exist
     (working_dir /'output').mkdir(exist_ok=True)
 
-    for var in output_vars:
-        pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
+    # for var in output_vars:
+    #     pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
 
     df_waterbal.to_csv(working_dir / 'output' / ('df_waterbal' + '.csv'), index=False, header=True)
     df_EP.to_csv(working_dir / 'output' / ('df_EP' + '.csv'), index=True, header=True)
+
+def save_nc(xr_datasets):
+    #Writes model output to netcdf file
+
+    # make output directory if one doesn't exist
+    (working_dir /'output').mkdir(exist_ok=True)
+
+    #save dataset
+    for ds in xr_datasets:
+        xr_datasets[ds].to_netcdf(working_dir / 'output' /  (ds + '.nc'))
