@@ -5,11 +5,14 @@ species = "ES"
 height_sp = Hspec
 total_LAI_sp = LAI
 
+crown_scaling = 2
+
 Cd = 0.2 # Drag coefficient
 alpha_ml = 0.1  # Mixing length constant
 mean_crown_area_sp = 17.02
 total_crown_area_sp = 83614.7803393742
 plot_area = 75649.5511
+sum_LAI_plot = 3.7850736000000005
 latitude = 39.9137
 longitude = -74.596
 time_offset = -5
