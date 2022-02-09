@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-import model_config as cfg
+from model_config import cfg
 from model_setup import z_upper, interpolate_2d
 
 # Helper functions

@@ -9,7 +9,7 @@ from model_setup import z_soil, z_root, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_
 
 from met_data import q_rain, tmax, start_time, end_time, working_dir
 
-import model_config as cfg
+from model_config import cfg
 
 #Imports for PM transpiration
 if cfg.transpiration_scheme == 0:
@@ -19,7 +19,6 @@ if cfg.transpiration_scheme == 0:
 
 #Imports for NHL transpiration
 elif cfg.transpiration_scheme == 1:
-    import nhl_transpiration.nhl_config as ncfg
     from nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
     from nhl_transpiration.main import NHL_modelres, LAD
 
@@ -382,7 +381,7 @@ def Picard(H_initial, Head_bottom_H):
             # For NHL transpiration
             elif cfg.transpiration_scheme == 1:  #1: NHL transpiration scheme
                 Pt_2d[:,i] = calc_transpiration_nhl(NHL_modelres[:,i],
-                                                    calc_stem_wp_response(hn[nz_r:nz], ncfg.wp_s50, ncfg.c3).transpose(), LAD)
+                                                    calc_stem_wp_response(hn[nz_r:nz], cfg.wp_s50, cfg.c3).transpose(), LAD)
 
             #SINK/SOURCE ARRAY : concatenating all sinks and sources in a vector
             S_S[:,i]=np.concatenate((TS,-Pt_2d[:,i])) #vector with sink and sources

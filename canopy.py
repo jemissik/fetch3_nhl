@@ -1,4 +1,4 @@
-import model_config as cfg
+from model_config import cfg
 from model_setup import z_Above
 
 import numpy as np

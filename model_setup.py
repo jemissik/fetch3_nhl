@@ -7,7 +7,7 @@ Created on Wed Mar 20 07:07:38 2019
 """
 import numpy as np
 
-from model_config import dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d
+from model_config import cfg
 
 #This code is a simple example replicating the results of the topic
 #3.3 Modeling LAD and capacitance from the paper:
@@ -63,7 +63,7 @@ def spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d):
 
 
 #############################################
-# Helper functions 
+# Helper functions
 #################################################
 # Function to do to 2d interpolation
 def interpolate_2d(x, zdim):
@@ -85,4 +85,6 @@ def interpolate_2d(x, zdim):
 def neg2zero(x):
     return np.where(x < 0, 0, x)
 
-z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay = spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d)
+dz = cfg.dz
+z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay = spatial_discretization(
+    cfg.dz, cfg.Soil_depth, cfg.Root_depth, cfg.Hspec, cfg.sand_d, cfg.clay_d)

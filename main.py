@@ -9,7 +9,7 @@ start = time.time()  # start run clock
 
 from initial_conditions import initial_conditions
 from model_functions import format_model_output, Picard, save_csv, save_nc
-import model_config as cfg
+from model_config import cfg
 
 ############## Calculate initial conditions #######################
 H_initial, Head_bottom_H = initial_conditions()

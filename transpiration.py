@@ -1,6 +1,6 @@
 import numpy as np
 
-import model_config as cfg
+from model_config import cfg
 from model_setup import neg2zero
 from met_data import Ta_2d, VPD_2d, SW_in_2d
 
