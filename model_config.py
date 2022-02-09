@@ -1,25 +1,22 @@
 ###############################################################################
-# PHYSICAL CONSTANTS
-###############################################################################
-Rho = 1000  ##[kg m-3]
-g = 9.8 # [m s-2]
-
-###############################################################################
 #INPUT DATA FILE PARAMETERS
 ###############################################################################
 
-# input_fname = "Derek_data_up.csv"
+# File for input met data
 input_fname = "UMBS_flux_2011.csv"
 
 start_time = "2011-05-01 9:00:00" #begining of simulation
 end_time = "2011-05-01 15:00:00" #end
 
-#Full Simulation
-#start_time = "2007-01-01 00:00:00" #begining of simulation
-#end_time = "2007-06-09 00:00:00" #end of simulation
-
 dt = 1800  #seconds - input data resolution
 tmin = 0  #tmin [s]
+
+###############################################################################
+#SITE INFORMATION
+###############################################################################
+latitude = 39.9137
+longitude = -74.596
+time_offset = -5 #Offset from UTC time, e.g EST = UTC -5 hrs
 
 ###############################################################################
 #RUN OPTIONS - printing
@@ -39,7 +36,6 @@ transpiration_scheme = 1 # 0: PM transpiration; 1: NHL transpiration
 ###############################################################################
 #The finite difference discretization constants
 dt0 = 20  #model temporal resolution [s]
-
 dz = 0.1  #model spatial resolution [m]
 
 stop_tol = 0.0001  #stop tolerance of equation converging
@@ -121,6 +117,15 @@ theta_2_clay=0.12
 theta_1_sand=0.05
 theta_2_sand=0.09
 
+# TREE PARAMETERS
+species = "ES"
+
+###############################################################################
+# PHYSICAL CONSTANTS
+###############################################################################
+Rho = 1000  ##[kg m-3]
+g = 9.8 # [m s-2]
+
 #ROOT PARAMETERS
 #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
 Kr=(7.2*10**(-10))/(Rho*g) #soil-to-root radial conductance [m/sPa]
@@ -142,11 +147,36 @@ Hspec=22                      #Height average of trees [m]
 LAI=1.5                       #[-] Leaf area index
 Abasal=8.62*10**(-4)          #[m2basal/m2-ground] xylem cross-sectional area and site surface ratio
 
+#########################################################################3
+#NHL PARAMETERS
+###########################################################################
+
+crown_scaling = 2
+
+mean_crown_area_sp = 17.02
+total_crown_area_sp = 83614.7803393742
+plot_area = 75649.5511
+sum_LAI_plot = 3.7850736000000005
+
+Cd = 0.2 # Drag coefficient
+alpha_ml = 0.1  # Mixing length constant
+Cf = 0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
+x = 1  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+
+Vcmax25 = 31.15
+alpha_gs = 7.3200
+alpha_p = 1
+
+wp_s50 = -9.1 * 10**5 #value for oak from Mirfenderesgi
+c3 = 12.3 #value for oak from Mirfenderesgi
+
+LAD_norm = 'LAD_data.csv' #LAD data
+
+
 #######################################################################
 #LEAF AREA DENSITY FORMULATION (LAD) [1/m]
 #######################################################################
 lad_scheme = 1  #0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
-LAI=1.5                #[-] Leaf area index
 
 #parameters if using penman-monteith transpiration scheme, based on Lalic et al 2014
 #if using NHL transpiration scheme, LAD is calculated in NHL module
