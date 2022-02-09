@@ -1,3 +1,5 @@
+# No longer used. configs moved to model_config in the main module
+#Could change to use this if want to run nhl as a standalone module
 from model_config import dt0, dz, start_time, end_time, input_fname, dt, Hspec, LAI
 
 species = "ES"
