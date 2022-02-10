@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-from model_config import cfg
+from model_config import cfg, model_dir
 from model_setup import z_upper, interpolate_2d
 
 # Helper functions
@@ -39,8 +39,7 @@ def calc_NETRAD(SW_in):
 ###########################################################
 
 #Input file
-working_dir = Path.cwd()
-data_path = working_dir / 'data' / cfg.input_fname
+data_path = model_dir / 'data' / cfg.input_fname
 
 start_time = pd.to_datetime(cfg.start_time)
 end_time = pd.to_datetime(cfg.end_time)

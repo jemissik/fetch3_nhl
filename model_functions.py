@@ -4,10 +4,11 @@ import pandas as pd
 import xarray as xr
 from scipy import linalg
 from numpy.linalg import multi_dot
+import logging
 
 from model_setup import z_soil, z_root, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
 
-from met_data import q_rain, tmax, start_time, end_time, working_dir
+from met_data import q_rain, tmax, start_time, end_time
 
 from model_config import cfg
 
@@ -22,6 +23,8 @@ elif cfg.transpiration_scheme == 1:
     from nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
     from nhl_transpiration.main import NHL_modelres, LAD
 
+
+logger = logging.getLogger(__file__)
 
 ##############Temporal discritization according to MODEL resolution
 t_num = np.arange(0,tmax+cfg.dt0,cfg.dt0)         #[s]
@@ -449,7 +452,7 @@ def Picard(H_initial, Head_bottom_H):
 
                 if cfg.print_run_progress:
                     if (niter % cfg.print_freq) == 0:
-                        print("calculated time steps",niter)
+                        logger.info("calculated time steps: %d" % niter)
 
             else:
                 hnp1mp1 =hnp1m + deltam

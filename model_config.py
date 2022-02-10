@@ -1,9 +1,13 @@
 # Imports model configs from yaml file
 import argparse
+import logging
 from pathlib import Path
 
 import yaml
 from dataclasses import dataclass
+
+
+
 
 # Command line argument for path of config file
 parser = argparse.ArgumentParser()
@@ -12,6 +16,17 @@ parser.add_argument('--output_path', nargs='?', default=Path.cwd())
 args = parser.parse_args()
 config_file = args.config_path
 output_dir = Path(args.output_path)
+
+model_dir = Path(__file__).parent.resolve()
+
+log_format = "%(levelname)s %(asctime)s - %(message)s"
+
+logging.basicConfig(filename=output_dir / "fetch3.log",
+                    filemode="w",
+                    format=log_format,
+                    level=logging.DEBUG)
+# logger = logging.getLogger(__file__)
+# handler = logging.F
 
 # Dataclass to hold the config parameters
 @dataclass
