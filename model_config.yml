@@ -6,7 +6,7 @@
 input_fname: "UMBS_flux_2011.csv"
 
 start_time: "2011-05-01 9:00:00" #begining of simulation
-end_time: "2011-05-01 15:00:00" #end
+end_time: "2011-05-01 10:00:00" #end
 
 dt:  1800  #seconds - input data resolution
 tmin:  0  #tmin [s]

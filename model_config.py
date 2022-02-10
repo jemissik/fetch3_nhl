@@ -1,13 +1,17 @@
 # Imports model configs from yaml file
 import argparse
+from pathlib import Path
+
 import yaml
 from dataclasses import dataclass
 
 # Command line argument for path of config file
 parser = argparse.ArgumentParser()
 parser.add_argument('--config_path', nargs='?', default='model_config.yml')
+parser.add_argument('--output_path', nargs='?', default=Path.cwd())
 args = parser.parse_args()
 config_file = args.config_path
+output_dir = Path(args.output_path)
 
 # Dataclass to hold the config parameters
 @dataclass

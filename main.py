@@ -9,7 +9,7 @@ start = time.time()  # start run clock
 
 from initial_conditions import initial_conditions
 from model_functions import format_model_output, Picard, save_csv, save_nc
-from model_config import cfg
+from model_config import cfg, output_dir
 
 ############## Calculate initial conditions #######################
 H_initial, Head_bottom_H = initial_conditions()
@@ -22,7 +22,7 @@ df_waterbal, df_EP, nc_output = format_model_output(H,K,S_stomata,theta, S_kx, S
                                                      THETA, infiltration,trans_2d, cfg.dt, cfg.dz)
 
 ####################### Save model outputs ###################################
-save_csv(df_waterbal, df_EP)
-save_nc(nc_output)
+save_csv(output_dir, df_waterbal, df_EP)
+save_nc(output_dir, nc_output)
 
 print(f"run time: {time.time() - start} s")  # end run clock
