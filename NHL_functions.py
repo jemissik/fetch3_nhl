@@ -720,7 +720,7 @@ def write_outputs(output_vars):
     for var in output_vars:
         pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / ('nhl_' + var + '.csv'), index = False, header=False)
 
-def write_outputs_netcdf(ds):
+def write_outputs_netcdf(dir, ds):
     """
     Writes model output to netcdf file
 
@@ -730,11 +730,8 @@ def write_outputs_netcdf(ds):
     """
 
 
-
-    working_dir = Path.cwd()
-
     # make output directory if one doesn't exist
-    (working_dir /'output').mkdir(exist_ok=True)
+    (dir /'output').mkdir(exist_ok=True)
 
     #save dataset
-    ds.to_netcdf(working_dir / 'output' /  'nhl_out.nc')
+    ds.to_netcdf(dir / 'output' /  'nhl_out.nc')
