@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-import model_config as cfg
+from model_config import cfg
 from nhl_transpiration.NHL_functions import *
 
 # Read in LAD and met data
