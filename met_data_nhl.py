@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 
 import model_config as cfg
+from model_config import model_dir
+
 
 # Helper functions
 
@@ -20,8 +22,7 @@ def interp_to_model_res(var, tmax, dt0):
 ###########################################################
 
 #Input file
-working_dir = Path.cwd()
-data_path = working_dir / 'data' / cfg.input_fname
+data_path = model_dir / 'data' / cfg.input_fname
 
 start_time = pd.to_datetime(cfg.start_time)
 end_time = pd.to_datetime(cfg.end_time)
