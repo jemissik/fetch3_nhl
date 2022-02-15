@@ -5,17 +5,22 @@ from pathlib import Path
 
 import yaml
 from dataclasses import dataclass
+from sphinx.errors import SphinxError
 
 
 
 
 # Command line argument for path of config file
-parser = argparse.ArgumentParser()
-parser.add_argument('--config_path', nargs='?', default='model_config.yml')
-parser.add_argument('--output_path', nargs='?', default=Path.cwd())
-args = parser.parse_args()
-config_file = args.config_path
-output_dir = Path(args.output_path)
+try:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config_path', nargs='?', default='model_config.yml')
+    parser.add_argument('--output_path', nargs='?', default=Path.cwd())
+    args = parser.parse_args()
+    config_file = args.config_path
+    output_dir = Path(args.output_path)
+except SystemExit:  # sphinx passing in args instead, using default.
+    config_file = Path(__file__).parent / "model_config.yml"
+    output_dir = Path(__file__).parent
 
 model_dir = Path(__file__).parent.resolve()
 
@@ -31,6 +36,14 @@ logging.basicConfig(filename=output_dir / "fetch3.log",
 # Dataclass to hold the config parameters
 @dataclass
 class ConfigParams:
+    """Model parameters
+
+    Parameters are read from the model_config.yml file, which can be modified by the user.
+
+    Attributes:
+        input_fname (str): Input file for met data
+        
+    """
     ###############################################################################
     #INPUT DATA FILE PARAMETERS
     ###############################################################################
