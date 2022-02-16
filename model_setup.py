@@ -1,9 +1,8 @@
 
-# -*- coding: utf-8 -*-
 """
-Created on Wed Mar 20 07:07:38 2019
-
-@author: mdef0001
+###################
+Model setup
+###################
 """
 import numpy as np
 

@@ -1,3 +1,9 @@
+"""
+##################
+Initial conditions
+##################
+"""
+
 from model_config import cfg
 from met_data import q_rain
 from model_setup import nz, dz, z, nz_s, nz_r, nz_clay, z_soil

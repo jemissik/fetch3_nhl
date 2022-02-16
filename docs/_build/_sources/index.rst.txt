@@ -7,33 +7,15 @@ Welcome to FETCH3's documentation!
 ==================================
 
 
-.. automodule:: initial_conditions
-   :members:
+.. toctree::
 
-
-.. automodule:: met_data
-   :members:
-
-
-.. automodule:: model_config
-   :members:
-
-
-.. automodule:: model_functions
-   :members:
-
-
-.. automodule:: model_setup
-   :members:
-
-
-.. automodule:: transpiration
-   :members:
-
-.. automodule:: nhl_transpiration.NHL_functions
-   :members:
-
-
+   model_config
+   model_setup
+   initial_conditions
+   met_data
+   transpiration
+   nhl_functions
+   model_functions
 
 
 Indices and tables

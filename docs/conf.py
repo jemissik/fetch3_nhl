@@ -51,9 +51,12 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 # html_permalinks_icon = '<span>#</span>'
-html_theme = 'press'
-# html_theme = 'pydata_sphinx_theme'
+# html_theme = 'press'
+# html_theme = 'sphinx_material'
+# html_theme = 'sphinx_book_theme'
+html_theme = 'pydata_sphinx_theme'
 # html_theme = 'sphinxawesome_theme'
+# html_theme = 'furo'
 
 # html_theme = 'alabaster'
 
