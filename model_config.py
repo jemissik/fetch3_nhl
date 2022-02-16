@@ -175,13 +175,13 @@ Dividing by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
 
 Xylem parameters
 ^^^^^^^^^^^^^^^^
-**kmax** (float): conductivity of xylem *[m2/sPa]*, divided by rho*g
-**ap** (float): xylem cavitation parameter *[Pa-1]*
-**bp** (float): xylem cavitation parameter *[Pa]*
-**Aind_x** (float): *[m2 xylem/m2 ground]*
-**Phi_0** (float): From bohrer et al 2005
-**p** (float): From bohrer et al 2005
-**sat_xylem** (float): From bohrer et al 2005
+* **kmax** (float): conductivity of xylem *[m2/sPa]*, divided by rho*g
+* **ap** (float): xylem cavitation parameter *[Pa-1]*
+* **bp** (float): xylem cavitation parameter *[Pa]*
+* **Aind_x** (float): *[m2 xylem/m2 ground]*
+* **Phi_0** (float): From bohrer et al 2005
+* **p** (float): From bohrer et al 2005
+* **sat_xylem** (float): From bohrer et al 2005
 
 Tree parameters
 ^^^^^^^^^^^^^^^
@@ -189,8 +189,8 @@ Tree parameters
 * **LAI** (float): *[-]* Leaf area index
 * **Abasal** (float): *[m2basal/m2-ground]* xylem cross-sectional area and site surface ratio
 
-NHL parameters
-^^^^^^^^^^^^^^
+NHL transpiration scheme parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If using the NHL transpiration scheme.
 
 * **crown_scaling** (float):
@@ -226,10 +226,11 @@ if using NHL transpiration scheme, LAD is calculated in NHL module
 * **L_m** (float): maximum value of LAD a canopy layer
 * **z_m** (float): height in which L_m is found [m]
 
-Penman-Monteith equation parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Penman-Monteith transpiration parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If using the PM transpiration scheme.
 
+Penman-Monteith equation parameters
 Note: W m^-2 is the same as J s^-1 m^-2
 1J= 1 kg m2/s2
 therefore 1W/m2 = kg/s3
@@ -241,8 +242,6 @@ therefore 1W/m2 = kg/s3
 * **gama** (float): *[Pa/K]* psychrometric constant
 
 Jarvis parameters
-^^^^^^^^^^^^^^^^^
-If using the PM transpiration scheme.
 
 * **gsmax** (float): *[m/s]* Maximum leaf stomatal conductance
 * **kr** (float): *[m2/W]* Jarvis radiation parameter
@@ -262,19 +261,23 @@ from pathlib import Path
 import yaml
 from dataclasses import dataclass
 
-
+default_output_dir = Path(__file__).parent / 'output'
 # Taking command line arguments for path of config file and output directory
 try:
     parser = argparse.ArgumentParser()
     parser.add_argument('--config_path', nargs='?', default='model_config.yml')
-    parser.add_argument('--output_path', nargs='?', default=Path.cwd())
+    parser.add_argument('--output_path', nargs='?', default= default_output_dir)
     args = parser.parse_args()
     config_file = args.config_path
     output_dir = Path(args.output_path)
 except SystemExit:  # sphinx passing in args instead, using default.
     #use default options if invalid command line arguments are given
     config_file = Path(__file__).parent / "model_config.yml"
-    output_dir = Path(__file__).parent
+    output_dir = default_output_dir
+
+# If using the default output directory, create directory if it doesn't exist
+if output_dir == default_output_dir:
+  (output_dir).mkdir(exist_ok=True)
 
 model_dir = Path(__file__).parent.resolve() # File path of model source code
 
@@ -285,6 +288,7 @@ logging.basicConfig(filename=output_dir / "fetch3.log",
                     filemode="w",
                     format=log_format,
                     level=logging.DEBUG)
+logging.getLogger().addHandler(logging.StreamHandler())
 
 # Dataclass to hold the config parameters
 @dataclass

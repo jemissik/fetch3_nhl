@@ -584,20 +584,20 @@ def save_csv(dir, df_waterbal, df_EP):
     #Writes model outputs to csv files
 
     # make output directory if one doesn't exist
-    (dir /'output').mkdir(exist_ok=True)
+    (dir).mkdir(exist_ok=True)
 
     # for var in output_vars:
     #     pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / (var + '.csv'), index = False, header=False)
 
-    df_waterbal.to_csv(dir / 'output' / ('df_waterbal' + '.csv'), index=False, header=True)
-    df_EP.to_csv(dir / 'output' / ('df_EP' + '.csv'), index=True, header=True)
+    df_waterbal.to_csv(dir / ('df_waterbal' + '.csv'), index=False, header=True)
+    df_EP.to_csv(dir  / ('df_EP' + '.csv'), index=True, header=True)
 
 def save_nc(dir, xr_datasets):
     #Writes model output to netcdf file
 
     # make output directory if one doesn't exist
-    (dir /'output').mkdir(exist_ok=True)
+    (dir).mkdir(exist_ok=True)
 
     #save dataset
     for ds in xr_datasets:
-        xr_datasets[ds].to_netcdf(dir / 'output' /  (ds + '.nc'))
+        xr_datasets[ds].to_netcdf(dir /  (ds + '.nc'))
