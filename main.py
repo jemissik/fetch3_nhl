@@ -18,12 +18,15 @@ logger = logging.getLogger(__file__)
 
 
 ############## Calculate initial conditions #######################
+logger.info("Calculating initial conditions " )
 H_initial, Head_bottom_H = initial_conditions()
 
 ############## Run the model #######################
+logger.info("Running the model ")
 H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink,EVsink_ts, THETA, infiltration,trans_2d = Picard(H_initial, Head_bottom_H)
 
 ############## Calculate water balance and format model outputs #######################
+logger.info("Saving outputs")
 df_waterbal, df_EP, nc_output = format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink, EVsink_ts,
                                                      THETA, infiltration,trans_2d, cfg.dt, cfg.dz)
 

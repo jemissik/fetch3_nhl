@@ -289,6 +289,13 @@ logging.basicConfig(filename=output_dir / "fetch3.log",
                     format=log_format,
                     level=logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler())
+logger = logging.getLogger(__file__)
+
+
+# Log the directories being used
+logger.info("Using config file: " + str(config_file) )
+logger.info("Using output directory: " + str(output_dir) )
+
 
 # Dataclass to hold the config parameters
 @dataclass
@@ -513,6 +520,8 @@ class ConfigParams:
 
 #TODO convert to function
 # Read configs from yaml file
+logger.info("Reading config file" )
+
 with open(config_file, "r") as yml_config:
     config_dict = yaml.safe_load(yml_config)
 
