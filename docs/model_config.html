@@ -1,0 +1,651 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Model configuration &#8212; FETCH3  documentation</title>
+    
+  <link href="_static/css/theme.css" rel="stylesheet">
+  <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/blank.css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.be7d3bbb2ef33a8344ce.js">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Model setup" href="model_setup.html" />
+    <link rel="prev" title="Welcome to FETCH3’s documentation!" href="index.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="index.html">
+<p class="title">FETCH3</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 current active nav-item">
+ <a class="current reference internal nav-link" href="#">
+  Model configuration
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="model_setup.html">
+  Model setup
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="initial_conditions.html">
+  Initial conditions
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="met_data.html">
+  Met data
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="transpiration.html">
+  PM transpiration
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="nhl_functions.html">
+  NHL transpiration
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="model_functions.html">
+  Model functions
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar"><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage pt-5 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-the-model">
+   Running the model
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#setting-input-and-output-directories">
+     Setting input and output directories
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#default-input-and-output-directories">
+       Default input and output directories:
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#running-the-model-from-the-command-line">
+       Running the model from the command line:
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#modifying-the-config-file">
+   Modifying the config file
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#yml-file-contents">
+     .yml file contents
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#model-options">
+       Model options
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#site-information">
+       Site information
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#run-options-printing">
+       Run options - printing
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#transpiration-options">
+       Transpiration options
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#numerical-solution-time-and-space-constants-dz-and-dt0">
+       Numerical solution time and space constants (dz and dt0)
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#model-parameters">
+       Model parameters
+      </a>
+      <ul class="nav section-nav flex-column">
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#soil-boundary-conditions">
+         Soil boundary conditions
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#soil-spatial-discretization">
+         Soil spatial discretization
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#configuration-of-soil-duplex">
+         Configuration of soil duplex
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#soil-initial-conditions">
+         Soil initial conditions
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#soil-parameters-using-van-genuchten-relationships">
+         Soil parameters - using Van Genuchten relationships
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#tree-parameters">
+         Tree parameters:
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#physical-constants">
+         PHYSICAL CONSTANTS
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#root-parameters">
+         Root parameters
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#xylem-parameters">
+         Xylem parameters
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#id1">
+         Tree parameters
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#nhl-parameters">
+         NHL parameters
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#leaf-area-density-formulation-lad-1-m">
+         Leaf area density formulation (LAD) [1/m]
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#penman-monteith-equation-parameters">
+         Penman-Monteith equation parameters
+        </a>
+       </li>
+       <li class="toc-h5 nav-item toc-entry">
+        <a class="reference internal nav-link" href="#jarvis-parameters">
+         Jarvis parameters
+        </a>
+       </li>
+      </ul>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <span class="target" id="module-model_config"></span><div class="section" id="model-configuration">
+<h1>Model configuration<a class="headerlink" href="#model-configuration" title="Permalink to this headline">¶</a></h1>
+<p>Reads in model configuration from .yml file</p>
+<p>Model setup options and model parameters are read from a .yml file, which can be
+modified by the user.</p>
+<div class="section" id="running-the-model">
+<h2>Running the model<a class="headerlink" href="#running-the-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setting-input-and-output-directories">
+<h3>Setting input and output directories<a class="headerlink" href="#setting-input-and-output-directories" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="default-input-and-output-directories">
+<h4>Default input and output directories:<a class="headerlink" href="#default-input-and-output-directories" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>Input meteorological data: <code class="docutils literal notranslate"><span class="pre">./data/</span></code></p></li>
+<li><p>Input configuration file: <code class="docutils literal notranslate"><span class="pre">./model_config.yml</span></code></p></li>
+<li><p>Model output and logs: <code class="docutils literal notranslate"><span class="pre">./output/</span></code>
+If using the default output directory, a directory <code class="docutils literal notranslate"><span class="pre">./output/</span></code> will be created
+if it doesn’t already exist.</p></li>
+</ul>
+</div>
+<div class="section" id="running-the-model-from-the-command-line">
+<h4>Running the model from the command line:<a class="headerlink" href="#running-the-model-from-the-command-line" title="Permalink to this headline">¶</a></h4>
+<p>Run the model by running <code class="docutils literal notranslate"><span class="pre">main.py</span></code></p>
+<p>To specify an input config file or output directory in a location other than the
+default, a different config file and output directory can be specified as command
+line arguments, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">config_path</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="n">fetch3</span><span class="o">/</span><span class="n">user_model_config</span><span class="o">.</span><span class="n">yml</span> <span class="o">--</span><span class="n">output_path</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="n">fetch3</span><span class="o">/</span><span class="n">output</span><span class="o">/</span>
+</pre></div>
+</div>
+<p>If the arguments <code class="docutils literal notranslate"><span class="pre">--config_path</span></code> and <code class="docutils literal notranslate"><span class="pre">--output_path</span></code> are omitted when running the
+model from the command line, the defaults will be used.</p>
+</div>
+</div>
+</div>
+<div class="section" id="modifying-the-config-file">
+<h2>Modifying the config file<a class="headerlink" href="#modifying-the-config-file" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="yml-file-contents">
+<h3>.yml file contents<a class="headerlink" href="#yml-file-contents" title="Permalink to this headline">¶</a></h3>
+<p>See <code class="docutils literal notranslate"><span class="pre">model_config.yml</span></code> for an example.</p>
+<div class="section" id="model-options">
+<h4>Model options<a class="headerlink" href="#model-options" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><strong>input_fname</strong> (str): File for input met data</p></li>
+<li><p><strong>start_time</strong> (str): [“YYYY-MM-DD HH:MM:SS”] Begining of simulation</p></li>
+<li><p><strong>end_time</strong> (str): [“YYYY-MM-DD HH:MM:SS”] End of simulation</p></li>
+<li><p><strong>dt</strong> (int): [seconds] Input data resolution</p></li>
+<li><p><strong>tmin</strong> (int): [s]  #tmin #TODO</p></li>
+</ul>
+</div>
+<div class="section" id="site-information">
+<h4>Site information<a class="headerlink" href="#site-information" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p><strong>latitude</strong> (float): Latitude of site in decimal degrees</p></li>
+<li><p><strong>longitude</strong> (longitude): Longitude of site in decimal degrees</p></li>
+<li><p><strong>time_offset</strong> (float): Offset from UTC time, e.g EST = UTC -5 hrs</p></li>
+</ul>
+</div>
+<div class="section" id="run-options-printing">
+<h4>Run options - printing<a class="headerlink" href="#run-options-printing" title="Permalink to this headline">¶</a></h4>
+<p>Options to turn printing off or specify print frequency. Printing the run
+progress will slow down the model run. The model will run faster if printing is
+turned off or set to print more infrequently.</p>
+<ul class="simple">
+<li><p><strong>print_run_progress</strong> (bool): Turns on/off printing for progress of the model run.
+<code class="docutils literal notranslate"><span class="pre">print_run_progress:</span> <span class="pre">False</span></code> will turn off printing.</p></li>
+<li><p><strong>print_freq</strong> (int): Interval of timesteps to print if <code class="docutils literal notranslate"><span class="pre">print_run_progress</span> <span class="pre">=</span> <span class="pre">True</span></code>
+(e.g. <code class="docutils literal notranslate"><span class="pre">print_freq:</span> <span class="pre">100</span></code> will print every 100 time steps)</p></li>
+</ul>
+</div>
+<div class="section" id="transpiration-options">
+<h4>Transpiration options<a class="headerlink" href="#transpiration-options" title="Permalink to this headline">¶</a></h4>
+<p>Specify whether to use the PM transpiration scheme or the NHL transpiration scheme</p>
+<ul class="simple">
+<li><p><strong>transpiration_scheme</strong> (int): 0: PM transpiration; 1: NHL transpiration</p></li>
+</ul>
+</div>
+<div class="section" id="numerical-solution-time-and-space-constants-dz-and-dt0">
+<h4>Numerical solution time and space constants (dz and dt0)<a class="headerlink" href="#numerical-solution-time-and-space-constants-dz-and-dt0" title="Permalink to this headline">¶</a></h4>
+<p>The finite difference discretization constants</p>
+<ul class="simple">
+<li><p><strong>dt0</strong> (int): model temporal resolution [s]</p></li>
+<li><p><strong>dz</strong> (float): model spatial resolution [m]</p></li>
+<li><p><strong>stop_tol</strong> (float): stop tolerance of equation converging</p></li>
+</ul>
+</div>
+<div class="section" id="model-parameters">
+<h4>Model parameters<a class="headerlink" href="#model-parameters" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="soil-boundary-conditions">
+<h5>Soil boundary conditions<a class="headerlink" href="#soil-boundary-conditions" title="Permalink to this headline">¶</a></h5>
+<p>Here the user can choose the desired soil boundary conditions as described below.
+The configuration used in the example config file follows Verma et al. 2014.</p>
+<ul>
+<li><p><strong>UpperBC</strong> (int): Upper boundary condition
+Options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>1: no flux (Neuman)</p></li>
+<li><p>0: infiltration</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>BottomBC</strong> (int): Bottom boundary condition
+Options:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>2: free drainage</p></li>
+<li><p>1: no flux (Neuman)</p></li>
+<li><p>0: constant potential (Dirichlet)</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="soil-spatial-discretization">
+<h5>Soil spatial discretization<a class="headerlink" href="#soil-spatial-discretization" title="Permalink to this headline">¶</a></h5>
+<ul class="simple">
+<li><p><strong>Root_depth</strong> (float): <em>[m]</em> depth of root column</p></li>
+<li><p><strong>Soil_depth</strong> (float): <em>[m]</em> depth of soil column</p></li>
+</ul>
+</div>
+<div class="section" id="configuration-of-soil-duplex">
+<h5>Configuration of soil duplex<a class="headerlink" href="#configuration-of-soil-duplex" title="Permalink to this headline">¶</a></h5>
+<p>Depths of layer/clay interface</p>
+<ul class="simple">
+<li><p><strong>sand_d</strong> (float): # TODO 4.2—-top soil #m</p></li>
+<li><p><strong>clay_d</strong> (float): Depth of clay layer. #0——4.2 #m #TODO</p></li>
+</ul>
+</div>
+<div class="section" id="soil-initial-conditions">
+<h5>Soil initial conditions<a class="headerlink" href="#soil-initial-conditions" title="Permalink to this headline">¶</a></h5>
+<p>Soil initial conditions as described in the paper [VERMA et al., 2014]
+The initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
+from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
+from 4,2 m [sand layer] cte value of -0.402 m</p>
+<ul class="simple">
+<li><p><strong>cte_clay</strong> (float): depth from 0-3m initial condition of clay [and SWC] is constant</p></li>
+<li><p><strong>H_init_soilbottom</strong> (float):  #TODO</p></li>
+<li><p><strong>H_init_soilmid</strong> (float):  #TODO</p></li>
+<li><p><strong>H_init_canopytop</strong> (float):  #TODO</p></li>
+</ul>
+</div>
+<div class="section" id="soil-parameters-using-van-genuchten-relationships">
+<h5>Soil parameters - using Van Genuchten relationships<a class="headerlink" href="#soil-parameters-using-van-genuchten-relationships" title="Permalink to this headline">¶</a></h5>
+<p>Clay:</p>
+<ul class="simple">
+<li><p><strong>alpha_1</strong> (float): soil hydraulic parameter <em>[1/m]</em></p></li>
+<li><p><strong>theta_S1</strong> (float): saturated volumetric soil moisture content <em>[-]</em></p></li>
+<li><p><strong>theta_R1</strong> (float): residual volumetric soil moisture content <em>[-]</em></p></li>
+<li><p><strong>n_1</strong> (float): soil hydraulic parameter <em>[-]</em></p></li>
+<li><p><strong>m_1</strong> (float): soil hydraulic parameter <em>[-]</em>. m_1 = 1-(1/n_1)</p></li>
+<li><p><strong>Ksat_1</strong> (float): saturated hydraulic conductivity <em>[m/s]</em></p></li>
+</ul>
+<p>Sand: same definitions as above, but for sand</p>
+<ul class="simple">
+<li><p><strong>alpha_2</strong> (float):</p></li>
+<li><p><strong>theta_S2</strong> (float):</p></li>
+<li><p><strong>theta_R2</strong> (float):</p></li>
+<li><p><strong>n_2</strong> (float):</p></li>
+<li><p><strong>m_2</strong> (float): m_2 = 1-(1/n_2)</p></li>
+<li><p><strong>Ksat_2</strong> (float):</p></li>
+</ul>
+<p>Soil stress parameters:</p>
+<ul class="simple">
+<li><p><strong>theta_1_clay</strong> (float):</p></li>
+<li><p><strong>theta_2_clay</strong> (float):</p></li>
+<li><p><strong>theta_1_sand</strong> (float): float</p></li>
+<li><p><strong>theta_2_sand</strong> (float): float</p></li>
+</ul>
+</div>
+<div class="section" id="tree-parameters">
+<h5>Tree parameters:<a class="headerlink" href="#tree-parameters" title="Permalink to this headline">¶</a></h5>
+<ul class="simple">
+<li><p><strong>species</strong> (str):  Tree species</p></li>
+</ul>
+</div>
+<div class="section" id="physical-constants">
+<h5>PHYSICAL CONSTANTS<a class="headerlink" href="#physical-constants" title="Permalink to this headline">¶</a></h5>
+<p>#TODO remove from config
+<strong>Rho</strong>:  float  ##[kg m-3]
+<strong>g</strong>:  float # [m s-2]</p>
+</div>
+<div class="section" id="root-parameters">
+<h5>Root parameters<a class="headerlink" href="#root-parameters" title="Permalink to this headline">¶</a></h5>
+<p>Dividing by Rho*g since Richards equation is being solved in terms of Phi (Pa)</p>
+<ul class="simple">
+<li><p><strong>Kr</strong> (float): soil-to-root radial conductance <em>[m/sPa]</em>, divided by rho*g</p></li>
+<li><p><strong>qz</strong> (float): unitless - parameter for the root mass distribution - Verma et al., 2014</p></li>
+<li><p><strong>Ksax</strong> (float): specific axial conductivity of roots <em>[m/s]</em>, divided by rho*g</p></li>
+<li><p><strong>Aind_r</strong> (float): <em>[m2 root xylem/m2 ground]</em></p></li>
+</ul>
+</div>
+<div class="section" id="xylem-parameters">
+<h5>Xylem parameters<a class="headerlink" href="#xylem-parameters" title="Permalink to this headline">¶</a></h5>
+<p><strong>kmax</strong> (float): conductivity of xylem <em>[m2/sPa]</em>, divided by rho*g
+<strong>ap</strong> (float): xylem cavitation parameter <em>[Pa-1]</em>
+<strong>bp</strong> (float): xylem cavitation parameter <em>[Pa]</em>
+<strong>Aind_x</strong> (float): <em>[m2 xylem/m2 ground]</em>
+<strong>Phi_0</strong> (float): From bohrer et al 2005
+<strong>p</strong> (float): From bohrer et al 2005
+<strong>sat_xylem</strong> (float): From bohrer et al 2005</p>
+</div>
+<div class="section" id="id1">
+<h5>Tree parameters<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h5>
+<ul class="simple">
+<li><p><strong>Hspec</strong> (float): Height average of trees <em>[m]</em></p></li>
+<li><p><strong>LAI</strong> (float): <em>[-]</em> Leaf area index</p></li>
+<li><p><strong>Abasal</strong> (float): <em>[m2basal/m2-ground]</em> xylem cross-sectional area and site surface ratio</p></li>
+</ul>
+</div>
+<div class="section" id="nhl-parameters">
+<h5>NHL parameters<a class="headerlink" href="#nhl-parameters" title="Permalink to this headline">¶</a></h5>
+<p>If using the NHL transpiration scheme.</p>
+<ul class="simple">
+<li><p><strong>crown_scaling</strong> (float):</p></li>
+<li><p><strong>mean_crown_area_sp</strong> (float):</p></li>
+<li><p><strong>total_crown_area_sp</strong> (float):</p></li>
+<li><p><strong>plot_area</strong> (float):</p></li>
+<li><p><strong>sum_LAI_plot</strong> (float):</p></li>
+<li><p><strong>Cd</strong> (float): Drag coefficient</p></li>
+<li><p><strong>alpha_ml</strong> (float): Mixing length constant</p></li>
+<li><p><strong>Cf</strong> (float): Clumping fraction [unitless], assumed to be 0.85 (Forseth &amp; Norman 1993) unless otherwise specified</p></li>
+<li><p><strong>x</strong> (float): Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)</p></li>
+<li><p><strong>Vcmax25</strong> (float):</p></li>
+<li><p><strong>alpha_gs</strong> (float):</p></li>
+<li><p><strong>alpha_p</strong> (float):</p></li>
+<li><p><strong>wp_s50</strong> (float): # TODO value for oak from Mirfenderesgi</p></li>
+<li><p><strong>c3</strong> (float):  # TODO value for oak from Mirfenderesgi</p></li>
+<li><p><strong>LAD_norm</strong> (str):  File with normalized LAD data</p></li>
+</ul>
+</div>
+<div class="section" id="leaf-area-density-formulation-lad-1-m">
+<h5>Leaf area density formulation (LAD) [1/m]<a class="headerlink" href="#leaf-area-density-formulation-lad-1-m" title="Permalink to this headline">¶</a></h5>
+<p>#TODO options for using Marcela’s LAD scheme or the NHL scheme</p>
+<ul class="simple">
+<li><p><strong>lad_scheme</strong> (int) : 0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module</p></li>
+</ul>
+<p>parameters if using penman-monteith transpiration scheme, based on Lalic et al 2014
+if using NHL transpiration scheme, LAD is calculated in NHL module</p>
+<ul class="simple">
+<li><p><strong>L_m</strong> (float): maximum value of LAD a canopy layer</p></li>
+<li><p><strong>z_m</strong> (float): height in which L_m is found [m]</p></li>
+</ul>
+</div>
+<div class="section" id="penman-monteith-equation-parameters">
+<h5>Penman-Monteith equation parameters<a class="headerlink" href="#penman-monteith-equation-parameters" title="Permalink to this headline">¶</a></h5>
+<p>If using the PM transpiration scheme.</p>
+<p>Note: W m^-2 is the same as J s^-1 m^-2
+1J= 1 kg m2/s2
+therefore 1W/m2 = kg/s3</p>
+<ul class="simple">
+<li><p><strong>gb</strong> (float): <em>[m/s]</em> Leaf boundary layer conductance</p></li>
+<li><p><strong>Cp</strong> (float): <em>[J/m3 K]</em> Heat capacity of air</p></li>
+<li><p><strong>ga</strong> (float): <em>[m/s]</em> Aerodynamic conductance</p></li>
+<li><p><strong>lamb</strong> (float): <em>[J/m3]</em> latent heat of vaporization</p></li>
+<li><p><strong>gama</strong> (float): <em>[Pa/K]</em> psychrometric constant</p></li>
+</ul>
+</div>
+<div class="section" id="jarvis-parameters">
+<h5>Jarvis parameters<a class="headerlink" href="#jarvis-parameters" title="Permalink to this headline">¶</a></h5>
+<p>If using the PM transpiration scheme.</p>
+<ul class="simple">
+<li><p><strong>gsmax</strong> (float): <em>[m/s]</em> Maximum leaf stomatal conductance</p></li>
+<li><p><strong>kr</strong> (float): <em>[m2/W]</em> Jarvis radiation parameter</p></li>
+<li><p><strong>kt</strong> (float): <em>[K-2]</em> Jarvis temperature parameter</p></li>
+<li><p><strong>Topt</strong> (float): <em>[K]</em> Jarvis temperature parameter (optimum temperature)</p></li>
+<li><p><strong>kd</strong> (float): <a href="#id2"><span class="problematic" id="id3">*</span></a>[Pa-1] Jarvis vapor pressure deficit temperature</p></li>
+<li><p><strong>hx50</strong> (float): <em>[Pa]</em>  Jarvis leaf water potential parameter</p></li>
+<li><p><strong>nl</strong> (float): <em>[-]</em> Jarvis leaf water potential parameter</p></li>
+<li><p><strong>Emax</strong> (float): <em>[m/s]</em> maximum nightime transpiration</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="model_config.ConfigParams">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">model_config.</span></span><span class="sig-name descname"><span class="pre">ConfigParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_fname</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_run_progress</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_freq</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transpiration_scheme</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_tol</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UpperBC</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">BottomBC</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Root_depth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Soil_depth</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sand_d</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clay_d</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cte_clay</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H_init_soilbottom</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H_init_soilmid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H_init_canopytop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_S1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_R1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ksat_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_S2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_R2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ksat_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_1_clay</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_2_clay</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_1_sand</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta_2_sand</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">species</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Kr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Ksax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Aind_r</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kmax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ap</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Aind_x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Phi_0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sat_xylem</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Hspec</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LAI</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Abasal</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crown_scaling</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_crown_area_sp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">total_crown_area_sp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_area</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sum_LAI_plot</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cd</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_ml</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cf</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Vcmax25</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_gs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_p</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wp_s50</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">c3</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LAD_norm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lad_scheme</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">L_m</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_m</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ga</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamb</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gama</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gsmax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kr</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Topt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kd</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hx50</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nl</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Emax</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#model_config.ConfigParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataclass to hold parameters from .yml file</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'> 
+    <a class='left-prev' id="prev-link" href="index.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Welcome to FETCH3’s documentation!</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="model_setup.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Model setup</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <script src="_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Justine Missik.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>
