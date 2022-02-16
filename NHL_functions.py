@@ -673,8 +673,6 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
 
     datasets = []
     for i in range(0,len(met_data)):
-        if i%50==0:
-            print('Calculating step ' + str(i))
         ds, LAD, zenith_angle = calc_NHL(
             dz, h, Cd, met_data.WS_F.iloc[i], met_data.USTAR.iloc[i], met_data.PPFD_IN.iloc[i], met_data.CO2_F.iloc[i], Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
