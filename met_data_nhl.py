@@ -1,3 +1,5 @@
+#This file is no longer used when running NHL through FETCH3.
+
 from pathlib import Path
 import pandas as pd
 import numpy as np

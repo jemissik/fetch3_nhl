@@ -1,3 +1,17 @@
+"""
+########
+Runs NHL
+########
+This file runs the NHL module.
+This version is intended to be called by FETCH3, and reads configs from the FETCH3
+model config.
+
+It returns NHL transpiration to be used by FETCH3, and also writes NHL
+transpiration to a netcdf file.
+
+If running NHL as a standalone module, need to use a different version.
+"""
+
 import numpy as np
 import pandas as pd
 from pathlib import Path
@@ -7,6 +21,7 @@ from nhl_transpiration.NHL_functions import *
 
 # Read in LAD and met data
 # Met data must include
+#TODO change so it uses the same input files as FETCH3
 met_data = pd.read_csv(model_dir / 'nhl_transpiration/data' / cfg.input_fname, parse_dates=[0])
 LAD_data = pd.read_csv(model_dir / 'nhl_transpiration/data' / cfg.LAD_norm)
 
