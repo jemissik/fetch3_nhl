@@ -734,9 +734,5 @@ def write_outputs_netcdf(dir, ds):
     ds : [xarray dataset]
     """
 
-
-    # make output directory if one doesn't exist
-    (dir /'output').mkdir(exist_ok=True)
-
     #save dataset
-    ds.to_netcdf(dir / 'output' /  'nhl_out.nc')
+    ds.to_netcdf(dir / 'nhl_out.nc')
