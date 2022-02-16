@@ -65,6 +65,25 @@ html_theme = 'pydata_sphinx_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+html_css_files = [
+    'css/custom.css',
+]
+
+html_theme_options = {
+    "icon_links": [
+        {
+            # Label for this link
+            "name": "GitHub",
+            # URL where the link will redirect
+            "url": "https://github.com/jemissik/fetch3_nhl",  # required
+            # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+            "icon": "fab fa-github-square",
+            # Whether icon should be a FontAwesome class, or a local file
+            "type": "fontawesome OR local",  # Default is fontawesome
+        }
+   ]
+}
+
 # For todo extension
 todo_include_todos = True
 
