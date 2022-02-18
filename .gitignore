@@ -3,6 +3,9 @@ output/
 # Output from speed testing
 speed_test/output/
 
+# docs build
+docs/_build
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
