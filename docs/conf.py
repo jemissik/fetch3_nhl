@@ -82,7 +82,6 @@ html_theme_options = {
             # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
             "icon": "fab fa-github-square",
             # Whether icon should be a FontAwesome class, or a local file
-            "type": "fontawesome OR local",  # Default is fontawesome
         }
    ]
 }
