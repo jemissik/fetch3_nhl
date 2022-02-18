@@ -32,7 +32,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
-    'sphinx.ext.autosummary',
+    # 'sphinx.ext.autosummary',
     'sphinx.ext.githubpages',
     'm2r2'
 
@@ -90,4 +90,4 @@ html_theme_options = {
 todo_include_todos = True
 
 # Autosummary
-autosummary_generate = True
+# autosummary_generate = True
