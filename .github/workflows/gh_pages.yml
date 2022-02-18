@@ -11,7 +11,8 @@ jobs:
     - uses: actions/checkout@master
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
-        submodules: true
+        ssh-key: ${{ secrets.SUBMODULE_CONTENT_PULL_KEY }}
+        submodules: 'recursive'
     - name: Build and Commit
       uses: sphinx-notes/pages@v2
       with:
