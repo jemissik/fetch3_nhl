@@ -526,4 +526,4 @@ with open(config_file, "r") as yml_config:
     config_dict = yaml.safe_load(yml_config)
 
 # Convert config dict to config dataclass
-cfg = ConfigParams(**config_dict)
+cfg = ConfigParams(**config_dict['model_options'], **config_dict['parameters'])
