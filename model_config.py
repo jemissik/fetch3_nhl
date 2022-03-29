@@ -261,22 +261,30 @@ from pathlib import Path
 import yaml
 from dataclasses import dataclass
 
-default_output_dir = Path(__file__).parent / 'output'
-# Taking command line arguments for path of config file and output directory
+# Default paths for config file, input data, and model output
+parent_path = Path(__file__).parent
+default_config_path = parent_path / 'model_config.yml'
+default_data_path = parent_path / 'data'
+default_output_path = parent_path / 'output'
+
+# Taking command line arguments for path of config file, input data, and output directory
 try:
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config_path', nargs='?', default='model_config.yml')
-    parser.add_argument('--output_path', nargs='?', default= default_output_dir)
+    parser.add_argument('--config_path', nargs='?', default=default_config_path)
+    parser.add_argument('--data_path', nargs='?', default=default_data_path)
+    parser.add_argument('--output_path', nargs='?', default= default_output_path)
     args = parser.parse_args()
     config_file = args.config_path
+    data_dir = args.data_path
     output_dir = Path(args.output_path)
 except SystemExit:  # sphinx passing in args instead, using default.
     #use default options if invalid command line arguments are given
-    config_file = Path(__file__).parent / "model_config.yml"
-    output_dir = default_output_dir
+    config_file = default_config_path
+    data_path = default_data_path
+    output_dir = default_output_path
 
 # If using the default output directory, create directory if it doesn't exist
-if output_dir == default_output_dir:
+if output_dir == default_output_path:
   (output_dir).mkdir(exist_ok=True)
 
 model_dir = Path(__file__).parent.resolve() # File path of model source code
@@ -334,7 +342,7 @@ class ConfigParams:
     #TRANSPIRATION OPTIONS - NHL OR PM
     ###############################################################################
     transpiration_scheme:  int # 0: PM transpiration; 1: NHL transpiration
-
+    zenith_method:  str
     ###############################################################################
     #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
     ###############################################################################
