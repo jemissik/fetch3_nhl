@@ -15,7 +15,7 @@ import pandas as pd
 from pathlib import Path
 import logging
 
-from nhl_config import cfg, model_dir, output_dir
+from nhl_config import cfg, model_dir, output_dir, data_dir
 from NHL_functions import *
 import time
 
@@ -23,15 +23,13 @@ logger = logging.getLogger(__file__)
 
 start = time.time()
 
-# Read in LAD and met data
-# Met data must include
-#TODO change so it uses the same input files as FETCH3
-met_data = pd.read_csv(model_dir / 'data' / cfg.input_fname, parse_dates=[0])
-LAD_data = pd.read_csv(model_dir / 'data' / cfg.LAD_norm)
-
 ####################################################
 # The rest of the file should be the same as main.py
 ###################################################
+
+# Read in LAD and met data
+met_data = pd.read_csv(data_dir / cfg.input_fname, parse_dates=[0])
+LAD_data = pd.read_csv(data_dir / cfg.LAD_norm)
 
 met_data = met_data[(met_data.Timestamp >= pd.to_datetime(cfg.start_time)) &
                     (met_data.Timestamp <= pd.to_datetime(cfg.end_time))].reset_index(drop=True)
