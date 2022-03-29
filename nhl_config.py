@@ -5,12 +5,12 @@ Running the model from the command line:
 ----------------------------------------
 Run the model by running ``main_standalone.py``
 
-To specify an input config file or output directory in a location other than the
-default, a different config file and output directory can be specified as command
-line arguments, for example::
-      python3 main_standalone.py --config_path /Users/username/fetch3/user_model_config.yml --output_path /Users/username/fetch3/output/
+To specify an input config file, data directory, or output directory in a location other than the
+default, different directories can be specified as command line arguments, for example::
+      python3 main_standalone.py --config_path /Users/username/fetch3/user_model_config.yml
+      --data_path /Users/username/fetch3/user_data/ --output_path /Users/username/fetch3/output/
 
-If the arguments ``--config_path`` and ``--output_path`` are omitted when running the
+If the arguments ``--config_path``, ``--data_path``, and ``--output_path`` are omitted when running the
 model from the command line, the defaults will be used.
 """
 
