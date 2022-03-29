@@ -10,15 +10,20 @@ import numpy as np
 from scipy.interpolate import interp1d
 
 def calc_esat(Tair):
-    '''
-    Calculates the saturation vapor pressure using the Clausius-Clapeyron equation
+    """
+    Calculates the saturation vapor pressure using the Clausius-Clapeyron equation.
 
-    Inputs:
-    Tair: Air temperature [degrees C]
+    Parameters
+    ----------
+    Tair : array_like
+        Air temperature [degrees C]
 
-    Outputs:
-    The saturation vapor pressure [kPa]
-    '''
+    Returns
+    -------
+    array_like
+        The saturation vapor pressure [kPa] corresponding to each element in Tair
+    """
+
     #constants
     e0 = 0.611 #kPa
     T0 = 273 #K
@@ -30,18 +35,22 @@ def calc_esat(Tair):
     return es
 
 def calc_vpd_kPa(RH, Tair):
-    '''
+    """
     Calculates vapor pressure deficit from air temperature and relative humidity.
 
-    Inputs:
-    RH: relative humidity [%]
-    Tair: air temperature [deg C]
+    Parameters
+    ----------
+    RH : array_like
+        Relative humidity [%]
+    Tair : array_like
+        Air temperature [deg C]
 
-    Outputs:
-    Vapor pressure deficit [kPa]
-    '''
+    Returns
+    -------
+    array_like
+        Vapor pressure deficit [kPa]
+    """
 
-    #calculate esat
     es = calc_esat(Tair)
     eactual = RH*es/100
 
@@ -241,17 +250,25 @@ def calc_geff(gb, gs):
     geff = (gb * gs) / (gb + gs)
     return geff
 
-def calc_zenith_angle(doy, lat, long, time_offset, time_of_day):
+def calc_zenith_angle(doy, lat, long, time_offset, time_of_day, zenith_method='CN'):
     """
-    Calculates the solar zenith angle, based on Campbell & Norman, 1998
+    Calculates the solar zenith angle, based on Campbell & Norman, 1998.
+    Also has options for 2 alternate methods: use a constant zenith angle of 0 (i.e.
+    pretend the sun is always directly overhead), or replicate the results of the
+    FETCH2 NHL code (which is missing an adjustment for longitude).
 
     Inputs:
     ----------
     doy : Day of year (Ordinal day, e.g. 1 = Jan 1)
     lat : Latitude
     long : Longitude (Needs to be negative for deg W, positive for deg E)
-    time_offset : Time offset [in hours] for local standard time zone, e.g, for Pacific Standard Time, time_offset = -8
+    time_offset : Time offset [in hours] for local standard time zone, e.g, for
+                Pacific Standard Time, time_offset = -8
     time_of_day : Time of day (hours) in local standard time
+    zenith_method : method to use for the calculations. Options are:
+            * "CN" - Campbell & Norman
+            * "constant" - constant zenith angle of 0
+            * "fetch2" - replicate the results of the FETCH2 NHL code
 
     Note: Be sure that time of day and time offset are in local standard time, not daylight savings
 
@@ -260,29 +277,50 @@ def calc_zenith_angle(doy, lat, long, time_offset, time_of_day):
     zenith_angle_deg : zenith angle of the sun [degrees]
 
     """
-    # Calculate the standard meridian (in degrees) from the time zone offset
-    standard_meridian = time_offset * 15
+    #Calculation if using the Campbell & Norman method
+    if zenith_method == "CN":
+        # Calculate the standard meridian (in degrees) from the time zone offset
+        standard_meridian = time_offset * 15
 
-    # Calculate the solar declination angle, Eqn 11.2, Campbell & Norman
-    declination_angle_rad = np.arcsin(0.39785 * np.sin(np.deg2rad(278.97 + 0.9856 * doy + 1.9165 * np.sin(np.deg2rad(356.6 + 0.9856 * doy)))))
+        # Calculate the solar declination angle, Eqn 11.2, Campbell & Norman
+        declination_angle_rad = np.arcsin(0.39785 * np.sin(np.deg2rad(278.97 + 0.9856 * doy + 1.9165 * np.sin(np.deg2rad(356.6 + 0.9856 * doy)))))
 
-    # Calculate the equation of time, Eqn 11.4, Campbell & Norman
-    f = np.deg2rad(279.575 + 0.98565 * doy) # in radians. NOTE: typo in my version of Campbell & Norman book
-    ET = (-104.7 * np.sin(f) + 596.2 * np.sin(2 * f) + 4.3 * np.sin (3 * f) - 12.7 * np.sin(4 * f) - 429.3 * np.cos (f) - 2.0 * np.cos(2 * f) + 19.3 * np.cos(3 * f))/3600
+        # Calculate the equation of time, Eqn 11.4, Campbell & Norman
+        f = np.deg2rad(279.575 + 0.98565 * doy) # in radians. NOTE: typo in my version of Campbell & Norman book
+        ET = (-104.7 * np.sin(f) + 596.2 * np.sin(2 * f) + 4.3 * np.sin (3 * f) - 12.7 * np.sin(4 * f) - 429.3 * np.cos (f) - 2.0 * np.cos(2 * f) + 19.3 * np.cos(3 * f))/3600
 
-    # Calculate the longitude correction
-    # + 1/15 of an hour for each degree east of standard meridian
-    # - 1/15 of an hour for each degree west of standard meridian
-    long_correction = (long - standard_meridian) * 1/15
+        # Calculate the longitude correction
+        # + 1/15 of an hour for each degree east of standard meridian
+        # - 1/15 of an hour for each degree west of standard meridian
+        long_correction = (long - standard_meridian) * 1/15
 
-    # Calculate the time of solar noon (t0), Eqn 11.3, Campbell & Norman
-    t0 = 12 - long_correction - ET
+        # Calculate the time of solar noon (t0), Eqn 11.3, Campbell & Norman
+        t0 = 12 - long_correction - ET
 
-    # Calculate the zenith angle, Eqn 11.1, Campbell & Norman
-    lat_rad = np.deg2rad(lat)
-    zenith_angle_rad = np.arccos(np.sin(lat_rad) * np.sin(declination_angle_rad)
-                                 + np.cos(lat_rad) * np.cos(declination_angle_rad) * np.cos(np.deg2rad(15 * (time_of_day - t0))))
-    zenith_angle_deg = np.rad2deg(zenith_angle_rad)
+        # Calculate the zenith angle, Eqn 11.1, Campbell & Norman
+        lat_rad = np.deg2rad(lat)
+        zenith_angle_rad = np.arccos(np.sin(lat_rad) * np.sin(declination_angle_rad)
+                                    + np.cos(lat_rad) * np.cos(declination_angle_rad) * np.cos(np.deg2rad(15 * (time_of_day - t0))))
+        zenith_angle_deg = np.rad2deg(zenith_angle_rad)
+    elif zenith_method == "constant":
+        zenith_angle_deg = 0;
+    elif zenith_method == "fetch2":
+        # This code was ported directly from the FETCH2 NHL module
+        #compute Solar declination angle
+        CF = np.pi/180
+        LAT = lat*CF
+        xx = 278.97 + 0.9856 * doy + 1.9165 * np.sin((356.6 + 0.9856 * doy) * CF)
+        dd = np.arcsin(0.39785 * np.sin(xx * CF))
+        #compute Zenith angle
+        f = (279.575 + 0.9856 * doy) * CF
+        ET = (-104.7*np.sin(f) + 596.2*np.sin(2*f) + 4.3*np.sin(3*f)
+              -12.7*np.sin(4*f) -429.3*np.cos(f) - 2*np.cos(2*f)
+              +19.3*np.cos(3*f))/3600
+
+        TF = 0 * (long/15) + ET
+        aa = np.sin(LAT)*np.sin(dd)+(np.cos(LAT))*np.cos(dd)*np.cos(15*(time_of_day-12-TF)*CF)
+        ZEN=np.arccos(aa)
+        zenith_angle_deg = np.rad2deg(ZEN)
 
     return zenith_angle_deg
 
@@ -662,7 +700,7 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
 
 def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
-            lat, long, time_offset = -5):
+            lat, long, time_offset = -5, **kwargs):
 
     zmin = 0
     z = np.arange(zmin, h, dz)  # [m]
@@ -677,7 +715,7 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
             dz, h, Cd, met_data.WS_F.iloc[i], met_data.USTAR.iloc[i], met_data.PPFD_IN.iloc[i], met_data.CO2_F.iloc[i], Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
             met_data.RH.iloc[i], met_data.TA_F.iloc[i], met_data.PA_F.iloc[i], doy = met_data.Timestamp.iloc[i].dayofyear, lat = lat,
-            long= long, time_offset = time_offset, time_of_day = met_data.Timestamp[i].hour + met_data.Timestamp[i].minute/60)
+            long= long, time_offset = time_offset, time_of_day = met_data.Timestamp[i].hour + met_data.Timestamp[i].minute/60, **kwargs)
 
         zenith_angle_all[i] = zenith_angle
         datasets.append(ds)

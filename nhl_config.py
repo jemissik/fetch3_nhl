@@ -1,32 +1,127 @@
-# No longer used. configs moved to model_config in the main module
-#Could change to use this if want to run nhl as a standalone module
-from model_config import dt0, dz, start_time, end_time, input_fname, dt, Hspec, LAI
+"""
+Configuration for running NHL as a standalone module
 
-species = "ES"
+Running the model from the command line:
+----------------------------------------
+Run the model by running ``main_standalone.py``
 
-height_sp = Hspec
-total_LAI_sp = LAI
+To specify an input config file or output directory in a location other than the
+default, a different config file and output directory can be specified as command
+line arguments, for example::
+      python3 main_standalone.py --config_path /Users/username/fetch3/user_model_config.yml --output_path /Users/username/fetch3/output/
 
-crown_scaling = 2
+If the arguments ``--config_path`` and ``--output_path`` are omitted when running the
+model from the command line, the defaults will be used.
+"""
 
-Cd = 0.2 # Drag coefficient
-alpha_ml = 0.1  # Mixing length constant
-mean_crown_area_sp = 17.02
-total_crown_area_sp = 83614.7803393742
-plot_area = 75649.5511
-sum_LAI_plot = 3.7850736000000005
-latitude = 39.9137
-longitude = -74.596
-time_offset = -5
-Vcmax25 = 31.15
-alpha_gs = 7.3200
-alpha_p = 1
-Cf = 0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
-x = 1  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+import argparse
+import logging
+from pathlib import Path
 
-wp_s50 = -9.1 * 10**5 #value for oak from Mirfenderesgi
-c3 = 12.3 #value for oak from Mirfenderesgi
+import yaml
+from dataclasses import dataclass
 
-LAD_norm = 'LAD_data.csv' #LAD data
-met_data = input_fname
-met_dt = dt
+default_output_dir = Path(__file__).parent / 'output'
+# Taking command line arguments for path of config file and output directory
+try:
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config_path', nargs='?', default=Path(__file__).parent / 'nhl_config.yml')
+    parser.add_argument('--output_path', nargs='?', default= default_output_dir)
+    args = parser.parse_args()
+    config_file = args.config_path
+    output_dir = Path(args.output_path)
+except SystemExit: #use default options if invalid command line arguments are given
+    config_file = Path(__file__).parent / "nhl_config.yml"
+    output_dir = default_output_dir
+
+# If using the default output directory, create directory if it doesn't exist
+if output_dir == default_output_dir:
+  (output_dir).mkdir(exist_ok=True)
+
+model_dir = Path(__file__).parent.resolve() # File path of model source code
+
+# Set up logging
+log_format = "%(levelname)s %(asctime)s - %(message)s"
+
+logging.basicConfig(filename=output_dir / "nhl.log",
+                    filemode="w",
+                    format=log_format,
+                    level=logging.DEBUG)
+logging.getLogger().addHandler(logging.StreamHandler())
+logger = logging.getLogger(__file__)
+
+
+# Log the directories being used
+logger.info("Using config file: " + str(config_file) )
+logger.info("Using output directory: " + str(output_dir) )
+
+
+# Dataclass to hold the config parameters
+@dataclass
+class ConfigParams:
+    """ Dataclass to hold parameters from .yml file
+    """
+
+    # File for input met data
+    input_fname: str
+
+    start_time: str #begining of simulation
+    end_time: str #end
+
+    dt:  int  #seconds - input data resolution
+
+    ###############################################################################
+    #SITE INFORMATION
+    ###############################################################################
+    latitude:  float
+    longitude:  float
+    time_offset:  float #Offset from UTC time, e.g EST = UTC -5 hrs
+
+    zenith_method: str
+
+    ###############################################################################
+    #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
+    ###############################################################################
+    #The finite difference discretization constants
+    dt0:  int  #model temporal resolution [s]
+    dz:  float  #model spatial resolution [m]
+
+
+    # TREE PARAMETERS
+    species:  str
+    LAD_norm:  str #LAD data
+
+    #TREE PARAMETERS
+    Hspec: float                      #Height average of trees [m]
+    LAI: float                       #[-] Leaf area index
+
+    #########################################################################3
+    #NHL PARAMETERS
+    ###########################################################################
+
+    crown_scaling:  float
+
+    mean_crown_area_sp:  float
+    total_crown_area_sp:  float
+    plot_area:  float
+    sum_LAI_plot:  float
+
+    Cd:  float # Drag coefficient
+    alpha_ml:  float  # Mixing length constant
+    Cf:  float  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
+    x:  float  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+
+    Vcmax25:  float
+    alpha_gs:  float
+    alpha_p:  float
+
+
+#TODO convert to function
+# Read configs from yaml file
+logger.info("Reading config file" )
+
+with open(config_file, "r") as yml_config:
+    config_dict = yaml.safe_load(yml_config)
+
+# Convert config dict to config dataclass
+cfg = ConfigParams(**config_dict['model_options'], **config_dict['parameters'])
