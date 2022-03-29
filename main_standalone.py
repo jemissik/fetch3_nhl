@@ -15,13 +15,14 @@ import pandas as pd
 from pathlib import Path
 import logging
 
-from nhl_config import cfg, model_dir, output_dir, data_dir
+from nhl_config import read_configs, config_file, output_dir, data_dir
 from NHL_functions import *
 import time
 
 logger = logging.getLogger(__file__)
 
 start = time.time()
+cfg = read_configs(config_file)
 
 ####################################################
 # The rest of the file should be the same as main.py

@@ -124,13 +124,14 @@ class ConfigParams:
     alpha_gs:  float
     alpha_p:  float
 
+def read_configs(config_file):
+    # Read configs from yaml file
+    logger.info("Reading config file" )
 
-#TODO convert to function
-# Read configs from yaml file
-logger.info("Reading config file" )
+    with open(config_file, "r") as yml_config:
+        config_dict = yaml.safe_load(yml_config)
 
-with open(config_file, "r") as yml_config:
-    config_dict = yaml.safe_load(yml_config)
+    # Convert config dict to config dataclass
+    cfg = ConfigParams(**config_dict['model_options'], **config_dict['parameters'])
 
-# Convert config dict to config dataclass
-cfg = ConfigParams(**config_dict['model_options'], **config_dict['parameters'])
+    return cfg
