@@ -1,7 +1,9 @@
 """
-###################
+#################
 NHL transpiration
-###################
+#################
+This module calculates non-hydrodynamically limited transpiration.
+This code was ported from FETCH2's MATLAB code (see Mirfenderesgi et al 2016)
 """
 from pathlib import Path
 import pandas as pd
@@ -20,7 +22,7 @@ def calc_esat(Tair):
 
     Returns
     -------
-    array_like
+    es : array_like
         The saturation vapor pressure [kPa] corresponding to each element in Tair
     """
 
@@ -47,7 +49,7 @@ def calc_vpd_kPa(RH, Tair):
 
     Returns
     -------
-    array_like
+    VPD : array_like
         Vapor pressure deficit [kPa]
     """
 
@@ -58,61 +60,57 @@ def calc_vpd_kPa(RH, Tair):
 
 def calc_Kg(Tair):
     """
-    Calculate the temperature-dependent conductance coefficient
-    From Ewers et al 2007
+    Calculates the temperature-dependent conductance coefficient.
+    Formulation from Ewers et al 2007
     Equation A.2 from Mirfenderesgi et al 2016
 
-    Inputs:
-    Tair : air temperature [deg C]
+    Parameters
+    ----------
+    Tair : array_like
+        Air temperature [deg C]
 
-    Outputs:
-    Kg: temperature-dependent conductance coefficient [kPa m3 kg-1]
+    Returns
+    -------
+    Kg : array_like
+        Temperature-dependent conductance coefficient [kPa m3 kg-1]
     """
     Kg = 115.8 + 0.4226 * Tair
     return Kg
 
-def calc_mixing_length(z, h, alpha = 0.1):
+def calc_mixing_length(z, h, alpha_ml = 0.1):
     """
-    Calculates the mixing length for each height in z
+    Calculates the mixing length for each height in z.
     Based on Poggi et al 2004
-    Zero-plane displacement height is taken as (2/3)*h, appropriate for dense canopies (Katul et al 2004)
+    Zero-plane displacement height is taken as (2/3)*h, appropriate for dense canopies (Katul et al 2004).
 
-    Inputs:
+    Parameters
+    ----------
+    z : array
+        vector of heights [m]
+    h : float
+        canopy height [m]
+    alpha_ml : float
+        unitless parameter
+
+    Returns
     -------
-    z : vector of heights [m]
-    h : canopy height [m]
-    alpha : unitless parameter
-
-    Outputs:
-    --------
-    mixing_length : mixing length [m] at each height in z
+    mixing_length : array
+        mixing length [m] at each height in z
     """
 
     dz = z[1] - z[0]  # Vertical discretization interval
     d = 0.67 * h  # zero-plane displacement height [m]
-    subcanopy_height = (alpha * h - 2 * dz) / 0.2
+    subcanopy_height = (alpha_ml * h - 2 * dz) / 0.2
 
     mixing_length = np.piecewise(z.astype(float), [z < subcanopy_height, (z >= subcanopy_height) & (z < d), z >= d],
-                                 [lambda z: 0.2 * z + 2 * dz, alpha * h, lambda z: 0.4 * (z - d) + alpha * h])
+                                 [lambda z: 0.2 * z + 2 * dz, alpha_ml * h, lambda z: 0.4 * (z - d) + alpha_ml * h])
     return mixing_length
 
-    """
-    Calculates the wind speed at canopy height z adjusted by the friction velocity
-    Eqn A.5 from Mirfenderesgi et al 2016
-
-    Inputs:
-    Uz : wind speed at height z [m s-1]
-    ustar : friction velocity [m s-1]
-
-    Outputs:
-    uz : wind speed [m s-1] at canopy height z adjusted by the friction velocity
-    """
-    uz = Uz*ustar
-    return uz
 
 def thomas_tridiagonal (aa, bb, cc, dd):
     """
     Thomas algorithm for solving tridiagonal matrix
+    #TODO update docstring
     """
 
     #initialize arrays
@@ -138,22 +136,29 @@ def thomas_tridiagonal (aa, bb, cc, dd):
 def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
     """
     Solves the momentum equation to calculate the vertical wind profile.
-    Applies no-slip boundary condition: wind speed  =  0 at surface (z = 0).
+    Applies no-slip boundary condition: wind speed=0 at surface (z = 0).
     Model for turbulent diffusivity of momentum is from Poggi 2004, eqn 6
 
-    Inputs:
-    _______
-    z : vector of heights [m]
-    mixing_length : mixing length [d] at each height in z
-    Cd : drag coefficient [unitless], assumed to be 0.2 (Katul et al 2004)
-    a_s: leaf surface area [m2]
-    U_top : Measured wind speed at top of canopy [m s-1]
+    Parameters
+    ----------
+    z : array
+        vector of heights [m]
+    dz : float
+        Vertical discretization interval [m]
+    Cd : float
+        drag coefficient [unitless]
+    a_s: float
+        leaf surface area [m2]
+    U_top : float
+        Measured wind speed at top of canopy [m s-1]
     **kwargs to be passed to calc_mixing_length
 
-    Outputs:
-    ________
-    Km : turbulent diffusivity of momentum at each height in z [m s-1]
-    U : wind speed at each height in z [m s-1]
+    Returns
+    -------
+    Km : array
+        turbulent diffusivity of momentum at each height in z [m s-1]
+    U : array
+        wind speed at each height in z [m s-1]
     """
 
     n = len(z)
@@ -211,21 +216,26 @@ def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
 
 def calc_gb(uz, d = 0.0015):
     """
-    Calculates the leaf boundary layer conductance and resistance, assuming laminar boundary layer
+    Calculates the leaf boundary layer conductance and resistance, assuming laminar boundary layer.
 
-    Inputs:
-    ________
-    uz: wind speed at canopy height z [m s-1]
-    d: characteristic leaf length [m]
+    Parameters
+    ----------
+    uz : array-like
+        wind speed at canopy height z [m s-1]
+    d : float
+        characteristic leaf length [m]. By default 0.0015.
 
-    Outputs:
-    ________________
-    gb: leaf boundary layer conductance
-    rb: leaf boundary layer resistance
+    Returns
+    -------
+    gb : array-like
+        leaf boundary layer conductance
+    rb : array_like
+        leaf boundary layer resistance
 
     References
     ----------
-    Monteith J, Unsworth M. Principles of environmental physics: plants, animals, and the atmosphere. Academic Press; 2013 Jul 26.
+    Monteith J, Unsworth M. Principles of environmental physics: plants, animals, and the atmosphere.
+    Academic Press; 2013 Jul 26.
 
     """
     rb = (395 * 29 / 1150) * (d / (np.sqrt(uz ** 2) + 0.001)) ** 0.5
@@ -234,17 +244,20 @@ def calc_gb(uz, d = 0.0015):
 
 def calc_geff(gb, gs):
     """
-    Calculates the effective leaf conductance
+    Calculates the effective leaf conductance.
     Eqn A.3 of Mirfenderesgi
 
-    Inputs:
+    Parameters
     ----------
-    gb : boundary layer conductance [mol m-2 s-1]
-    gs : stomatal conductance [mol m-2 s-1]
+    gb : array_like
+        boundary layer conductance [mol m-2 s-1]
+    gs : array_like
+        stomatal conductance [mol m-2 s-1]
 
-    Outputs:
+    Returns
     -------
-    geff : effective leaf conductance [mol m-2 s-1]
+    geff : array_like
+        effective leaf conductance [mol m-2 s-1]
 
     """
     geff = (gb * gs) / (gb + gs)
@@ -253,26 +266,33 @@ def calc_geff(gb, gs):
 def calc_zenith_angle(doy, lat, long, time_offset, time_of_day, zenith_method='CN'):
     """
     Calculates the solar zenith angle, based on Campbell & Norman, 1998.
+
     Also has options for 2 alternate methods: use a constant zenith angle of 0 (i.e.
     pretend the sun is always directly overhead), or replicate the results of the
     FETCH2 NHL code (which is missing an adjustment for longitude).
 
-    Inputs:
+    Parameters
     ----------
-    doy : Day of year (Ordinal day, e.g. 1 = Jan 1)
-    lat : Latitude
-    long : Longitude (Needs to be negative for deg W, positive for deg E)
-    time_offset : Time offset [in hours] for local standard time zone, e.g, for
-                Pacific Standard Time, time_offset = -8
-    time_of_day : Time of day (hours) in local standard time
-    zenith_method : method to use for the calculations. Options are:
-            * "CN" - Campbell & Norman
+    doy : int
+        Day of year (Ordinal day, e.g. 1 = Jan 1)
+    lat : float
+        Latitude
+    long : float
+        Longitude (Needs to be negative for deg W, positive for deg E)
+    time_offset : int
+        Time offset [in hours] for local standard time zone, e.g, for
+        Pacific Standard Time, time_offset = -8
+    time_of_day : float
+        Time of day (hours) in local standard time
+    zenith_method : str
+        Method to use for the calculations. Options are:
+            * "CN" - Campbell & Norman 1998
             * "constant" - constant zenith angle of 0
             * "fetch2" - replicate the results of the FETCH2 NHL code
 
     Note: Be sure that time of day and time offset are in local standard time, not daylight savings
 
-    Outputs:
+    Returns
     -------
     zenith_angle_deg : zenith angle of the sun [degrees]
 
@@ -324,27 +344,36 @@ def calc_zenith_angle(doy, lat, long, time_offset, time_of_day, zenith_method='C
 
     return zenith_angle_deg
 
-def calc_rad_attenuation(PAR, LAD, dz, alpha, Cf = 0.85, x = 1, **kwargs):
+def calc_rad_attenuation(PAR, LAD, dz, Cf = 0.85, x = 1, **kwargs):
     """
     Calculates the vertical attenuation of radiation through the canopy
 
-    Inputs:
+    Parameters
     ----------
-    PAR : photosynthetically active radiation at canopy top [umol m-2 s-1]
-    LAI : Normalized leaf area index at each height in z
-    Cf : Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
-    x : Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
-    **kwargs for calc_zenith_angle
+    PAR : float
+        photosynthetically active radiation at canopy top [umol m-2 s-1]
+    LAD : array
+        Leaf area density [m2leaf m-2crown m-1stem] at each height in z
+    dz : float
+        Vertical discretization interval [m]
+    Cf : float
+        Clumping fraction [unitless]. By default assumed to be 0.85 (Forseth & Norman 1993)
+    x : float
+        Ratio of horizontal to vertical projections of leaves (leaf angle distribution).
+        By default assumed to be spherical (x=1).
+    **kwargs to be passed to calc_zenith_angle
 
-    Outputs:
+    Returns
     -------
-    P0 : attenuation fraction of PAR penetrating the canopy at each level z [unitless]
-    Qp : absorbed photosynthetically active radiation at each level within the canopy
+    P0 : array
+        attenuation fraction of PAR penetrating the canopy at each level z [unitless]
+    Qp : array
+        absorbed photosynthetically active radiation at each level within the canopy [umol m-2 s-1]
     """
     zenith_angle = calc_zenith_angle(**kwargs)
     # Calculate the light extinction coefficient (unitless)
-    xn1=np.sqrt(alpha * alpha + (np.cos(np.deg2rad(zenith_angle))) ** 2)
-    xd1=(alpha + 1.774 * np.cos(np.deg2rad(zenith_angle)) * (alpha + 1.182) **(-0.733))
+    xn1=np.sqrt(x * x + (np.cos(np.deg2rad(zenith_angle))) ** 2)
+    xd1=(x + 1.774 * np.cos(np.deg2rad(zenith_angle)) * (x + 1.182) **(-0.733))
     k = xn1/xd1
 
     LAI_cumulative = (LAD*dz)[::-1].cumsum()[::-1] # Cumulative sum from top of canopy
@@ -360,25 +389,26 @@ def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
 
     Parameters
     ----------
-    g0 : [mol m-2 s-1]
-        [cuticular conductance, residual stomatal conductance at the light compensation point (empirically fitted parameter)]
-    m : [unitless]
-        [empirically fitted parameter]
-    A : [umol CO2 m-2 s-1]
-        [net CO2 assimilation rate]
-    c_s : [umol mol-1]
-        [atmospheric CO2 concentration]
-    gamma_star : [umol mol-1]
-        [CO2 compensation point]
-    VPD : [kPa]
-        [VPD]
-    D0 : [kPa]
-        [reference vapor pressure, assumed to be 3.0 kPa]
+    g0 : float
+        cuticular conductance [mol m-2 s-1], residual stomatal conductance at the
+        light compensation point (empirically fitted parameter)
+    m : float
+        empirically fitted parameter [unitless]
+    A : float
+        net CO2 assimilation rate [umol CO2 m-2 s-1]
+    c_s : float
+        atmospheric CO2 concentration [umol mol-1]
+    gamma_star : float
+        CO2 compensation point [umol mol-1]
+    VPD : float
+        VPD [kPa]
+    D0 : float
+        reference vapor pressure [kPa], by default assumed to be 3.0 kPa
 
     Returns
     -------
-    gs [mol H2O m-2 s-1]
-        [stomatal conductance]
+    gs : float
+        stomatal conductance [mol H2O m-2 s-1]
     """
 
     gs = g0 + m * abs(A)/((c_s - gamma_star) * (1 + VPD/D0))
@@ -391,34 +421,34 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
 
     Parameters
     ----------
-    Tair : [deg C]
-        [Air temperature]
-    VPD : [Kpa]
-        Vapor pressure deficit
-    Qp : [type]
-        [description]
-    Ca : [type]
-        CO2 concentration
-    U : Wind speed of
-        [description]
-    Vcmax25 : [type]
+    Tair : float
+        Air temperature [deg C]
+    Qp : float
+        absorbed photosynthetically active radiation at each level within the canopy [umol m-2 s-1]
+    Ca : float
+        CO2 concentration [umol/mol]
+    Vcmax25 : float
         Farquhar model parameter
-    alpha_p : [type]
+    alpha_p : float
         Farquhar model parameter
-    d : [m]
-        Leaf length scale for aerodynamic resistance
-    D0 : [kPa]
-        [reference vapor pressure, assumed to be 3.0 kPa]
+    VPD : float
+        Vapor pressure deficit [kPa]
     **kwargs for calc_gb
 
-    Outputs
+    Returns
     -------
-    A : photosynthesis [umol m-2 s-1]
-    gs : stomatal conductance [mol m-2 s-1]
-    Ci : intracellular CO2 concentration [umol mol-1]
-    Cs : CO2 concentration at leaf surface [umol mol-1]
-    gb : boundary layer conductance [mol m-2 s-1]
-    geff : effective leaf conductance [mol m-2 s-1]
+    A : float
+        photosynthesis [umol m-2 s-1]
+    gs : float
+        stomatal conductance [mol m-2 s-1]
+    Ci : float
+        intracellular CO2 concentration [umol mol-1]
+    Cs : float
+        CO2 concentration at leaf surface [umol mol-1]
+    gb : float
+        boundary layer conductance [mol m-2 s-1]
+    geff : float
+        effective leaf conductance [mol m-2 s-1]
 
     """
     # Parameters
@@ -485,23 +515,23 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
 
 def calc_transpiration_leaf(VPD, Tair, geff, Press):
     """
-    Calculates the water vapor source from the leaf
+    Calculates the water vapor source from the leaf.
 
     Parameters
     ----------
-    VPD : kPa
-        vapor pressure deficit
-    Tair : deg C
-        air :
-    geff : mol m-2_leaf s-1
-        effective leaf conductance
-    Press : kPa
-        air pressure
+    VPD : float
+        vapor pressure deficit [kPa]
+    Tair : float
+        air temperature [deg C]
+    geff : float
+        effective leaf conductance [mol m-2_leaf s-1]
+    Press : float
+        air pressure [kPa]
 
     Returns
     -------
-    [kg s-1 m-2_leaf]
-        water vapor source per unit leaf area
+    transpiration_leaf : float
+        water vapor source per unit leaf area [kg s-1 m-2_leaf]
     """
     Kg = calc_Kg(Tair)  #kPa m3 kg-1
     rhov = 44.6 * Press / 101.3 * 273.15 / (Tair + 273.15)  # water vapor density, mol m-3
@@ -511,18 +541,18 @@ def calc_transpiration_leaf(VPD, Tair, geff, Press):
 
 def calc_respiration(Tair):
     """
-    Calculates respiration
-    Based on Q10 model
+    Calculates respiration.
+    Based on Q10 model.
 
     Parameters
     ----------
-    Tair : [deg C]
-        Air temperature
+    Tair : float
+        Air temperature [deg C]
 
     Returns
     -------
-    [umol CO2 m-2 s-1]
-        Respiration
+    Re : float
+        Respiration [umol CO2 m-2 s-1]
     """
     Tr = 10
     RE10 = 2.6
@@ -583,23 +613,25 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, V
 
 def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h):
     """
-    Creates vertical leaf area distribution
+    Creates vertical leaf area distribution.
 
     Parameters
     ----------
-    LAD : [type]
-        Vertical gradient of normalized LAD
-    z_h_LAD : [unitless: m/m]
-        z/h for LAD
-    dz : [m]
-        Vertical discretization interval
-    h : [m]
-        Canopy height
+    LADnorm : array
+        Vertical gradient of normalized LAD [unitless]
+    z_h_LADnorm : array
+        z/h for LAD [unitless: m/m]
+    tot_LAI_crown : float
+        total leaf area per crown area [m2_leaf m-2_crown]
+    dz : float
+        Vertical discretization interval [m]
+    h : float
+        Canopy height [m]
 
     Returns
     -------
-    LAD on new vertical grid [m2leaf m-2crown m-1stem]
-
+    LAD: array
+        Leaf area density on new vertical grid [m2leaf m-2crown m-1stem]
 
     """
     z_LAD = z_h_LADnorm * h  # Heights for LAD points
@@ -622,29 +654,56 @@ def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h):
 def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total_LAI_sp, plot_area, total_crown_area_sp, mean_crown_area_sp, LADnorm, z_h_LADnorm, RH, Tair, Press, Cf=0.85, x=1, **kwargs):
     """
     Calculate NHL transpiration
+    #TODO make docstring
 
     Parameters
     ----------
-    z : m
-        [Height vector]
-    total_LAI_sp : [m2_leaf m-2_ground]
-        [total LAI for each species]
-    plot_area : [m2]
-        [Total plot area]
-    total_crown_area_sp : [m2]
-    mean_crown_area_sp : [m2]
-    LAD : [m2_leaf m-1]
-    VPD : [kPa]
-    Tair : [deg C]
-    geff : mol m-2_leaf s-1
-        effective leaf conductance
-    Press : [kPa]
-        air pressure
+    dz : float
+        Vertical discretization interval [m]
+    h : float
+        Canopy height [m]
+    Cd : float
+        drag coefficient [unitless]
+    U_top : float
+        Measured wind speed at top of canopy [m s-1]
+    ustar : float
+        friction velocity [m s-1]
+    PAR : float
+        photosynthetically active radiation at canopy top [umol m-2 s-1]
+    Ca : float
+        CO2 concentration [umol/mol]
+    Vcmax25 : float
+        Maximum carboxylation capacity of Rubisco at 25 deg C
+    alpha_gs : float
+        fitting parameter of stomatal conductance model
+    total_LAI_sp : _type_
+        _description_
+    plot_area : _type_
+        _description_
+    total_crown_area_sp : _type_
+        _description_
+    mean_crown_area_sp : _type_
+        _description_
+    LADnorm : _type_
+        _description_
+    z_h_LADnorm : _type_
+        _description_
+    RH : _type_
+        _description_
+    Tair : _type_
+        _description_
+    Press : _type_
+        _description_
+    Cf : float, optional
+        _description_, by default 0.85
+    x : int, optional
+        _description_, by default 1
 
     Returns
     -------
-    NHL transpiration
-    """
+    _type_
+        _description_
+    """    """"""
 
     # Calculate VPD
     VPD = calc_vpd_kPa(RH, Tair = Tair)
@@ -663,11 +722,13 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     U, Km = solve_Uz(z, dz, Cd , LAD , U_top, h = h)
 
     # Adjust the diffusivity and velocity by Ustar
+    # Eqn A.5 from Mirfenderesgi et al 2016
+
     U = U * ustar
     Km = Km * ustar
 
     # Calculate radiation at each layer
-    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, alpha_gs, Cf, x, **kwargs)
+    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, Cf = Cf, x = alpha_p, **kwargs)
 
     # Solve conductances
     A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD = VPD, uz = U)
@@ -701,6 +762,50 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
 def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
             total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
             lat, long, time_offset = -5, **kwargs):
+    """
+    Calls NHL for each timestep in the met data
+    #TODO docstring
+
+    Parameters
+    ----------
+    dz : _type_
+        _description_
+    h : _type_
+        _description_
+    Cd : _type_
+        _description_
+    met_data : _type_
+        _description_
+    Vcmax25 : _type_
+        _description_
+    alpha_gs : _type_
+        _description_
+    alpha_p : _type_
+        _description_
+    total_LAI_spn : _type_
+        _description_
+    plot_area : _type_
+        _description_
+    total_crown_area_spn : _type_
+        _description_
+    mean_crown_area_spn : _type_
+        _description_
+    LAD_norm : _type_
+        _description_
+    z_h_LADnorm : _type_
+        _description_
+    lat : _type_
+        _description_
+    long : _type_
+        _description_
+    time_offset : int, optional
+        _description_, by default -5
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
 
     zmin = 0
     z = np.arange(zmin, h, dz)  # [m]
@@ -730,26 +835,35 @@ def calc_stem_wp_response(stem_wp, wp_s50, c3):
 
     Parameters
     ----------
-    stem_wp : [type]
+    stem_wp : float
         Stem water potential (function of z and time) [Pa]
-    wp_s50 : [type]
+    wp_s50 : float
         Empirical shape parameter describing the inflection point
         of the leaf stem water potential response curve [Pa]
-    c3 : [type]
+    c3 : float
         Shape parameter for stomatal response
 
     Returns
     -------
-    [type]
-        [description]
+    wp_response: float
+        restriction for NHL transpiration
     """
     wp_response = np.exp(-((stem_wp)/wp_s50)**c3)
     return wp_response
 
 def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn, LAD):
+    """Calculates transpiration for FETCH3"""
     return nhl_transpiration * stem_wp_fn * LAD
 
 def write_outputs(output_vars):
+    """
+    Writes NHL outputs to csv files 
+
+    Parameters
+    ----------
+    output_vars : _type_
+        _description_
+    """
 
     #Writes model outputs to csv files
 

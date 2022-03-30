@@ -9,7 +9,7 @@ model config.
 It returns NHL transpiration to be used by FETCH3, and also writes NHL
 transpiration to a netcdf file.
 
-If running NHL as a standalone module, need to use a different version.
+If running NHL as a standalone module, use ``main_standalone.py``.
 """
 
 import numpy as np
