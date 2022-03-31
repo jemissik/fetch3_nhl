@@ -48,7 +48,7 @@ logger.info(f"NHL calculations finished in {time.time() - start} s")
 
 logger.info("Saving NHL output...")
 write_outputs_netcdf(output_dir, ds)
-write_outputs({'zenith':zen, 'LAD': LAD})
+write_outputs({'zenith':zen, 'LAD': LAD}, output_dir)
 
 
 logger.info(f"Interpolating NHL to the time resolution for FETCH3...")

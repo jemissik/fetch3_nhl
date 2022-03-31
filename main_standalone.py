@@ -42,12 +42,12 @@ logger.info("Calculating NHL...")
 
 ds, LAD, zen = calc_NHL_timesteps(cfg.dz, cfg.Hspec, cfg.Cd, met_data, cfg.Vcmax25, cfg.alpha_gs, cfg.alpha_p,
             cfg.LAI, cfg.plot_area, total_crown_area_sp, cfg.mean_crown_area_sp, LAD_data[cfg.species], LAD_data.z_h,
-            cfg.latitude, cfg.longitude, time_offset = cfg.time_offset, zenith_method = cfg.zenith_method)
+            cfg.latitude, cfg.longitude, time_offset = cfg.time_offset, zenith_method = cfg.zenith_method, x = cfg.x)
 logger.info(f"NHL calculations finished in {time.time() - start} s")
 
 logger.info("Saving NHL output...")
 write_outputs_netcdf(output_dir, ds)
-write_outputs({'zenith':zen, 'LAD': LAD})
+write_outputs({'zenith':zen, 'LAD': LAD}, output_dir)
 
 
 logger.info(f"Interpolating NHL to the time resolution for FETCH3...")

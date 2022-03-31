@@ -56,7 +56,7 @@ parameters:
   Cd:  0.2 # Drag coefficient Note: NHL forcing says 0.1, but i think it uses 0.2
   alpha_ml:  0.1  # Mixing length constant
   Cf:  0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
-  x:  1  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+  x:  6.67330000000000 #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
 
   Vcmax25:  59.9300000000000
   alpha_gs:  6.67330000000000

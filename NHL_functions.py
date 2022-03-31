@@ -327,6 +327,7 @@ def calc_zenith_angle(doy, lat, long, time_offset, time_of_day, zenith_method='C
     elif zenith_method == "fetch2":
         # This code was ported directly from the FETCH2 NHL module
         #compute Solar declination angle
+        adjusted_time_of_day = time_of_day + 5 #accounts for the adjustment in Time used in the FETCH2 input
         CF = np.pi/180
         LAT = lat*CF
         xx = 278.97 + 0.9856 * doy + 1.9165 * np.sin((356.6 + 0.9856 * doy) * CF)
@@ -338,7 +339,7 @@ def calc_zenith_angle(doy, lat, long, time_offset, time_of_day, zenith_method='C
               +19.3*np.cos(3*f))/3600
 
         TF = 0 * (long/15) + ET
-        aa = np.sin(LAT)*np.sin(dd)+(np.cos(LAT))*np.cos(dd)*np.cos(15*(time_of_day-12-TF)*CF)
+        aa = np.sin(LAT)*np.sin(dd)+(np.cos(LAT))*np.cos(dd)*np.cos(15*(adjusted_time_of_day-12-TF)*CF)
         ZEN=np.arccos(aa)
         zenith_angle_deg = np.rad2deg(ZEN)
 
@@ -716,7 +717,7 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     tot_LAI_crown = total_LAI_sp * plot_area / total_crown_area_sp  # LAI per crown area [m2_leaf m-2_crown]
 
     # Distrubute leaves vertically, and assign leaf area to stem
-    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h) #[m2leaf m-2crown m-1stem]
+    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, total_LAI_sp, dz, h) #[m2leaf m-2crown m-1stem]
 
     # Calculate wind speed at each layer
     U, Km = solve_Uz(z, dz, Cd , LAD , U_top, h = h)
@@ -728,14 +729,14 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     Km = Km * ustar
 
     # Calculate radiation at each layer
-    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, Cf = Cf, x = alpha_p, **kwargs)
+    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, Cf = Cf, x = x, **kwargs)
 
     # Solve conductances
     A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD = VPD, uz = U)
 
     # Calculate the transpiration per m-1 [ kg H2O s-1 m-1_stem]
     NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)  #[kg H2O m-2leaf s-1]
-    NHL_trans_sp_stem = NHL_trans_leaf * LAD  # [kg H2O s-1 m-1stem m-2ground]
+    NHL_trans_sp_stem = NHL_trans_leaf * LAD * mean_crown_area_sp / dz # [kg H2O s-1 m-1stem m-2ground]
 
     #Add data to dataset
     ds = xr.Dataset(data_vars=dict(
@@ -855,9 +856,9 @@ def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn, LAD):
     """Calculates transpiration for FETCH3"""
     return nhl_transpiration * stem_wp_fn * LAD
 
-def write_outputs(output_vars):
+def write_outputs(output_vars, dir):
     """
-    Writes NHL outputs to csv files 
+    Writes NHL outputs to csv files
 
     Parameters
     ----------
@@ -867,13 +868,8 @@ def write_outputs(output_vars):
 
     #Writes model outputs to csv files
 
-    working_dir = Path.cwd()
-
-    # make output directory if one doesn't exist
-    (working_dir /'output').mkdir(exist_ok=True)
-
     for var in output_vars:
-        pd.DataFrame(output_vars[var]).to_csv(working_dir / 'output' / ('nhl_' + var + '.csv'), index = False, header=False)
+        pd.DataFrame(output_vars[var]).to_csv(dir / ('nhl_' + var + '.csv'), index = False, header=False)
 
 def write_outputs_netcdf(dir, ds):
     """
