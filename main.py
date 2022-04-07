@@ -43,7 +43,7 @@ logger.info("Calculating NHL...")
 
 ds, LAD, zen = calc_NHL_timesteps(cfg.dz, cfg.Hspec, cfg.Cd, met_data, cfg.Vcmax25, cfg.alpha_gs, cfg.alpha_p,
             cfg.LAI, cfg.plot_area, total_crown_area_sp, cfg.mean_crown_area_sp, LAD_data[cfg.species], LAD_data.z_h,
-            cfg.latitude, cfg.longitude, time_offset = cfg.time_offset, zenith_method = cfg.zenith_method)
+            cfg.latitude, cfg.longitude, time_offset = cfg.time_offset, zenith_method = cfg.zenith_method, x = cfg.x)
 logger.info(f"NHL calculations finished in {time.time() - start} s")
 
 logger.info("Saving NHL output...")
@@ -60,9 +60,9 @@ ds2 = ds.assign_coords({'time': pd.to_timedelta(pd.to_datetime(ds.time.values) -
 model_ts = np.arange(0, len(ds.time) * cfg.dt + cfg.dt0, cfg.dt0)
 model_z = np.arange(0, cfg.Hspec, cfg.dz)
 
-#NHL transpiration in units of m s-1 * LAD  = kg H2O s-1 m-1stem m-2ground
-da = ds2.NHL_trans_sp_stem #NHL in units of m s-1 * m-1stem
-# da = ds2.NHL_trans_sp_stem * 10**-3
+#NHL transpiration in units of kg H2O s-1 m-1stem 
+# da = ds2.NHL_trans_leaf #NHL in units of kg H2O m-2 s-1
+da = ds2.NHL_trans_sp_stem *10**-3   #NHL in units of kg m-1stem s-1 #* 10**-3 to convert kg to m
 
 NHL_modelres = da.interp(z = model_z, time = model_ts, assume_sorted = True, kwargs={'fill_value':0})
 

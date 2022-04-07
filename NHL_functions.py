@@ -852,9 +852,9 @@ def calc_stem_wp_response(stem_wp, wp_s50, c3):
     wp_response = np.exp(-((stem_wp)/wp_s50)**c3)
     return wp_response
 
-def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn, LAD):
+def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn):
     """Calculates transpiration for FETCH3"""
-    return nhl_transpiration * stem_wp_fn * LAD
+    return nhl_transpiration * stem_wp_fn
 
 def write_outputs(output_vars, dir):
     """

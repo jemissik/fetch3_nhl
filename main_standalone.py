@@ -59,9 +59,9 @@ ds2 = ds.assign_coords({'time': pd.to_timedelta(pd.to_datetime(ds.time.values) -
 model_ts = np.arange(0, len(ds.time) * cfg.dt + cfg.dt0, cfg.dt0)
 model_z = np.arange(0, cfg.Hspec, cfg.dz)
 
-#NHL transpiration in units of m s-1 * LAD  = kg H2O s-1 m-1stem m-2ground
-da = ds2.NHL_trans_sp_stem #NHL in units of m s-1 * m-1stem
-# da = ds2.NHL_trans_sp_stem * 10**-3
+#NHL transpiration in units of kg H2O s-1 m-1stem
+# da = ds2.NHL_trans_leaf #NHL in units of kg H2O m-2 s-1
+da = ds2.NHL_trans_sp_stem *10**-3   #NHL in units of kg m-1stem s-1 #* 10**-3 to convert kg to m
 
 NHL_modelres = da.interp(z = model_z, time = model_ts, assume_sorted = True, kwargs={'fill_value':0})
 
