@@ -389,7 +389,7 @@ def Picard(H_initial, Head_bottom_H):
             # For NHL transpiration
             elif cfg.transpiration_scheme == 1:  #1: NHL transpiration scheme
                 Pt_2d[:,i] = calc_transpiration_nhl(NHL_modelres[:,i],
-                                                    calc_stem_wp_response(hn[nz_r:nz], cfg.wp_s50, cfg.c3).transpose(), LAD)
+                                                    calc_stem_wp_response(hn[nz_r:nz], cfg.wp_s50, cfg.c3).transpose())
 
             #SINK/SOURCE ARRAY : concatenating all sinks and sources in a vector
             S_S[:,i]=np.concatenate((TS,-Pt_2d[:,i])) #vector with sink and sources
