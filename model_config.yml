@@ -170,7 +170,7 @@ parameters:
   #NHL PARAMETERS
   ###########################################################################
 
-  crown_scaling:  2
+  scale_nhl:  2
 
   mean_crown_area_sp:  17.02
   total_crown_area_sp:  83614.7803393742
