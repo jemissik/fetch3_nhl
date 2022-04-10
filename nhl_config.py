@@ -35,7 +35,7 @@ try:
     parser.add_argument('--output_path', nargs='?', default= default_output_path)
     args = parser.parse_args()
     config_file = args.config_path
-    data_dir = args.data_path
+    data_dir = Path(args.data_path)
     output_dir = Path(args.output_path)
 except SystemExit:  # sphinx passing in args instead, using default.
     #use default options if invalid command line arguments are given
@@ -108,7 +108,10 @@ class ConfigParams:
     #NHL PARAMETERS
     ###########################################################################
 
-    crown_scaling:  float
+    scale_nhl:  float
+    sapwood_area: float
+    theta_sat_x: float # Pa
+    taper_top: float
 
     mean_crown_area_sp:  float
     total_crown_area_sp:  float
