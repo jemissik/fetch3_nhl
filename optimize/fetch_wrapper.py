@@ -1,9 +1,19 @@
 """
-Optimization wrapper for FETCH3
+Optimization wrapper for FETCH3.
+
+These functions provide the interface between the optimization tool and FETCH3
+- Setting up optimization experiment
+- Creating directories for model outputs of each iteration
+- Writing model configuration files for each iteration
+- Starting model runs for each iteration
+- Reading model outputs and observation data for model evaluation
+- Defines objective function for optimization, and other performance metrics of interest
+- Defines how results of each iteration should be evaluated
 """
 
 import yaml
 import pandas as pd
+import xarray as xr
 
 from pathlib import Path
 import datetime as dt
@@ -117,7 +127,7 @@ def write_configs(trial_dir, parameters, model_options):
         yaml.dump(config_dict, f)
         return f.name
 
-def run_model(model_path, config_path, output_path):
+def run_model(model_path, config_path, data_path, output_path):
     """
     Runs FETCH3 for the trial.
 
@@ -136,14 +146,14 @@ def run_model(model_path, config_path, output_path):
     os.chdir(model_path) # Run from model directory
     print(Path.cwd())
     result = subprocess.run(["python3", "main.py", "--config_path", str(config_path),
-                             "--output_path", str(output_path)],
+                             "--data_path", str(data_path), "--output_path", str(output_path)],
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr = subprocess.PIPE)
     print(result.stdout)
     print(result.stderr)
     print("Done running model")
 
-def get_model_obs(modelfile, obsfile):
+def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
     """
     Read in observation data model output for a trial, which will be used for
     calculating the objective function for the trial.
@@ -154,6 +164,8 @@ def get_model_obs(modelfile, obsfile):
         File path to the model output
     obsfile : str
         File path to the observation data
+    model_settings: dict
+        dictionary with model settings read from model config file
 
     Returns
     -------
@@ -167,24 +179,34 @@ def get_model_obs(modelfile, obsfile):
         * Add option to read from .nc file
 
     """
+    #Read config file
+
     # Read in observation data
-    metdf = pd.read_csv(obsfile, parse_dates = [0])
-    metdf = metdf.set_index('Timestamp')
-    metdf.index = metdf.index - pd.to_timedelta('30Min') # TODO: remove timestamp shift
+    obsdf = pd.read_csv(obsfile, parse_dates = [0])
+    obsdf = obsdf.set_index('Timestamp')
+    # metdf.index = metdf.index - pd.to_timedelta('30Min') # TODO: remove timestamp shift
 
     # Read in model output
-    modeldf = pd.read_csv(modelfile, parse_dates=[0])
-    modeldf.columns = ['Timestamp', 'trans'] #TODO: this is specific for the df_EP csv files
-    modeldf = modeldf.set_index('Timestamp')
+    modeldf = xr.load_dataset(modelfile)
+
 
     # Slice met data to just the time period that was modeled
-    metdf = metdf.loc[modeldf.index[0]:modeldf.index[-1]]
+    obsdf = obsdf.loc[modeldf.time.data[0]:modeldf.time.data[-1]]
 
     # Convert model output to the same units as the input data
-    dt = 1800 # dt [s] of input data
-    modeldf['trans_scaled'] = modeldf.trans * dt /2
+    modeldf['trans_scaled'] = scale_transpiration(modeldf.trans_2d, model_settings['dz'],
+                                                  parameters['mean_crown_area_sp'],
+                                                  parameters['total_crown_area_sp'],
+                                                  parameters['plot_area'])
 
-    return modeldf.trans_scaled, metdf.stand_trans_mm_h
+    return modeldf.trans_scaled.data, obsdf[ex_settings['obsvar']]
+
+def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
+    """Scales transpiration from FETCH output (in m H20 m-1stem s-1) to W m-2"""
+    scaled_trans = (trans * 1000 * dz * 2440000 /
+                        mean_crown_area_sp * total_crown_area_sp
+                        / plot_area).sum(dim='z', skipna=True)
+    return scaled_trans
 
 def ssqr(model, obs):
     """
@@ -204,7 +226,7 @@ def ssqr(model, obs):
     """
     return ((model - obs) ** 2).mean()
 
-def evaluate(modelfile, obsfile):
+def evaluate(modelfile, obsfile, ex_settings, model_settings, params):
     """
     Defines how to evaluate trials.
 
@@ -220,5 +242,5 @@ def evaluate(modelfile, obsfile):
     dict
         Dict with definition of objective function
     """
-    model, obs = get_model_obs(modelfile, obsfile)
+    model, obs = get_model_obs(modelfile, obsfile, ex_settings, model_settings, params)
     return {"ssqr": ssqr(model, obs)}
