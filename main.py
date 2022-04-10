@@ -14,6 +14,8 @@ start = time.time()  # start run clock
 from initial_conditions import initial_conditions
 from model_functions import format_model_output, Picard, save_csv, save_nc
 
+from sapflux import calc_sapflux, format_inputs
+
 logger = logging.getLogger(__file__)
 
 
@@ -26,11 +28,18 @@ logger.info("Running the model ")
 H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink,EVsink_ts, THETA, infiltration,trans_2d = Picard(H_initial, Head_bottom_H)
 
 ############## Calculate water balance and format model outputs #######################
-logger.info("Saving outputs")
 df_waterbal, df_EP, nc_output = format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink, EVsink_ts,
                                                      THETA, infiltration,trans_2d, cfg.dt, cfg.dz)
 
+# Calculate sapflux and aboveground storage
+H_above, trans_kg = format_inputs(nc_output)
+
+ds_sapflux = calc_sapflux(H_above, trans_kg, cfg)
+
+nc_output['sapflux'] = ds_sapflux
+
 ####################### Save model outputs ###################################
+logger.info("Saving outputs")
 save_csv(output_dir, df_waterbal, df_EP)
 save_nc(output_dir, nc_output)
 

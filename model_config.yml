@@ -161,6 +161,10 @@ parameters:
   p: 20                                           #From bohrer et al 2005
   sat_xylem: 0.573                                #From bohrer et al 2005
 
+  sapwood_area: 0.0177
+  theta_sat_x: 573 # Pa
+  taper_top: 0.2
+  
   #TREE PARAMETERS
   Hspec: 22                      #Height average of trees [m]
   LAI: 1.5                       #[-] Leaf area index
