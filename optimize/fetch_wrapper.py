@@ -14,6 +14,7 @@ These functions provide the interface between the optimization tool and FETCH3
 import yaml
 import pandas as pd
 import xarray as xr
+import numpy as np
 
 from pathlib import Path
 import datetime as dt
@@ -194,12 +195,27 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
     obsdf = obsdf.loc[modeldf.time.data[0]:modeldf.time.data[-1]]
 
     # Convert model output to the same units as the input data
+    # modeldf['sapflux_scaled'] = scale_sapflux(modeldf.sapflux, model_settings['dz'],
+    #                                               parameters['mean_crown_area_sp'],
+    #                                               parameters['total_crown_area_sp'],
+    #                                               parameters['plot_area'])
     modeldf['trans_scaled'] = scale_transpiration(modeldf.trans_2d, model_settings['dz'],
                                                   parameters['mean_crown_area_sp'],
                                                   parameters['total_crown_area_sp'],
                                                   parameters['plot_area'])
 
-    return modeldf.trans_scaled.data, obsdf[ex_settings['obsvar']]
+    # remove first and last timestamp
+    obsdf = obsdf.iloc[1:-1]
+    modeldf = modeldf.trans_scaled.isel(time=np.arange(1,len(modeldf.time)-1))
+
+    return modeldf.data, obsdf[ex_settings['obsvar']]
+
+def scale_sapflux(sapflux, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
+    """Scales sapflux from FETCH output (in kg s-1) to W m-2"""
+    scaled_sapflux = (sapflux * 2440000 /
+                        mean_crown_area_sp * total_crown_area_sp
+                        / plot_area)
+    return scaled_sapflux
 
 def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
     """Scales transpiration from FETCH output (in m H20 m-1stem s-1) to W m-2"""
