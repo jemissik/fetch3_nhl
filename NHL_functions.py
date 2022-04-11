@@ -828,6 +828,15 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
     d2 = xr.concat(datasets, pd.Index(met_data.Timestamp, name="time"))
     return d2, LAD, zenith_angle_all
 
+def calc_nighttime_trans(trans):
+    """
+    Modifies transpiration timeseries to set nighttime transpiration to be almost zero
+    """
+    is_nighttime = (trans.time.dt.hour <=5) | (trans.time.dt.hour > 19)
+    trans2 = trans.where(~(is_nighttime & (trans > 0)), 0.0000001)
+
+    return trans2
+
 def calc_stem_wp_response(stem_wp, wp_s50, c3):
     """
     Calculates the restriction for NHL transpiration

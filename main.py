@@ -49,6 +49,11 @@ ds, LAD, zen = calc_NHL_timesteps(cfg.dz, cfg.Hspec, cfg.Cd, met_data, cfg.Vcmax
 ds['NHL_trans_sp_stem'] = ds.NHL_trans_sp_stem * cfg.scale_nhl
 ds['NHL_trans_leaf'] = ds.NHL_trans_leaf * cfg.scale_nhl
 
+#Nighttime transpiration
+ds['NHL_trans_sp_stem'] = calc_nighttime_trans(ds.NHL_trans_sp_stem)
+ds['NHL_trans_leaf'] = calc_nighttime_trans(ds.NHL_trans_leaf)
+
+
 logger.info(f"NHL calculations finished in {time.time() - start} s")
 
 logger.info("Saving NHL output...")
