@@ -12,6 +12,6 @@ config_dir=$SLURM_SUBMIT_DIR/umbs_optimization_config.yml
 
 echo $config_dir
 
-python ~/repos/fetch3_nhl/optimize run_optimization.py --config_path $config_dir
+python ~/repos/fetch3_nhl/optimize/run_optimization.py --config_path $config_dir
 
 echo "Finished with run_optimization.py"
