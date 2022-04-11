@@ -6,5 +6,5 @@ Links:
 Create conda environment for FETCH3:
 
 ```
-conda env create --file fetch3_env.yml
+conda env create --file fetch3_requirements.yml
 ```
