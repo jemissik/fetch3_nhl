@@ -40,7 +40,7 @@ Clone the FETCH3 repository from `FETCH3's GitHub page <https://github.com/jemis
 
 .. note::
     The NHL transpiration code is in a submodule inside the FETCH3 repository. Make sure
-    you have cloned the files in the `nhl_transpiration` submodule!
+    you have cloned the files in the ``nhl_transpiration`` submodule!
 
 .. todo::
     - The NHL transpiration code will be moved out of a submodule in a future version

@@ -13,6 +13,9 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath("../nhl_transpiration/"))
+
+
 
 
 # -- Project information -----------------------------------------------------
@@ -33,7 +36,7 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
     # 'sphinx.ext.mathjax',
-    # 'sphinx.ext.autosummary',
+    'sphinx.ext.autosummary',
     'sphinx.ext.githubpages',
     'sphinx.ext.autosectionlabel',
     'm2r2'
@@ -49,6 +52,8 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+autosummary_generate = True  # Turn on sphinx.ext.autosummary
+add_module_names = False
 
 # -- Options for HTML output -------------------------------------------------
 

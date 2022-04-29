@@ -47,6 +47,7 @@ Transpiration options
 ---------------------
 
 * **transpiration_scheme** (int): Whether to use the PM transpiration scheme or the NHL transpiration scheme
+
   * 0: PM transpiration
   * 1: NHL transpiration
 

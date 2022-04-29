@@ -68,6 +68,8 @@ Contents
 
    getting_started
    model_config
+   model_outputs
+   fetch3
    model_setup
    initial_conditions
    scaling
