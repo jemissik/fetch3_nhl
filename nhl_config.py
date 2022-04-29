@@ -110,7 +110,6 @@ class ConfigParams:
 
     scale_nhl:  float
     sapwood_area: float
-    theta_sat_x: float # Pa
     taper_top: float
 
     mean_crown_area_sp:  float
