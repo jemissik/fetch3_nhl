@@ -458,7 +458,6 @@ class ConfigParams:
     p: float                                          #From bohrer et al 2005
     sat_xylem: float                                #From bohrer et al 2005
     sapwood_area: float
-    theta_sat_x: float # Pa
     taper_top: float
     #TREE PARAMETERS
     Hspec: float                      #Height average of trees [m]

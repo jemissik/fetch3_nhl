@@ -152,7 +152,6 @@ parameters:
   sat_xylem: 0.573                                #From bohrer et al 2005 [m3 h2o/m3xylem]
 
   sapwood_area: 0.0177
-  theta_sat_x: 573 # Pa #TODO same as sat_xylem, need to remove
   taper_top: 0.2  # Fraction of active xylem area at the top of the tree relative to the bottom
 
 

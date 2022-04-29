@@ -18,7 +18,8 @@ def calc_sap_storage(H, params):
     Phi0x = params.Phi_0
     p = params.p
 
-    thetasat = params.theta_sat_x # [kg m-3]
+    #params.sat_xylem is in [m3 h2o/m3xylem]
+    thetasat = params.sat_xylem * 1000 # thetasat[kg m-3]
     taper_top = params.taper_top
 
     #convert H from MPa to Pa

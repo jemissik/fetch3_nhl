@@ -162,7 +162,6 @@ parameters:
   sat_xylem: 0.573                                #From bohrer et al 2005
 
   sapwood_area: 0.0177
-  theta_sat_x: 573 # Pa
   taper_top: 0.2
 
   #TREE PARAMETERS

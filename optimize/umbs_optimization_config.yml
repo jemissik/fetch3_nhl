@@ -250,9 +250,6 @@ parameters:
   sapwood_area:
     type: fixed
     value: 0.0177
-  theta_sat_x:
-    type: fixed
-    value: 573 # Pa
   taper_top:
     type: fixed
     value: 0.2
