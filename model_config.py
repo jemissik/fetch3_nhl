@@ -8,32 +8,6 @@ Reads in model configuration from .yml file
 Model setup options and model parameters are read from a .yml file, which can be
 modified by the user.
 
-*****************
-Running the model
-*****************
-
-Setting input and output directories
-====================================
-
-Default input and output directories:
--------------------------------------
-* Input meteorological data: ``./data/``
-* Input configuration file: ``./model_config.yml``
-* Model output and logs: ``./output/``
-  If using the default output directory, a directory ``./output/`` will be created
-  if it doesn't already exist.
-
-Running the model from the command line:
-----------------------------------------
-Run the model by running ``main.py``
-
-To specify an input config file, data directory, or output directory in a location other than the
-default, different directories can be specified as command line arguments, for example::
-      python main.py --config_path /Users/username/fetch3/user_model_config.yml
-      --data_path /Users/username/fetch3/user_data/ --output_path /Users/username/fetch3/output/
-
-If the arguments ``--config_path``, ``--data_path``, and ``--output_path`` are omitted when running the
-model from the command line, the defaults will be used.
 
 *************************
 Modifying the config file
@@ -71,9 +45,10 @@ turned off or set to print more infrequently.
 
 Transpiration options
 ---------------------
-Specify whether to use the PM transpiration scheme or the NHL transpiration scheme
 
-* **transpiration_scheme** (int): 0: PM transpiration; 1: NHL transpiration
+* **transpiration_scheme** (int): Whether to use the PM transpiration scheme or the NHL transpiration scheme
+  * 0: PM transpiration
+  * 1: NHL transpiration
 
 Numerical solution time and space constants (dz and dt0)
 --------------------------------------------------------

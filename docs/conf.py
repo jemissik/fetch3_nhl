@@ -35,6 +35,7 @@ extensions = [
     # 'sphinx.ext.mathjax',
     # 'sphinx.ext.autosummary',
     'sphinx.ext.githubpages',
+    'sphinx.ext.autosectionlabel',
     'm2r2'
 
 
