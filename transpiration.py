@@ -1,7 +1,10 @@
 """
-###################
+################
 PM transpiration
-###################
+################
+
+Functions for the Penman-Monteith transpiration scheme
+Uses Jarvis stomata reduction functions
 """
 import numpy as np
 

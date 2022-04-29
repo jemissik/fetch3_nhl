@@ -1,3 +1,7 @@
+"""
+Functions for calculating sap storage and sap flux from the model outputs 
+"""
+
 import numpy as np
 import xarray as xr
 

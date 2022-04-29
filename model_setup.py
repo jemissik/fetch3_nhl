@@ -1,29 +1,14 @@
 
 """
-###################
+###########
 Model setup
-###################
+###########
+
+Spatial discretization to set up the model 
 """
 import numpy as np
 
 from model_config import cfg
-
-#This code is a simple example replicating the results of the topic
-#3.3 Modeling LAD and capacitance from the paper:
-#Tree Hydrodynamic Modelling of Soil Plant Atmosphere Continuum (SPAC-3Hpy)
-#published at Geoscientific Model Development (gmd)
-#contact marcela.defreitassilva@monash.edu and edoardo.daly@monash.edu
-
-#Here we simulate the same conditions as in the study Verma et al., 2014, but
-#considering a simplified LAD and capacitance formulation according to
-#Lalic, B. & Mihailovic, D. T. An Empirical Relation Describing
-#Leaf-Area Density inside the Forest for Environmental Modeling
-#Journal of Applied Meteorology, American Meteorological Society, 2004, 43, 641-645
-
-#refer to the case study paper below for details on the model set up
-#Verma, P.; Loheide, S. P.; Eamus, D. & Daly, E.
-#Root water compensation sustains transpiration rates in an Australian woodland
-#Advances in Water Resources, Elsevier BV, 2014, 74, 91-101
 
 ###########################################################
 #Discretization

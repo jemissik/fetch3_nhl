@@ -1,7 +1,10 @@
 """
-###################
+###############
 Model functions
-###################
+###############
+
+Core functions of FETCH3
+Porous media flow, Picard iteration, etc
 """
 #importing libraries
 import numpy as np

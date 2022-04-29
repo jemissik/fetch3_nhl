@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Aug  5 11:10:31 2019
+####
+Main
+####
 
-@author: mdef0001
+Main model runner
+
+Note: This is intended to be run from the command line 
 """
 
 import logging

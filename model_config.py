@@ -29,7 +29,7 @@ Run the model by running ``main.py``
 
 To specify an input config file, data directory, or output directory in a location other than the
 default, different directories can be specified as command line arguments, for example::
-      python3 main.py --config_path /Users/username/fetch3/user_model_config.yml
+      python main.py --config_path /Users/username/fetch3/user_model_config.yml
       --data_path /Users/username/fetch3/user_data/ --output_path /Users/username/fetch3/output/
 
 If the arguments ``--config_path``, ``--data_path``, and ``--output_path`` are omitted when running the
@@ -213,9 +213,8 @@ If using the NHL transpiration scheme.
 
 * **LAD_norm** (str):  File with normalized LAD data
 
-Leaf area density formulation (LAD) [1/m]
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#TODO options for using Marcela's LAD scheme or the NHL scheme
+Penman-Monteith transpiration parameters
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * **lad_scheme** (int) : 0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
 
@@ -225,9 +224,6 @@ if using NHL transpiration scheme, LAD is calculated in NHL module
 * **L_m** (float): maximum value of LAD a canopy layer
 * **z_m** (float): height in which L_m is found [m]
 
-Penman-Monteith transpiration parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-If using the PM transpiration scheme.
 
 Penman-Monteith equation parameters
 Note: W m^-2 is the same as J s^-1 m^-2
