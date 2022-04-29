@@ -149,18 +149,17 @@ parameters:
   Aind_x: 8.62e-4                           #m2 xylem/m2 ground]
   Phi_0: 5.74e+8                               #From bohrer et al 2005
   p: 20                                           #From bohrer et al 2005
-  sat_xylem: 0.573                                #From bohrer et al 2005
+  sat_xylem: 0.573                                #From bohrer et al 2005 [m3 h2o/m3xylem]
 
   sapwood_area: 0.0177
-  theta_sat_x: 573 # Pa
-  taper_top: 0.2
+  theta_sat_x: 573 # Pa #TODO same as sat_xylem, need to remove
+  taper_top: 0.2  # Fraction of active xylem area at the top of the tree relative to the bottom
 
 
   #TREE PARAMETERS
   Hspec: 22                      #Height average of trees [m]
   #From NHL code
   LAI: 37.8507360000000                      #[-] Leaf area index
-  Abasal: 8.62e-4         #[m2basal/m2-ground] xylem cross-sectional area and site surface ratio
 
   #########################################################################3
   #NHL PARAMETERS

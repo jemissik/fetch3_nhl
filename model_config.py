@@ -187,7 +187,6 @@ Tree parameters
 ^^^^^^^^^^^^^^^
 * **Hspec** (float): Height average of trees *[m]*
 * **LAI** (float): *[-]* Leaf area index
-* **Abasal** (float): *[m2basal/m2-ground]* xylem cross-sectional area and site surface ratio
 
 NHL transpiration scheme parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -464,7 +463,6 @@ class ConfigParams:
     #TREE PARAMETERS
     Hspec: float                      #Height average of trees [m]
     LAI: float                       #[-] Leaf area index
-    Abasal: float         #[m2basal/m2-ground] xylem cross-sectional area and site surface ratio
 
     #########################################################################3
     #NHL PARAMETERS

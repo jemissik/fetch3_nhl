@@ -164,11 +164,10 @@ parameters:
   sapwood_area: 0.0177
   theta_sat_x: 573 # Pa
   taper_top: 0.2
-  
+
   #TREE PARAMETERS
   Hspec: 22                      #Height average of trees [m]
   LAI: 1.5                       #[-] Leaf area index
-  Abasal: 8.62e-4         #[m2basal/m2-ground] xylem cross-sectional area and site surface ratio
 
   #########################################################################3
   #NHL PARAMETERS

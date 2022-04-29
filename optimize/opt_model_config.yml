@@ -262,9 +262,6 @@ parameters:
   LAI:
     type: fixed
     value: 37.8507360000000                        #[-] Leaf area index
-  Abasal:
-    type: fixed
-    value: 8.62e-4         #[m2basal/m2-ground] xylem cross-sectional area and site surface ratio
 
   #########################################################################3
   #NHL PARAMETERS
