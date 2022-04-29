@@ -146,7 +146,7 @@ def run_model(model_path, config_path, data_path, output_path):
     """
     os.chdir(model_path) # Run from model directory
     print(Path.cwd())
-    result = subprocess.run(["python3", "main.py", "--config_path", str(config_path),
+    result = subprocess.run(["python", "main.py", "--config_path", str(config_path),
                              "--data_path", str(data_path), "--output_path", str(output_path)],
                             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                             stderr = subprocess.PIPE)
