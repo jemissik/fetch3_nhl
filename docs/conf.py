@@ -32,6 +32,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
+    # 'sphinx.ext.mathjax',
     # 'sphinx.ext.autosummary',
     'sphinx.ext.githubpages',
     'm2r2'

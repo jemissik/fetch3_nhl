@@ -12,6 +12,7 @@ Welcome to FETCH3's documentation!
    model_config
    model_setup
    initial_conditions
+   scaling
    met_data
    transpiration
    nhl_functions
