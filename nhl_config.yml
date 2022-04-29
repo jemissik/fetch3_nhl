@@ -49,7 +49,7 @@ parameters:
   scale_nhl:  1
 
   sapwood_area: 0.0177
-  taper_top: 0.2
+  taper_top: 1.0
 
   mean_crown_area_sp:  26.8600000000000 #from NHL
   total_crown_area_sp:  2171.75744784689 #from NHL code
