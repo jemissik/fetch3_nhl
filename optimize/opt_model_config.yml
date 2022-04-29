@@ -250,7 +250,7 @@ parameters:
     value: 0.0177
   taper_top:
     type: fixed
-    value: 0.2
+    value: 1.0
 
   #TREE PARAMETERS
   Hspec: # From 2011 Tree info in FETCH2 Matlab example

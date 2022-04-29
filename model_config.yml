@@ -162,7 +162,7 @@ parameters:
   sat_xylem: 0.573                                #From bohrer et al 2005
 
   sapwood_area: 0.0177
-  taper_top: 0.2
+  taper_top: 1.0
 
   #TREE PARAMETERS
   Hspec: 22                      #Height average of trees [m]
