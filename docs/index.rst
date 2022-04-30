@@ -71,6 +71,8 @@ Contents
    model_outputs
    FETCH3 code reference <ftch/fetch3>
    scaling
+   optimization
+
 
 
 Indices and tables
