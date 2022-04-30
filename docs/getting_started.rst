@@ -38,12 +38,7 @@ Install FETCH3
 
 Clone the FETCH3 repository from `FETCH3's GitHub page <https://github.com/jemissik/fetch3_nhl>`_.
 
-.. note::
-    The NHL transpiration code is in a submodule inside the FETCH3 repository. Make sure
-    you have cloned the files in the ``nhl_transpiration`` submodule!
-
 .. todo::
-    - The NHL transpiration code will be moved out of a submodule in a future version
     - Eventually FETCH3 will be released as a package to make installation simpler
 
 Install FETCH3's dependencies

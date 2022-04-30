@@ -1,9 +1,9 @@
 ####################
-NHL code reference
+FETCH3 code reference
 ####################
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
 
-   nhl_transpiration
+   fetch3

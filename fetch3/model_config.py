@@ -233,8 +233,8 @@ import yaml
 from dataclasses import dataclass
 
 # Default paths for config file, input data, and model output
-parent_path = Path(__file__).parent
-default_config_path = parent_path / 'model_config.yml'
+parent_path = Path(__file__).resolve().parent.parent
+default_config_path = parent_path / 'config_files' / 'model_config.yml'
 default_data_path = parent_path / 'data'
 default_output_path = parent_path / 'output'
 

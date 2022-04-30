@@ -70,13 +70,7 @@ Contents
    model_config
    model_outputs
    fetch3
-   model_setup
-   initial_conditions
    scaling
-   met_data
-   transpiration
-   nhl_functions
-   model_functions
 
 
 Indices and tables
