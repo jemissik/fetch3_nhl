@@ -4,11 +4,11 @@
 Model setup
 ###########
 
-Spatial discretization to set up the model 
+Spatial discretization to set up the model
 """
 import numpy as np
 
-from model_config import cfg
+from fetch3.model_config import cfg
 
 ###########################################################
 #Discretization

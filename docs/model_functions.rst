@@ -1,2 +1,2 @@
-.. automodule:: model_functions
+.. automodule:: fetch3.model_functions
    :members:

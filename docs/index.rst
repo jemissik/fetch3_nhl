@@ -69,7 +69,7 @@ Contents
    getting_started
    model_config
    model_outputs
-   fetch3
+   FETCH3 code reference <ftch/fetch3>
    scaling
 
 

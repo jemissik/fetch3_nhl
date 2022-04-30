@@ -10,13 +10,13 @@ Note: This is intended to be run from the command line
 """
 
 import logging
-from model_config import cfg, output_dir
+from fetch3.model_config import cfg, output_dir
 
 import time
 start = time.time()  # start run clock
 
-from initial_conditions import initial_conditions
-from model_functions import format_model_output, Picard, save_csv, save_nc
+from fetch3.initial_conditions import initial_conditions
+from fetch3.model_functions import format_model_output, Picard, save_csv, save_nc
 
 from sapflux import calc_sapflux, format_inputs
 

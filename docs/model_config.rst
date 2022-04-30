@@ -1,2 +1,2 @@
-.. automodule:: model_config
+.. automodule:: fetch3.model_config
    :members:

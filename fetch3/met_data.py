@@ -8,8 +8,8 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-from model_config import cfg, model_dir, data_dir
-from model_setup import z_upper, interpolate_2d
+from fetch3.model_config import cfg, model_dir, data_dir
+from fetch3.model_setup import z_upper, interpolate_2d
 
 # Helper functions
 

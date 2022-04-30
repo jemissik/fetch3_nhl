@@ -35,6 +35,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
+    'sphinx.ext.autodoc',
     # 'sphinx.ext.mathjax',
     'sphinx.ext.autosummary',
     'sphinx.ext.githubpages',
@@ -92,6 +93,9 @@ html_theme_options = {
         }
    ]
 }
+
+print("conf.py stuff!")
+
 
 # For todo extension
 todo_include_todos = True

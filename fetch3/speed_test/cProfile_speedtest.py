@@ -1,12 +1,12 @@
 # from FETCH2_loading_LAD import *
-# from met_data import *
-# from initial_conditions import *
+# from fetch3.met_data import *
+# from fetch3.initial_conditions import *
 # from jarvis import *
 # from canopy import *
 
 # from FETCH2_run_LAD import *
-from model_functions import *
-from initial_conditions import initial_conditions
+from fetch3.model_functions import *
+from fetch3.initial_conditions import initial_conditions
 
 import cProfile
 import pstats

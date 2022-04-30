@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 
 import model_config as cfg
-from model_config import model_dir
+from fetch3.model_config import model_dir
 
 
 # Helper functions

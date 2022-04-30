@@ -1,2 +1,2 @@
-.. automodule:: transpiration
+.. automodule:: fetch3.transpiration
    :members:

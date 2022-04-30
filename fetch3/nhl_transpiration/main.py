@@ -17,7 +17,7 @@ import pandas as pd
 from pathlib import Path
 import logging
 
-from model_config import cfg, model_dir, output_dir, data_dir
+from fetch3.model_config import cfg, model_dir, output_dir, data_dir
 from nhl_transpiration.NHL_functions import *
 import time
 

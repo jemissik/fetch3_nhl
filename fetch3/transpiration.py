@@ -8,9 +8,9 @@ Uses Jarvis stomata reduction functions
 """
 import numpy as np
 
-from model_config import cfg
-from model_setup import neg2zero
-from met_data import Ta_2d, VPD_2d, SW_in_2d
+from fetch3.model_config import cfg
+from fetch3.model_setup import neg2zero
+from fetch3.met_data import Ta_2d, VPD_2d, SW_in_2d
 
 ###################################################################
 #STOMATA REDUCTIONS FUNCTIONS

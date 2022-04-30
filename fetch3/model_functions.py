@@ -14,15 +14,15 @@ from scipy import linalg
 from numpy.linalg import multi_dot
 import logging
 
-from model_setup import z_soil, z_root, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
+from fetch3.model_setup import z_soil, z_root, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
 
-from met_data import q_rain, tmax, start_time, end_time
+from fetch3.met_data import q_rain, tmax, start_time, end_time
 
-from model_config import cfg
+from fetch3.model_config import cfg
 
 #Imports for PM transpiration
 if cfg.transpiration_scheme == 0:
-    from met_data import VPD_2d, NET_2d, delta_2d, SW_in
+    from fetch3.met_data import VPD_2d, NET_2d, delta_2d, SW_in
     from transpiration import jarvis_fleaf, calc_transpiration, f_Ta_2d, f_d_2d, f_s_2d
     from canopy import LAD
 

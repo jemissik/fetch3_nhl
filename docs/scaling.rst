@@ -1,4 +1,4 @@
 Scaling
 -------
-.. automodule:: scaling
+.. automodule:: fetch3.scaling
    :members:

@@ -1,5 +1,5 @@
-from model_config import cfg
-from model_setup import z_Above
+from fetch3.model_config import cfg
+from fetch3.model_setup import z_Above
 
 import numpy as np
 #######################################################################

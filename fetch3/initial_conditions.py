@@ -4,9 +4,9 @@ Initial conditions
 ##################
 """
 
-from model_config import cfg
-from met_data import q_rain
-from model_setup import nz, dz, z, nz_s, nz_r, nz_clay, z_soil
+from fetch3.model_config import cfg
+from fetch3.met_data import q_rain
+from fetch3.model_setup import nz, dz, z, nz_s, nz_r, nz_clay, z_soil
 
 import numpy as np
 #######################################################################
