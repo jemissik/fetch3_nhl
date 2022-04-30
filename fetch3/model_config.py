@@ -35,13 +35,15 @@ Site information
 Run options - printing
 ----------------------
 Options to turn printing off or specify print frequency. Printing the run
-progress will slow down the model run. The model will run faster if printing is
-turned off or set to print more infrequently.
+progress every timestep will slow down the model run (and make your log file very
+long). The model will run faster if printing is turned off or set to print more
+infrequently.
 
 * **print_run_progress** (bool): Turns on/off printing for progress of the model run.
-  ``print_run_progress: False`` will turn off printing.
+  ``print_run_progress: False`` will turn off printing the progress of the timesteps
+  calculated.
 * **print_freq** (int): Interval of timesteps to print if ``print_run_progress = True``
-  (e.g. ``print_freq: 100`` will print every 100 time steps)
+  (e.g. ``print_freq: 100`` will print every 100 timesteps)
 
 Transpiration options
 ---------------------
@@ -251,7 +253,7 @@ try:
 except SystemExit:  # sphinx passing in args instead, using default.
     #use default options if invalid command line arguments are given
     config_file = default_config_path
-    data_path = default_data_path
+    data_dir = default_data_path
     output_dir = default_output_path
 
 # If using the default output directory, create directory if it doesn't exist

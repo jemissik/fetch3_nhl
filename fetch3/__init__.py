@@ -1,0 +1,7 @@
+"""
+FETCH3 is a tree hydrodynamic model for water fluxes across the soil-plant-atmosphere continuum. FETCH3 simulates water
+transport through the soil, roots, and xylem as flow through porous media. The model resolves water potentials along the
+vertical dimension, and stomatal response is linked to xylem water potential.
+
+See FETCH3's doc pages for instructions about how to use the model
+"""
