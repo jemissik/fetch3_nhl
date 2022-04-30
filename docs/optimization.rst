@@ -15,7 +15,7 @@ Install requirements:
 Prepare optimizaion configuration file
 --------------------------------------
 
-See ``opt_model-config.yml`` for an example.
+See ``optimization_config_template.yml`` for an example.
 
 
 Running an optimization
