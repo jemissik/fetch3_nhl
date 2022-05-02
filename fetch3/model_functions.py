@@ -14,33 +14,26 @@ from scipy import linalg
 from numpy.linalg import multi_dot
 import logging
 
-from fetch3.model_setup import z_soil, z_root, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
+# from fetch3.model_setup import z_soil, z_root, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
 
-from fetch3.met_data import q_rain, tmax, start_time, end_time
+# from fetch3.met_data import q_rain, tmax, start_time, end_time
 
-from fetch3.model_config import cfg
+# def import_transpiration(cfg):
+#     #Imports for PM transpiration
+#     if cfg.transpiration_scheme == 0:
+#         from fetch3.pm_transpiration import jarvis_fleaf, calc_pm_transpiration, f_Ta_2d, f_d_2d, f_s_2d
+#         from fetch3.canopy import LAD
 
-#Imports for PM transpiration
-if cfg.transpiration_scheme == 0:
-    from fetch3.met_data import VPD_2d, NET_2d, delta_2d, SW_in
-    from transpiration import jarvis_fleaf, calc_transpiration, f_Ta_2d, f_d_2d, f_s_2d
-    from canopy import LAD
-
-#Imports for NHL transpiration
-elif cfg.transpiration_scheme == 1:
-    from nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
-    from nhl_transpiration.main import NHL_modelres, LAD
+#     #Imports for NHL transpiration
+#     elif cfg.transpiration_scheme == 1:
+#         from fetch3.nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
+#         from fetch3.nhl_transpiration.main import NHL_modelres, LAD
 
 
 logger = logging.getLogger(__file__)
 
-##############Temporal discritization according to MODEL resolution
-t_num = np.arange(0,tmax+cfg.dt0,cfg.dt0)         #[s]
-nt = len(t_num)  #number of time steps
-########################################
-
 #function for stem xylem: K and C
-def Porous_media_xylem(arg, ap, bp, kmax, Aind_x, p, sat_xylem, Phi_0):
+def Porous_media_xylem(arg, ap, bp, kmax, Aind_x, p, sat_xylem, Phi_0, z, nz_r, nz):
 
     #arg= potential [Pa]
     cavitation_xylem=np.zeros(shape=(len(arg)))
@@ -64,7 +57,7 @@ def Porous_media_xylem(arg, ap, bp, kmax, Aind_x, p, sat_xylem, Phi_0):
 ########################################################################################
 
 #function for root xylem: K and C
-def Porous_media_root(arg, ap, bp, Ksax, Aind_r, p, sat_xylem, Phi_0):
+def Porous_media_root(arg, ap, bp, Ksax, Aind_r, p, sat_xylem, Phi_0, nz_r, nz_s):
      #arg= potential (Pa)
     stress_kr=np.zeros(shape=(len(arg)))
 
@@ -150,9 +143,36 @@ def vanGenuchten(arg, z, g, Rho, clay_d, theta_S1, theta_R1, alpha_1, n_1, m_1, 
 
 ###############################################################################
 
-def Picard(H_initial, Head_bottom_H):
+def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data_dir):
     #picard iteration solver, as described in the supplementary material
     #solution following Celia et al., 1990
+    z_soil = zind.z_soil
+    z_root = zind.z_root
+    nz_s = zind.nz_s
+    nz_r = zind.nz_r
+    z_upper =zind.z_upper
+    z = zind.z
+    nz = zind.nz
+    nz_sand = zind.nz_sand
+    nz_clay = zind.nz_clay
+
+    q_rain = met.q_rain
+    NET_2d = met.NET_2d
+    SW_in_2d = met.SW_in_2d
+    delta_2d = met.delta_2d
+    VPD_2d = met.VPD_2d
+
+
+    #Imports for PM transpiration
+    if cfg.transpiration_scheme == 0:
+        from fetch3.pm_transpiration import jarvis_fleaf, calc_pm_transpiration, f_Ta_2d, f_d_2d, f_s_2d
+        from fetch3.canopy import LAD
+
+    #Imports for NHL transpiration
+    elif cfg.transpiration_scheme == 1:
+        from fetch3.nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
+        import fetch3.nhl_transpiration.main as nhl
+        NHL_modelres, LAD = nhl.main(cfg, output_dir, data_dir)
 
     # Stem water potential [Pa]
 
@@ -256,11 +276,11 @@ def Picard(H_initial, Head_bottom_H):
 
             #Equations for C, K for the root nodes
             cnp1m[nz_s:nz_r],knp1m[nz_s:nz_r],stress_kr[:] = Porous_media_root(hnp1m[nz_s:nz_r], cfg.ap, cfg.bp, cfg.Ksax,
-                                                                               cfg.Aind_r, cfg.p, cfg.sat_xylem, cfg.Phi_0)
+                                                                               cfg.Aind_r, cfg.p, cfg.sat_xylem, cfg.Phi_0, nz_r, nz_s)
 
             #Equations for C, K for stem nodes
             cnp1m[nz_r:nz],knp1m[nz_r:nz], stress_kx[:] = Porous_media_xylem(hnp1m[nz_r:nz], cfg.ap, cfg.bp, cfg.kmax, cfg.Aind_x,
-                                                                             cfg.p, cfg.sat_xylem, cfg.Phi_0)
+                                                                             cfg.p, cfg.sat_xylem, cfg.Phi_0, z, nz_r, nz)
 
 
             #% Compute the individual elements of the A matrix for LHS
@@ -386,7 +406,7 @@ def Picard(H_initial, Head_bottom_H):
 
             #For PM transpiration
             if cfg.transpiration_scheme == 0: #0: PM transpiration scheme
-                Pt_2d[:,i] = calc_transpiration(SW_in[i], NET_2d[:,i], delta_2d[i], cfg.Cp, VPD_2d[:,i], cfg.lamb, cfg.gama,
+                Pt_2d[:,i] = calc_pm_transpiration(SW_in_2d[:,i], NET_2d[:,i], delta_2d[i], cfg.Cp, VPD_2d[:,i], cfg.lamb, cfg.gama,
                                                 cfg.gb, cfg.ga, cfg.gsmax, cfg.Emax, f_Ta_2d[:,i], f_s_2d[:,i], f_d_2d[:,i],
                                                 jarvis_fleaf(hn[nz_r:nz], cfg.hx50, cfg.nl), LAD)
             # For NHL transpiration
@@ -470,7 +490,7 @@ def Picard(H_initial, Head_bottom_H):
 
 #Calculating water balance from model outputs
 def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink, EVsink_ts, THETA,
-                       infiltration,trans_2d, dt, dz):
+                       infiltration,trans_2d, dt, start_time, end_time, dz, cfg, zind):
     ####################### Water balance ###################################
 
     theta_i=sum(THETA[:,1]*cfg.dz)
@@ -544,7 +564,7 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
         },
         coords={
             "time": df_EP.index,
-            "z": z_soil,
+            "z": zind.z_soil,
         })
     #root TODO
     ds_root = xr.Dataset(
@@ -556,7 +576,7 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
         },
         coords={
             "time": df_EP.index,
-            "z": z_root,
+            "z": zind.z_root,
         })
     #canopy
     ds_canopy = xr.Dataset(
@@ -566,7 +586,7 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
         },
         coords={
             "time": df_EP.index,
-            "z": z_upper,
+            "z": zind.z_upper,
         })
     #whole system
     ds_all = xr.Dataset(
@@ -577,7 +597,7 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
         },
         coords={
             "time": df_EP.index,
-            "z": z,
+            "z": zind.z,
         })
 
     return df_waterbal, df_EP, {'ds_EP': ds_EP, 'ds_soil': ds_soil, 'ds_root': ds_root, 'ds_canopy': ds_canopy, 'ds_all':ds_all}

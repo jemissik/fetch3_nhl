@@ -352,7 +352,7 @@ def calc_rad_attenuation(PAR, LAD, dz, Cf = 0.85, x = 1, **kwargs):
     Parameters
     ----------
     PAR : float
-        photosynthetically active radiation at canopy top [umol m-2 s-1]
+        photosynthetically active radiation at canopy top [µmol m-2 s-1]
     LAD : array
         Leaf area density [m2leaf m-2crown m-1stem] at each height in z
     dz : float
@@ -369,7 +369,7 @@ def calc_rad_attenuation(PAR, LAD, dz, Cf = 0.85, x = 1, **kwargs):
     P0 : array
         attenuation fraction of PAR penetrating the canopy at each level z [unitless]
     Qp : array
-        absorbed photosynthetically active radiation at each level within the canopy [umol m-2 s-1]
+        absorbed photosynthetically active radiation at each level within the canopy [µmol m-2 s-1]
     """
     zenith_angle = calc_zenith_angle(**kwargs)
     # Calculate the light extinction coefficient (unitless)
@@ -396,11 +396,11 @@ def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
     m : float
         empirically fitted parameter [unitless]
     A : float
-        net CO2 assimilation rate [umol CO2 m-2 s-1]
+        net CO2 assimilation rate [µmol CO2 m-2 s-1]
     c_s : float
-        atmospheric CO2 concentration [umol mol-1]
+        atmospheric CO2 concentration [µmol mol-1]
     gamma_star : float
-        CO2 compensation point [umol mol-1]
+        CO2 compensation point [µmol mol-1]
     VPD : float
         VPD [kPa]
     D0 : float
@@ -425,9 +425,9 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
     Tair : float
         Air temperature [deg C]
     Qp : float
-        absorbed photosynthetically active radiation at each level within the canopy [umol m-2 s-1]
+        absorbed photosynthetically active radiation at each level within the canopy [µmol m-2 s-1]
     Ca : float
-        CO2 concentration [umol/mol]
+        CO2 concentration [µmol/mol]
     Vcmax25 : float
         Farquhar model parameter
     alpha_p : float
@@ -439,13 +439,13 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
     Returns
     -------
     A : float
-        photosynthesis [umol m-2 s-1]
+        photosynthesis [µmol m-2 s-1]
     gs : float
         stomatal conductance [mol m-2 s-1]
     Ci : float
-        intracellular CO2 concentration [umol mol-1]
+        intracellular CO2 concentration [µmol mol-1]
     Cs : float
-        CO2 concentration at leaf surface [umol mol-1]
+        CO2 concentration at leaf surface [µmol mol-1]
     gb : float
         boundary layer conductance [mol m-2 s-1]
     geff : float
@@ -454,7 +454,7 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
     """
     # Parameters
     #Farquhar model
-    Kc25 = 300 # [umol mol-1] Michaelis-Menten constant for CO2, at 25 deg C
+    Kc25 = 300 # [µmol mol-1] Michaelis-Menten constant for CO2, at 25 deg C
     Ko25 = 300 # [mmol mol-1] Michaelis-Menten constant for O2, at 25 deg C
     e_m = 0.08 # [mol mol-1]
     o = 210 #[mmol mol-1]
@@ -468,7 +468,7 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
     Ko = Ko25 * np.exp(0.018 * (Tair - 25))
 
     #Calculate gamma_star and Rd
-    Rd = 0.015 * Vcmax  # Dark respiration [umol m-2 s-1]
+    Rd = 0.015 * Vcmax  # Dark respiration [µmol m-2 s-1]
     gamma_star = (3.69 + 0.188 * (Tair - 25) + 0.0036 * (Tair -25 ) ** 2) * 10
 
     # equation for RuBP saturated rate of CO2 assimilation
@@ -553,7 +553,7 @@ def calc_respiration(Tair):
     Returns
     -------
     Re : float
-        Respiration [umol CO2 m-2 s-1]
+        Respiration [µmol CO2 m-2 s-1]
     """
     Tr = 10
     RE10 = 2.6
@@ -605,7 +605,7 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, V
         A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs)
         S = -A * a_s / CF
 
-    # Fluxes are computed in umol/m2/s; Sources are computed in umol/m3/s
+    # Fluxes are computed in µmol/m2/s; Sources are computed in µmol/m3/s
     Fc = -np.concatenate(Re, np.diff(Kc)) / dz
     Fc = CF * Fc
     S = S * CF
@@ -652,7 +652,7 @@ def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h):
 
     return LAD_z
 
-def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total_LAI_sp, plot_area, total_crown_area_sp, mean_crown_area_sp, LADnorm, z_h_LADnorm, RH, Tair, Press, Cf=0.85, x=1, **kwargs):
+def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     """
     Calculate NHL transpiration
     #TODO make docstring
@@ -670,9 +670,9 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     ustar : float
         friction velocity [m s-1]
     PAR : float
-        photosynthetically active radiation at canopy top [umol m-2 s-1]
+        photosynthetically active radiation at canopy top [µmol m-2 s-1]
     Ca : float
-        CO2 concentration [umol/mol]
+        CO2 concentration [µmol/mol]
     Vcmax25 : float
         Maximum carboxylation capacity of Rubisco at 25 deg C
     alpha_gs : float
@@ -704,7 +704,38 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     -------
     _type_
         _description_
-    """    """"""
+    """
+
+    dz=cfg.dz
+    h = cfg.Hspec
+    Cd = cfg.Cd
+    Vcmax25 = cfg.Vcmax25
+    alpha_gs = cfg.alpha_gs
+    alpha_p = cfg.alpha_p
+    total_LAI_sp = cfg.LAI
+    plot_area = cfg.plot_area
+    total_crown_area_sp = cfg.total_crown_area_sp
+    mean_crown_area_sp = cfg.mean_crown_area_sp
+    latitude = cfg.latitude
+    longitude = cfg.longitude
+    zenith_method = cfg.zenith_method
+    x = cfg.x
+    Cf = cfg.Cf
+    time_offset = cfg.time_offset
+
+
+    U_top = met_data.WS_F[timestep]
+    ustar = met_data.USTAR[timestep]
+    PAR = met_data.PPFD_IN[timestep]
+    Ca = met_data.CO2_F[timestep]
+    RH = met_data.RH[timestep]
+    Tair = met_data.TA_F[timestep]
+    Press = met_data.PA_F[timestep]
+    doy = met_data.Timestamp.iloc[timestep].dayofyear
+    time_of_day = met_data.Timestamp[timestep].hour + met_data.Timestamp[timestep].minute/60
+
+    LADnorm = LADnorm_df[cfg.species]
+    z_h_LADnorm = LADnorm_df.z_h
 
     # Calculate VPD
     VPD = calc_vpd_kPa(RH, Tair = Tair)
@@ -729,7 +760,7 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
     Km = Km * ustar
 
     # Calculate radiation at each layer
-    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, Cf = Cf, x = x, **kwargs)
+    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, Cf = Cf, x = x, lat = latitude, long=longitude, doy = doy, time_of_day = time_of_day, time_offset=time_offset)
 
     # Solve conductances
     A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD = VPD, uz = U)
@@ -760,9 +791,7 @@ def calc_NHL(dz, h, Cd, U_top, ustar, PAR, Ca, Vcmax25, alpha_gs, alpha_p, total
 
     return ds, LAD, zenith_angle
 
-def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
-            total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
-            lat, long, time_offset = -5, **kwargs):
+def calc_NHL_timesteps(cfg, met_data, LADnorm_df, **kwargs):
     """
     Calls NHL for each timestep in the met data
     #TODO docstring
@@ -808,6 +837,8 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
         _description_
     """
 
+    h = cfg.Hspec
+    dz = cfg.dz
     zmin = 0
     z = np.arange(zmin, h, dz)  # [m]
 
@@ -817,11 +848,13 @@ def calc_NHL_timesteps(dz, h, Cd, met_data, Vcmax25, alpha_gs, alpha_p,
 
     datasets = []
     for i in range(0,len(met_data)):
-        ds, LAD, zenith_angle = calc_NHL(
-            dz, h, Cd, met_data.WS_F.iloc[i], met_data.USTAR.iloc[i], met_data.PPFD_IN.iloc[i], met_data.CO2_F.iloc[i], Vcmax25, alpha_gs, alpha_p,
-            total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
-            met_data.RH.iloc[i], met_data.TA_F.iloc[i], met_data.PA_F.iloc[i], doy = met_data.Timestamp.iloc[i].dayofyear, lat = lat,
-            long= long, time_offset = time_offset, time_of_day = met_data.Timestamp[i].hour + met_data.Timestamp[i].minute/60, **kwargs)
+        ds, LAD, zenith_angle = calc_NHL(cfg, met_data, LADnorm_df, i)
+
+        # ds, LAD, zenith_angle = calc_NHL(
+        #     dz, h, Cd, met_data.WS_F.iloc[i], met_data.USTAR.iloc[i], met_data.PPFD_IN.iloc[i], met_data.CO2_F.iloc[i], Vcmax25, alpha_gs, alpha_p,
+        #     total_LAI_spn, plot_area, total_crown_area_spn, mean_crown_area_spn, LAD_norm, z_h_LADnorm,
+        #     met_data.RH.iloc[i], met_data.TA_F.iloc[i], met_data.PA_F.iloc[i], doy = met_data.Timestamp.iloc[i].dayofyear, lat = lat,
+        #     long= long, time_offset = time_offset, time_of_day = met_data.Timestamp[i].hour + met_data.Timestamp[i].minute/60, **kwargs)
 
         zenith_angle_all[i] = zenith_angle
         datasets.append(ds)

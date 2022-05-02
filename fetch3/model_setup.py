@@ -7,14 +7,14 @@ Model setup
 Spatial discretization to set up the model
 """
 import numpy as np
-
-from fetch3.model_config import cfg
+from dataclasses import dataclass
 
 ###########################################################
 #Discretization
 ###########################################################
 
 def spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d):
+
     ##########################################
     #below-ground spatial discretization
     #######################################
@@ -43,32 +43,37 @@ def spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d):
     #####################################################################
     nz_sand=int(np.flatnonzero(z==sand_d)) #node where sand layer finishes
     nz_clay=int(np.flatnonzero(z==clay_d)) #node where clay layer finishes- sand starts
-    return z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay
 
+    zind = Zind(z_soil=z_soil,
+                nz_s=nz_s,
+                z_root=z_root,
+                nz_r=nz_r,
+                z_Above=z_Above,
+                nz_Above=nz_Above,
+                z_upper=z_upper,
+                z=z,
+                nz=nz,
+                nz_sand=nz_sand,
+                nz_clay=nz_clay)
 
-#############################################
-# Helper functions
-#################################################
-# Function to do to 2d interpolation
-def interpolate_2d(x, zdim):
-    """
-    Interpolates input to 2d for canopy-distributed values
+    return zind
 
-    Parameters
-    ----------
-    x : [type]
-        input
-    zdim : [type]
-        length of z dimension
-    """
-    x_2d = np.zeros(shape=(zdim, len(x)))
-    for i in np.arange(0,len(x),1):
-        x_2d[:,i]=x[i]
-    return x_2d
+def temporal_discretization(cfg, tmax):
+    ##############Temporal discritization according to MODEL resolution
+    t_num = np.arange(0,tmax+cfg.dt0,cfg.dt0)         #[s]
+    nt = len(t_num)  #number of time steps
+    return t_num, nt
 
-def neg2zero(x):
-    return np.where(x < 0, 0, x)
-
-dz = cfg.dz
-z_soil, nz_s, z_root, nz_r, z_Above, nz_Above, z_upper, z, nz, nz_sand, nz_clay = spatial_discretization(
-    cfg.dz, cfg.Soil_depth, cfg.Root_depth, cfg.Hspec, cfg.sand_d, cfg.clay_d)
+@dataclass
+class Zind:
+    z_soil: np.ndarray
+    nz_s: int
+    z_root: np.ndarray
+    nz_r: int
+    z_Above: np.ndarray
+    nz_Above: int
+    z_upper: np.ndarray
+    z: np.ndarray
+    nz: int
+    nz_sand: int
+    nz_clay: int

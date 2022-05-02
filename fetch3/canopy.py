@@ -1,4 +1,4 @@
-from fetch3.model_config import cfg
+from fetch3.cfg import cfg  # TODO CHANGE THIS 
 from fetch3.model_setup import z_Above
 
 import numpy as np

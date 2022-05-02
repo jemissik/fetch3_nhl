@@ -12,6 +12,7 @@ dependencies:
 - ipympl
 - pip
 - pip:
+  - click
   - PyYAML
   - conda-merge
   - pytest

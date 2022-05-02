@@ -4,4 +4,21 @@ transport through the soil, roots, and xylem as flow through porous media. The m
 vertical dimension, and stomatal response is linked to xylem water potential.
 
 See FETCH3's doc pages for instructions about how to use the model
+
+
+
+Overview of package structure:
+
+model_config
+- Reads configuration yml file
+- #TODO conversions of parameters to the required format of the model
+
+model_setup
+- sets up spatial discretization
+
+met_data
+- imports and prepares met data for model
+
+initial_conditions
+- calculates initial water potential conditions 
 """

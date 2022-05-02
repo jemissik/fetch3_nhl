@@ -8,7 +8,7 @@ Uses Jarvis stomata reduction functions
 """
 import numpy as np
 
-from fetch3.model_config import cfg
+from fetch3.cfg import cfg  # TODO CHANGE THIS
 from fetch3.model_setup import neg2zero
 from fetch3.met_data import Ta_2d, VPD_2d, SW_in_2d
 
@@ -46,7 +46,7 @@ def night_trans(Emax, f_Ta, f_d, f_leaf):
     # Eqn S.64
     return Emax * f_Ta * f_d * f_leaf #[m/s]
 
-def calc_transpiration(SW_in, NET, delta, Cp, VPD, lamb, gama, gb, ga, gsmax, Emax, f_Ta, f_s, f_d, f_leaf, LAD):
+def calc_pm_transpiration(SW_in, NET, delta, Cp, VPD, lamb, gama, gb, ga, gsmax, Emax, f_Ta, f_s, f_d, f_leaf, LAD):
 
     if SW_in > 5: #income radiation > 5 = daylight
         gs = calc_gs(gsmax, f_Ta, f_d, f_s, f_leaf)

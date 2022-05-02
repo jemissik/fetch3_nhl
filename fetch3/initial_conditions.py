@@ -3,39 +3,37 @@
 Initial conditions
 ##################
 """
-
-from fetch3.model_config import cfg
-from fetch3.met_data import q_rain
-from fetch3.model_setup import nz, dz, z, nz_s, nz_r, nz_clay, z_soil
-
 import numpy as np
+
 #######################################################################
 #INITIAL CONDITIONS
 #######################################################################
 #soil initial conditions as described in the paper [VERMA et al., 2014]
 
-def initial_conditions():
-    initial_H=np.zeros(shape=nz)
+def initial_conditions(cfg, q_rain, zind):
+    dz = cfg.dz
+
+    initial_H=np.zeros(shape=zind.nz)
 
     factor_soil=(cfg.H_init_soilbottom-(cfg.H_init_soilmid))/(int((cfg.clay_d-cfg.cte_clay)/dz)) #factor for interpolation
 
     #soil
-    for i in np.arange(0,len(z_soil),1):
-        if  0.0<=z_soil[i]<=cfg.cte_clay :
+    for i in np.arange(0,len(zind.z_soil),1):
+        if  0.0<=zind.z_soil[i]<=cfg.cte_clay :
             initial_H[i]=cfg.H_init_soilbottom
-        if cfg.cte_clay<z_soil[i]<=z[nz_clay]:
+        if cfg.cte_clay<zind.z_soil[i]<=zind.z[zind.nz_clay]:
             initial_H[i]=initial_H[i-1]-factor_soil #factor for interpolation
-        if cfg.clay_d<z_soil[i]<= z[nz_r-1]:
+        if cfg.clay_d<zind.z_soil[i]<= zind.z[zind.nz_r-1]:
             initial_H[i]=cfg.H_init_soilmid
 
-    initial_H[nz_s-1]=cfg.H_init_soilmid
+    initial_H[zind.nz_s-1]=cfg.H_init_soilmid
 
 
-    factor_xylem=(cfg.H_init_canopytop-(cfg.H_init_soilbottom))/((z[-1]-z[nz_s])/dz)
+    factor_xylem=(cfg.H_init_canopytop-(cfg.H_init_soilbottom))/((zind.z[-1]-zind.z[zind.nz_s])/dz)
 
     #roots and xylem
-    initial_H[nz_s]=cfg.H_init_soilbottom
-    for i in np.arange(nz_s+1,nz,1):
+    initial_H[zind.nz_s]=cfg.H_init_soilbottom
+    for i in np.arange(zind.nz_s+1,zind.nz,1):
         initial_H[i]=initial_H[i-1]+factor_xylem #meters
 
 

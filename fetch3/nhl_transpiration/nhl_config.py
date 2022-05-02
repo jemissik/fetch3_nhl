@@ -40,7 +40,7 @@ try:
 except SystemExit:  # sphinx passing in args instead, using default.
     #use default options if invalid command line arguments are given
     config_file = default_config_path
-    data_path = default_data_path
+    data_dir = default_data_path
     output_dir = default_output_path
 
 # If using the default output directory, create directory if it doesn't exist
