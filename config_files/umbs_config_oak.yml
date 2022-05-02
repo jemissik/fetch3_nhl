@@ -158,7 +158,7 @@ parameters:
   #TREE PARAMETERS
   Hspec: 22                      #Height average of trees [m]
   #From NHL code
-  LAI: 37.8507360000000                      #[-] Leaf area index
+  LAI: 0.983304                      #[-] Leaf area index
 
   #########################################################################3
   #NHL PARAMETERS

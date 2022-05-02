@@ -106,7 +106,6 @@ def calc_mixing_length(z, h, alpha_ml = 0.1):
                                  [lambda z: 0.2 * z + 2 * dz, alpha_ml * h, lambda z: 0.4 * (z - d) + alpha_ml * h])
     return mixing_length
 
-
 def thomas_tridiagonal (aa, bb, cc, dd):
     """
     Thomas algorithm for solving tridiagonal matrix
@@ -623,7 +622,7 @@ def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h):
     z_h_LADnorm : array
         z/h for LAD [unitless: m/m]
     tot_LAI_crown : float
-        total leaf area per crown area [m2_leaf m-2_crown]
+        crown-level LAI [m2_leaf m-2_crown]
     dz : float
         Vertical discretization interval [m]
     h : float
@@ -656,63 +655,15 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     """
     Calculate NHL transpiration
     #TODO make docstring
-
-    Parameters
-    ----------
-    dz : float
-        Vertical discretization interval [m]
-    h : float
-        Canopy height [m]
-    Cd : float
-        drag coefficient [unitless]
-    U_top : float
-        Measured wind speed at top of canopy [m s-1]
-    ustar : float
-        friction velocity [m s-1]
-    PAR : float
-        photosynthetically active radiation at canopy top [µmol m-2 s-1]
-    Ca : float
-        CO2 concentration [µmol/mol]
-    Vcmax25 : float
-        Maximum carboxylation capacity of Rubisco at 25 deg C
-    alpha_gs : float
-        fitting parameter of stomatal conductance model
-    total_LAI_sp : _type_
-        _description_
-    plot_area : _type_
-        _description_
-    total_crown_area_sp : _type_
-        _description_
-    mean_crown_area_sp : _type_
-        _description_
-    LADnorm : _type_
-        _description_
-    z_h_LADnorm : _type_
-        _description_
-    RH : _type_
-        _description_
-    Tair : _type_
-        _description_
-    Press : _type_
-        _description_
-    Cf : float, optional
-        _description_, by default 0.85
-    x : int, optional
-        _description_, by default 1
-
-    Returns
-    -------
-    _type_
-        _description_
     """
-
+    #unpack config parameters
     dz=cfg.dz
     h = cfg.Hspec
     Cd = cfg.Cd
     Vcmax25 = cfg.Vcmax25
     alpha_gs = cfg.alpha_gs
     alpha_p = cfg.alpha_p
-    total_LAI_sp = cfg.LAI
+    LAI_p_sp = cfg.LAI
     plot_area = cfg.plot_area
     total_crown_area_sp = cfg.total_crown_area_sp
     mean_crown_area_sp = cfg.mean_crown_area_sp
@@ -723,7 +674,7 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     Cf = cfg.Cf
     time_offset = cfg.time_offset
 
-
+    #unpack met data
     U_top = met_data.WS_F[timestep]
     ustar = met_data.USTAR[timestep]
     PAR = met_data.PPFD_IN[timestep]
@@ -745,10 +696,10 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     z = np.arange(zmin, h, dz)  # [m]
 
     # Calculate leaf area for each vertical layer (for one tree)
-    tot_LAI_crown = total_LAI_sp * plot_area / total_crown_area_sp  # LAI per crown area [m2_leaf m-2_crown]
+    LAI_c_sp = LAI_p_sp * plot_area / total_crown_area_sp  # LAI per crown area [m2_leaf m-2_crown]
 
     # Distrubute leaves vertically, and assign leaf area to stem
-    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, total_LAI_sp, dz, h) #[m2leaf m-2crown m-1stem]
+    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, LAI_c_sp, dz, h) #[m2leaf m-2crown m-1stem]
 
     # Calculate wind speed at each layer
     U, Km = solve_Uz(z, dz, Cd , LAD , U_top, h = h)
@@ -760,14 +711,16 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     Km = Km * ustar
 
     # Calculate radiation at each layer
-    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, Cf = Cf, x = x, lat = latitude, long=longitude, doy = doy, time_of_day = time_of_day, time_offset=time_offset)
+    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, Cf = Cf, x = x, lat = latitude, long=longitude,
+                                                doy = doy, time_of_day = time_of_day, time_offset=time_offset,
+                                                zenith_method = zenith_method)
 
     # Solve conductances
     A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD = VPD, uz = U)
 
     # Calculate the transpiration per m-1 [ kg H2O s-1 m-1_stem]
     NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)  #[kg H2O m-2leaf s-1]
-    NHL_trans_sp_stem = NHL_trans_leaf * LAD * mean_crown_area_sp / dz # [kg H2O s-1 m-1stem m-2ground]
+    NHL_trans_sp_stem = NHL_trans_leaf * LAD # [kg H2O s-1 m-1stem m-2crown]
 
     #Add data to dataset
     ds = xr.Dataset(data_vars=dict(

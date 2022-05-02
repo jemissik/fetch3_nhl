@@ -218,9 +218,8 @@ def scale_sapflux(sapflux, dz, mean_crown_area_sp, total_crown_area_sp, plot_are
     return scaled_sapflux
 
 def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
-    """Scales transpiration from FETCH output (in m H20 m-1stem s-1) to W m-2"""
-    scaled_trans = (trans * 1000 * dz * 2440000 /
-                        mean_crown_area_sp * total_crown_area_sp
+    """Scales transpiration from FETCH output (in m H20 m-2crown m-1stem s-1) to W m-2"""
+    scaled_trans = (trans * 1000 * dz * 2440000 * total_crown_area_sp
                         / plot_area).sum(dim='z', skipna=True)
     return scaled_trans
 

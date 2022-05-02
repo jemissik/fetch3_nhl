@@ -14,21 +14,6 @@ from scipy import linalg
 from numpy.linalg import multi_dot
 import logging
 
-# from fetch3.model_setup import z_soil, z_root, nz_s, nz_r, z_upper, z, nz, nz_sand, nz_clay
-
-# from fetch3.met_data import q_rain, tmax, start_time, end_time
-
-# def import_transpiration(cfg):
-#     #Imports for PM transpiration
-#     if cfg.transpiration_scheme == 0:
-#         from fetch3.pm_transpiration import jarvis_fleaf, calc_pm_transpiration, f_Ta_2d, f_d_2d, f_s_2d
-#         from fetch3.canopy import LAD
-
-#     #Imports for NHL transpiration
-#     elif cfg.transpiration_scheme == 1:
-#         from fetch3.nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
-#         from fetch3.nhl_transpiration.main import NHL_modelres, LAD
-
 
 logger = logging.getLogger(__file__)
 

@@ -68,9 +68,7 @@ def main(cfg, output_dir, data_dir):
     model_ts = np.arange(0, len(ds.time) * cfg.dt + cfg.dt0, cfg.dt0)
     model_z = np.arange(0, cfg.Hspec, cfg.dz)
 
-    #NHL transpiration in units of kg H2O s-1 m-1stem
-    # da = ds2.NHL_trans_leaf #NHL in units of kg H2O m-2 s-1
-    da = ds2.NHL_trans_sp_stem *10**-3   #NHL in units of kg m-1stem s-1 #* 10**-3 to convert kg to m
+    da = ds2.NHL_trans_sp_stem *10**-3   #NHL in units of kg m-2crown m-1stem s-1 #* 10**-3 to convert kg to m
 
     NHL_modelres = da.interp(z = model_z, time = model_ts, assume_sorted = True, kwargs={'fill_value':0})
 

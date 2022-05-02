@@ -35,7 +35,7 @@ default_output_path = parent_path / 'output'
 model_dir = Path(__file__).parent.resolve() # File path of model source code
 
 
-@click.command
+@click.command()
 @click.option("--config_path", type=click.Path(exists=True, dir_okay=False, path_type=Path),
               default=str(default_config_path),
               help="Path to configuration YAML file")

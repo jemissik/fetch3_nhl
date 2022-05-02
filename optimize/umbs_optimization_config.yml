@@ -260,7 +260,7 @@ parameters:
     value: 22.0                      #Height average of trees [m]
   LAI: # should be species specific LAI
     type: fixed
-    value: 34.24813425 #Updated using calculated LAI_c_sp using matlab example. [m2leaf/m2 ground under crown] #TODO reasonable? #[-] Leaf area index
+    value: 0.983304 #Updated using  LAI_p_sp using matlab example. [m2leaf/m2 ground]  #[-] Leaf area index
 
   #########################################################################3
   #NHL PARAMETERS
@@ -312,9 +312,6 @@ parameters:
   c3:
     type: fixed
     value: 12.3 #value for oak from Mirfenderesgi
-
-
-
 
 
   #parameters if using penman-monteith transpiration scheme, based on Lalic et al 2014
