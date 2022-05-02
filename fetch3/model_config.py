@@ -89,8 +89,8 @@ Configuration of soil duplex
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Depths of layer/clay interface
 
-* **sand_d** (float): # TODO 4.2----top soil #m
-* **clay_d** (float): Depth of clay layer. #0------4.2 #m #TODO
+* **sand_d** (float): # Depth of sand layer #m
+* **clay_d** (float): Depth of clay layer. #m
 
 Soil initial conditions
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -138,7 +138,6 @@ Tree parameters:
 
 PHYSICAL CONSTANTS
 ^^^^^^^^^^^^^^^^^^
-#TODO remove from config
 **Rho**:  float  ##[kg m-3]
 **g**:  float # [m s-2]
 
@@ -186,8 +185,8 @@ If using the NHL transpiration scheme.
 * **alpha_gs** (float):
 * **alpha_p** (float):
 
-* **wp_s50** (float): # TODO value for oak from Mirfenderesgi
-* **c3** (float):  # TODO value for oak from Mirfenderesgi
+* **wp_s50** (float): 
+* **c3** (float):
 
 * **LAD_norm** (str):  File with normalized LAD data
 

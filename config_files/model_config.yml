@@ -1,59 +1,52 @@
 model_options:
-  ###############################################################################
   #INPUT DATA FILE PARAMETERS
-  ###############################################################################
+  ###########################
 
   # File for input met data
   input_fname: "UMBS_flux_2011.csv"
 
-  start_time: "2011-05-01 9:00:00" #begining of simulation
-  end_time: "2011-05-01 10:00:00" #end
+  # Start and end in the fetch2 example
+  # start_time: "2011-06-09 00:00:00" #begining of simulation #DOY 160
+  # end_time: "2011-07-10 00:00:00" #end #DOY190 - 7/10 is doy 191
+  start_time: "2011-06-29 00:00:00" #begining of simulation #DOY 160
+  end_time: "2011-07-03 00:00:00" #end #DOY190 - 7/10 is doy 191
 
   dt:  1800  #seconds - input data resolution
   tmin:  0  #tmin [s]
 
-  ###############################################################################
+
   #SITE INFORMATION
-  ###############################################################################
-  latitude:  39.9137
-  longitude:  -74.596
+  #################
+  latitude:  45.5598  # From AmeriFlux UMBS page
+  longitude:  -84.7138
   time_offset:  -5 #Offset from UTC time, e.g EST = UTC -5 hrs
 
-  ###############################################################################
+
   #RUN OPTIONS - printing
-  ###############################################################################
+  #######################
   # Printing slows down model run
   # Options to turn printing off or specify print frequency
   print_run_progress:  True  # Turn on/off printing for progress of time steps calculated
-  print_freq:  50  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
+  print_freq:  100  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
 
-  ###############################################################################
   #TRANSPIRATION OPTIONS - NHL OR PM
-  ###############################################################################
+  ##################################
   transpiration_scheme:  1 # 0: PM transpiration; 1: NHL transpiration
-  zenith_method: "CN"  # Method to use for zenith angle calculation (if using NHL)
+  zenith_method: "fetch2"  # Method to use for zenith angle calculation (if using NHL)
 
-  ###############################################################################
   #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
-  ###############################################################################
+  #########################################################
   #The finite difference discretization constants
   dt0:  20  #model temporal resolution [s]
-  dz:  0.1  #model spatial resolution [m]
+  dz:  0.2  #model spatial resolution [m] #from fetch2 example
 
-  stop_tol:  0.0001  #stop tolerance of equation converging
+  stop_tol:  0.01  #stop tolerance of equation converging #from fetch2 example
 
-  #############################################################################
   #MODEL PARAMETERS
-  #Values according to Verma et al., 2014
-  ############################################################################
+  #################
 
   #CONFIGURING SOIL BOUNDARY CONDITIONS
-  #Here the user can choose the desired contition by setting the numbers as
-  #described below
-
-  #The configuration used follows Verma et al. 2014
-
-  #############################################################################
+  #####################################
 
   #Upper Boundary condition
 
@@ -71,20 +64,18 @@ model_options:
   BottomBC: 0
 
   # TREE INFO
-  species:  "ES"
+  species:  "Oak"
 
   LAD_norm:  'LAD_data.csv' #LAD data
 
 
-  ###############################################################################
   # PHYSICAL CONSTANTS
-  ###############################################################################
-  Rho:  1000  ##[kg m-3]
-  g:  9.8 # [m s-2]
+  ####################
+  Rho:  998  ##[kg m-3] # water density [kg water / m3 sapwood]-from fetch2 matlab
+  g:  9.81 # [m s-2]
 
-  #######################################################################
   #LEAF AREA DENSITY FORMULATION (LAD) [1/m]
-  #######################################################################
+  ##########################################
   lad_scheme :  1  #0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
 
 parameters:
@@ -103,10 +94,6 @@ parameters:
   clay_d: 4.2 #0------4.2 #m
 
   #SOIL INITIAL CONDITIONS
-  #soil initial conditions as described in the paper [VERMA et al., 2014]
-  #the initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
-  #from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
-  #from 4,2 m [sand layer] cte value of -0.402 m
 
   cte_clay: 3 #depth from 0-3m initial condition of clay [and SWC] is constant
   H_init_soilbottom:  -6.09
@@ -159,33 +146,34 @@ parameters:
   Aind_x: 8.62e-4                           #m2 xylem/m2 ground]
   Phi_0: 5.74e+8                               #From bohrer et al 2005
   p: 20                                           #From bohrer et al 2005
-  sat_xylem: 0.573                                #From bohrer et al 2005
+  sat_xylem: 0.573                                #From bohrer et al 2005 [m3 h2o/m3xylem]
 
   sapwood_area: 0.0177
-  taper_top: 1.0
+  taper_top: 1.0  # Fraction of active xylem area at the top of the tree relative to the bottom
+
 
   #TREE PARAMETERS
   Hspec: 22                      #Height average of trees [m]
-  LAI: 1.5                       #[-] Leaf area index
+  #From NHL code
+  LAI: 0.983304                      #[-] Leaf area index
 
   #########################################################################3
   #NHL PARAMETERS
   ###########################################################################
+  scale_nhl:  1
 
-  scale_nhl:  2
-
-  mean_crown_area_sp:  17.02
-  total_crown_area_sp:  83614.7803393742
+  mean_crown_area_sp:  26.8600000000000 #from NHL
+  total_crown_area_sp:  2171.75744784689 #from NHL code
   plot_area:  75649.5511
   sum_LAI_plot:  3.7850736000000005
 
-  Cd:  0.2 # Drag coefficient
+  Cd:  0.2 # Drag coefficient Note: NHL forcing says 0.1, but i think it uses 0.2
   alpha_ml:  0.1  # Mixing length constant
   Cf:  0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
-  x:  1  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+  x:  6.67330000000000  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
 
-  Vcmax25:  31.15
-  alpha_gs:  7.3200
+  Vcmax25:  59.9300000000000
+  alpha_gs:  6.67330000000000
   alpha_p:  1
 
   wp_s50:  -9.1e+5 #value for oak from Mirfenderesgi
