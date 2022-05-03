@@ -7,7 +7,7 @@ optimization_options:
   output_fname: 'ds_canopy.nc'
   experiment_name: "fetch_UMBS_test_oak"
   objective_name: "ssqr"
-  ntrials: 10
+  ntrials: 1
 
 model_options:
   ###############################################################################
@@ -18,8 +18,8 @@ model_options:
   input_fname: "UMBS_flux_2011.csv"
 
 # Start and end in the fetch2 example
-  start_time: "2011-07-24 14:00:00" #begining of simulation #DOY 160
-  end_time: "2011-07-24 15:00:00" #end #DOY190 - 7/10 is doy 191
+  start_time: "2011-06-29 00:00:00" #begining of simulation #DOY 160
+  end_time: "2011-07-02 00:00:00" #end #DOY190 - 7/10 is doy 191
 
   dt:  1800  #seconds - input data resolution
   tmin:  0  #tmin [s]

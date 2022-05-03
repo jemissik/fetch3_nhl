@@ -27,12 +27,12 @@ model_options:
   # Printing slows down model run
   # Options to turn printing off or specify print frequency
   print_run_progress:  True  # Turn on/off printing for progress of time steps calculated
-  print_freq:  100  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
+  print_freq:  200  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
 
   #TRANSPIRATION OPTIONS - NHL OR PM
   ##################################
   transpiration_scheme:  1 # 0: PM transpiration; 1: NHL transpiration
-  zenith_method: "fetch2"  # Method to use for zenith angle calculation (if using NHL)
+  zenith_method: "CN"  # Method to use for zenith angle calculation (if using NHL)
 
   #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
   #########################################################
@@ -146,34 +146,34 @@ parameters:
   kmax: 1.0204081632653063e-09   #conductivity of xylem  [ m2/sPa]
   ap: 2.0e-6                                  #xylem cavitation parameter [Pa-1]
   bp: -1.5e+6                                #xylem cavitation parameter [Pa]
-  Aind_x: 8.62e-4                           #m2 xylem/m2 ground]
+  Aind_x: 0.000335057                           #m2 xylem/m2 ground]
   Phi_0: 5.74e+8                               #From bohrer et al 2005
   p: 20                                           #From bohrer et al 2005
   sat_xylem: 0.573                                #From bohrer et al 2005 [m3 h2o/m3xylem]
 
-  sapwood_area: 0.0177
+  sapwood_area: 0.03397475
   taper_top: 1.0  # Fraction of active xylem area at the top of the tree relative to the bottom
 
 
   #TREE PARAMETERS
-  Hspec: 22                      #Height average of trees [m]
+  Hspec: 18.9                      #Height average of trees [m]
   #From NHL code
-  LAI: 0.983304                      #[-] Leaf area index
+  LAI: 0.99                      #[-] Leaf area index
 
   #########################################################################3
   #NHL PARAMETERS
   ###########################################################################
   scale_nhl:  1
 
-  mean_crown_area_sp:  26.8600000000000 #from NHL
-  total_crown_area_sp:  2171.75744784689 #from NHL code
-  plot_area:  75649.5511
-  sum_LAI_plot:  3.7850736000000005
+  mean_crown_area_sp:  101.4
+  total_crown_area_sp:  5471.710609
+  plot_area:  10000
+  sum_LAI_plot:  3.66
 
-  Cd:  0.2 # Drag coefficient Note: NHL forcing says 0.1, but i think it uses 0.2
+  Cd:  0.1 # Drag coefficient Note: NHL forcing says 0.1, but i think it uses 0.2
   alpha_ml:  0.1  # Mixing length constant
   Cf:  0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
-  x:  6.67330000000000  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+  x:  1  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
 
   Vcmax25:  59.9300000000000
   alpha_gs:  6.67330000000000

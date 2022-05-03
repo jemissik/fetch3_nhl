@@ -1,20 +1,24 @@
 """
-Functions for calculating sap storage and sap flux from the model outputs 
+Functions for calculating sap storage and sap flux from the model outputs
 """
 
 import numpy as np
 import xarray as xr
 
-def format_inputs(nc_out):
+def format_inputs(nc_out, crown_area):
     H = nc_out["ds_all"].H
-    trans_2d = nc_out["ds_canopy"].trans_2d * 10**3 # 10**3 to convert m to kg
+
+    #trans_2d [ m3H2O m-2crown_projection s-1 m-1stem]
+    # 10**3 to convert m to kg
+    # multiply by crown area to get transpiration in [kg s-1 m-1stem]
+    trans_2d_kg = nc_out["ds_canopy"].trans_2d * 10**3 * crown_area
 
     #Get aboveground z indexes to slice the H dataset
     zind_canopy = np.arange(len(nc_out['ds_all'].z) - len(nc_out['ds_canopy'].z),len(nc_out['ds_all'].z))
 
     H_above = H.isel(z=zind_canopy)
 
-    return H_above, trans_2d
+    return H_above, trans_2d_kg
 
 def calc_sap_storage(H, params):
     sapwood_area = params.sapwood_area # m2

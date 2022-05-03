@@ -4,9 +4,9 @@ Provides scaling functions to convert common parameters to model parameters
 Config parameters that will be provided by the user:
 
 - :math:`\mathrm{LAI_p^{(sp)} \ [m^2_{leaf (sp)} / m^2_{ground}]}`: species-specific plot-level LAI
-- :math:`SD [trees \ hectare^{-1}]`: stand density [# trees per hectare]
-- DBH (stem diameter at breast height #TODO units [m or cm])
-- Active xylem fraction (or depth?) #TODO[m or cm]
+- :math:`\mathrm{SD [trees \ hectare^{-1}]}`: stand density [# trees per hectare]
+- DBH (stem diameter at breast height [cm])
+- Active xylem fraction (or depth?) [cm]
 - Crown Area (Ac_sp)
 
 Need to calculate:
@@ -46,27 +46,31 @@ def calc_LAIc_sp(LAIp_sp, mean_crown_area_sp, stand_density_sp):
     LAIc_sp = LAIp_sp / (mean_crown_area_sp * 10**-4 * stand_density_sp)
     return LAIc_sp
 
-def calc_xylem_cross_sectional_area(DBH, active_xylem_depth):
+def calc_xylem_cross_sectional_area(DBH_cm, active_xylem_depth_cm):
     """
     Calculate xylem cross-sectional area from DBH and active xylem depth
 
     Parameters
     ----------
-    DBH : float
+    DBH : float or array
         Diameter at breast height [cm]
-    active_xylem_depth : float
+    active_xylem_depth : float or array
         Active xylem depth [cm]
 
     Returns
     -------
-    xylem_cross_sectional_area : float
-        Cross-sectional area of active xylem [cm2]
+    xylem_cross_sectional_area : float or array
+        Cross-sectional area of active xylem [m2]
     """
-    # Calculate stem cross-sectional area
-    stem_cross_sectional_area = np.pi * (DBH/2) ** 2
+    # Convert DBH and active xylem depth to m
+    DBH_m = DBH_cm / 100
+    active_xylem_depth_m = active_xylem_depth_cm / 100
 
-    # Calculate cross-sectional area of inner portion of stem below sapwood
-    inner_cross_sectional_area = np.pi * (DBH/2 - active_xylem_depth) ** 2
+    # Calculate stem cross-sectional area
+    stem_cross_sectional_area = np.pi * (DBH_m/2) ** 2
+
+    # Calculate cross-sectional area of inner portion of stem (that is not active xylem)
+    inner_cross_sectional_area = np.pi * (DBH_m/2 - active_xylem_depth_m) ** 2
 
     # Xylem cross-sectional area
     xylem_cross_sectional_area = stem_cross_sectional_area - inner_cross_sectional_area

@@ -8,7 +8,6 @@ Uses Jarvis stomata reduction functions
 """
 import numpy as np
 
-from fetch3.cfg import cfg  # TODO CHANGE THIS
 from fetch3.model_setup import neg2zero
 from fetch3.met_data import Ta_2d, VPD_2d, SW_in_2d
 

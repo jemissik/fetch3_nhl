@@ -495,6 +495,7 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
     root_water=sum(EVsink_total)*1000*dt #mm
     #############################
 
+    #trans_2d [ m3H2O m-2ground s-1 m-1stem]
     transpiration_tot=sum(sum(trans_2d))*1000*dt*dz ##mm
 
     df_waterbal = pd.DataFrame(data={'theta_i':theta_i,
