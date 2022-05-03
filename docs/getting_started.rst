@@ -104,7 +104,6 @@ The meteorological variables that are required depend on whether you are using P
 - *PPFD_IN*: Incoming photosynthetic photon flux density (PAR) [µmolPhoton m-2 s-1]
 - *CO2_F*: CO2 concentration [µmolCO2 mol-1]
 - *RH*: Relative humidity [%]
-- *TA_F*: Air temperature [deg C]
 - *PA_F*: Atmospheric pressure [kPa]
 
 .. todo::

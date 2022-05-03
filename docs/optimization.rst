@@ -14,6 +14,10 @@ Install requirements:
 .. note::
       Make sure to install Ax inside your fetch-dev environment
 
+.. todo::
+      Future version will move all optimization requirements to the fetch3 environment file
+      for easier installation
+
 
 Prepare optimizaion configuration file
 --------------------------------------
@@ -25,6 +29,7 @@ The optimization configuration file is similar to the FETCH3 configuration file.
 To prepare this file:
 
 1. Update the ``optimization_options`` section:
+
       - **obsfile**: path to the data file containing sapflux observations
       - **obsvar**: column header for the variable of interest in the observations file
       - **model_path**: path to the fetch3 repository
@@ -37,9 +42,17 @@ To prepare this file:
 2. Prepare the ``model_options`` section. This is identical to the model options section in the FETCH3 config file.
 3. Prepare the ``parameters`` section. The parameters listed in this section are identical to those in the FETCH3 config file,
    but here you must specify additional information. For each parameter, you must specify:
+
       - **type**: fixed or range. Fixed parameters will not be optimized. Range parameters will be optimized.
       - **value or bounds**: For fixed parameters, you must specify the value of the parameter. For range parameters, you
         must specify bounds for the optimization.
+
+.. todo::
+      Will be updated soon:
+      
+      - cleaner options for specifying files and directories
+      - additional options for objective functions
+
 
 Running an optimization
 -----------------------
@@ -47,6 +60,9 @@ Running an optimization
 To run an optimization, ``cd`` into the ``optimize`` directory, then run::
 
       python run_optimization.py --config_path /Users/jmissik/Desktop/fetch_opt/umbs_optimization_config.yml
+
+Outputs will be saved in a folder inside the ``working_dir`` you specified, labeled with the experiment name and timestamp
+of the optimization run.
 
 .. note::
     Replace the paths and filenames in this example with the actual paths and files you are using.

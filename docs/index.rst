@@ -69,9 +69,10 @@ Contents
    getting_started
    model_config
    model_outputs
-   FETCH3 code reference <ftch/fetch3>
-   scaling
    optimization
+   scaling
+   roadmap
+   FETCH3 code reference <ftch/fetch3>
 
 
 
