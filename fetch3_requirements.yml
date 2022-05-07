@@ -16,3 +16,4 @@ dependencies:
   - PyYAML
   - conda-merge
   - pytest
+  -snakeviz
