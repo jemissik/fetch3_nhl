@@ -663,10 +663,8 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     Vcmax25 = cfg.Vcmax25
     alpha_gs = cfg.alpha_gs
     alpha_p = cfg.alpha_p
-    LAI_p_sp = cfg.LAI
-    plot_area = cfg.plot_area
-    total_crown_area_sp = cfg.total_crown_area_sp
-    mean_crown_area_sp = cfg.mean_crown_area_sp
+    LAIp_sp = cfg.LAI
+    LAIc_sp = cfg.LAIc_sp
     latitude = cfg.latitude
     longitude = cfg.longitude
     zenith_method = cfg.zenith_method
@@ -695,11 +693,8 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     zmin = 0
     z = np.arange(zmin, h, dz)  # [m]
 
-    # Calculate leaf area for each vertical layer (for one tree)
-    LAI_c_sp = LAI_p_sp * plot_area / total_crown_area_sp  # LAI per crown area [m2_leaf m-2_crown]
-
     # Distrubute leaves vertically, and assign leaf area to stem
-    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, LAI_c_sp, dz, h) #[m2leaf m-2crown m-1stem]
+    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, LAIc_sp, dz, h) #[m2leaf m-2crown m-1stem]
 
     # Calculate wind speed at each layer
     U, Km = solve_Uz(z, dz, Cd , LAD , U_top, h = h)

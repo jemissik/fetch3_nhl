@@ -76,3 +76,16 @@ def calc_xylem_cross_sectional_area(DBH_cm, active_xylem_depth_cm):
     xylem_cross_sectional_area = stem_cross_sectional_area - inner_cross_sectional_area
 
     return xylem_cross_sectional_area
+
+def calc_Aind_x(xylem_cross_sectional_area, mean_crown_area_sp):
+    """
+    Calculates the crown-level xylem area index [m2 xylem m-2 crown projection]
+
+    Parameters
+    ----------
+    xylem_cross_sectional_area : float
+        sapwood area [m2]
+    mean_crown_area_sp : float
+        Mean crown area of species (crown projection to ground) [m2]
+    """
+    return xylem_cross_sectional_area / mean_crown_area_sp

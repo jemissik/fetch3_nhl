@@ -1,19 +1,24 @@
 name: fetch3-dev
 channels:
-- conda-forge
-- defaults
+  - pytorch
+  - conda-forge
+  - defaults
 dependencies:
-- python=3.9
-- matplotlib
-- numpy
-- pandas
-- scipy
-- xarray
-- ipympl
-- pip
-- pip:
-  - click
-  - PyYAML
-  - conda-merge
-  - pytest
-  -snakeviz
+  - python=3.9
+  - torchvision
+  - pytorch
+  - matplotlib
+  - numpy
+  - pandas
+  - scipy
+  - xarray
+  - ipympl
+  - pip
+  - pip:
+    - ax-platform
+    - git+https://github.com/madeline-scyphers/optiwrap.git
+    - click
+    - PyYAML
+    - conda-merge
+    - pytest
+    - snakeviz

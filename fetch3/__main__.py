@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 
 from fetch3.model_setup import spatial_discretization, temporal_discretization
-from fetch3.model_config import setup_config
+from fetch3.model_config import setup_config, save_calculated_params
 from fetch3.met_data import prepare_met_data
 
 
@@ -62,6 +62,9 @@ def run(config_file, data_dir, output_dir):
     logger.info("Using output directory: " + str(output_dir) )
 
     cfg = setup_config(config_file)
+
+    #save the calculated params to a file
+    save_calculated_params(str(output_dir / 'calculated_params.yml'), cfg)
 
     ##########Set up spatial discretization
     zind = spatial_discretization(

@@ -185,7 +185,7 @@ If using the NHL transpiration scheme.
 * **alpha_gs** (float):
 * **alpha_p** (float):
 
-* **wp_s50** (float): 
+* **wp_s50** (float):
 * **c3** (float):
 
 * **LAD_norm** (str):  File with normalized LAD data
@@ -230,6 +230,7 @@ import logging
 
 import yaml
 from dataclasses import dataclass
+from fetch3.scaling import calc_LAIc_sp, calc_Aind_x, calc_xylem_cross_sectional_area
 
 # # Default paths for config file, input data, and model output
 # parent_path = Path(__file__).resolve().parent.parent
@@ -401,12 +402,6 @@ class ConfigParams:
     # TREE PARAMETERS
     species:  str
 
-    ###############################################################################
-    # PHYSICAL CONSTANTS
-    ###############################################################################
-    Rho:  float  ##[kg m-3]
-    g:  float # [m s-2]
-
     #ROOT PARAMETERS
     #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
     #Kr divided by rho*g
@@ -421,12 +416,16 @@ class ConfigParams:
     kmax: float   #conductivity of xylem  [ m2/sPa]
     ap: float                                  #xylem cavitation parameter [Pa-1]
     bp: float                                #xylem cavitation parameter [Pa]
-    Aind_x: float                           #m2 xylem/m2 ground]
     Phi_0: float                               #From bohrer et al 2005
     p: float                                          #From bohrer et al 2005
     sat_xylem: float                                #From bohrer et al 2005
-    sapwood_area: float
+
     taper_top: float
+
+    sapwood_depth: float  #Sapwood depth [cm]
+    dbh: float  #DBH [cm]
+    stand_density_sp: float  #Species-specific stand density [trees ha-1]
+
     #TREE PARAMETERS
     Hspec: float                      #Height average of trees [m]
     LAI: float                       #[-] Leaf area index
@@ -438,8 +437,6 @@ class ConfigParams:
     scale_nhl:  float
 
     mean_crown_area_sp:  float
-    total_crown_area_sp:  float
-    plot_area:  float
     sum_LAI_plot:  float
 
     Cd:  float # Drag coefficient
@@ -493,7 +490,28 @@ class ConfigParams:
     nl: float                   #[-] Jarvis leaf water potential parameter
     Emax: float        #m/s maximum nightime transpiration
 
-#TODO convert to function
+    ###############################################################################
+    # PHYSICAL CONSTANTS
+    ###############################################################################
+    Rho:  float = 998  #[kg m-3] water density
+    g:  float = 9.81  # [m s-2]
+
+
+    def __post_init__(self):
+      # divide Kr, Ksax, and kmax by rho*g
+      #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
+      self.Kr = self.Kr / (self.Rho * self.g)
+      self.Ksax = self.Ksax / (self.Rho * self.g)
+      self.kmax = self.kmax / (self.Rho * self.g)
+
+      #Calculate sapwood area
+      self.sapwood_area = calc_xylem_cross_sectional_area(self.dbh, self.sapwood_depth)
+
+      #Calculate Aind_x
+      self.Aind_x = calc_Aind_x(self.sapwood_area, self.mean_crown_area_sp)
+      #Calculate LAIc_sp
+      self.LAIc_sp = calc_LAIc_sp(self.LAI, self.mean_crown_area_sp, self.stand_density_sp)
+
 # Read configs from yaml file
 
 
@@ -505,3 +523,9 @@ def setup_config(config_file):
       config_dict = yaml.safe_load(yml_config)
   cfg = ConfigParams(**config_dict['model_options'], **config_dict['parameters'])
   return cfg
+
+def save_calculated_params(fileout, params):
+      with open(fileout, 'w') as f:
+        # Write model options from loaded config
+        # Parameters for the trial from Ax
+        yaml.dump(params, f)
