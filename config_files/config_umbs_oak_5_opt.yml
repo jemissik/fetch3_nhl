@@ -4,14 +4,14 @@ optimization_options:
   experiment: {}
   generation_strategy: {}
   scheduler:
-    total_trials: 4
+    total_trials: 1
   output_dir: "./output"
-  obsfile: './data/sapflux_data.csv'
+  obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
   data_path: "./data"
-  obsvar: 'md_oak'
-  output_fname: 'ds_canopy.nc'
-  experiment_name: "fetch_UMBS_test_oak"
+  obsvar: 'USA_UMB_CON_Qru_Js_5'
+  output_fname: 'sapflux.nc'
+  experiment_name: "fetch_UMBS_test_oak5"
 
 
 model_options:

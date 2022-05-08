@@ -305,11 +305,11 @@ parameters:
   wp_s50:
     type: range
     # value: -9.1e+5 #value for oak from Mirfenderesgi
-    bounds: [-2.0e6, -1.0e5]
+    bounds: [-2.0e+6, -1.0e+5]
   c3:
     type: range
     # value: 12.3 #value for oak from Mirfenderesgi
-    bounds: [0.1, 20]
+    bounds: [0.1, 20.0]
 
 
 
