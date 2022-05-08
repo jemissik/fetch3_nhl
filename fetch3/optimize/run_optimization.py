@@ -17,6 +17,7 @@ import datetime as dt
 import logging
 import time
 from pathlib import Path
+import shutil
 
 import click
 # from ax.storage.json_store.save import save_experiment
@@ -51,6 +52,9 @@ def main(config_file):
     config = load_experiment_config(config_file)  # Read experiment config'
     experiment_dir = make_experiment_dir(config["optimization_options"]["output_dir"],
                                          config["optimization_options"]["experiment_name"])
+
+    # Copy the experiment config to the experiment directory
+    shutil.copyfile(config_file, experiment_dir / Path(config_file).name)
 
     log_format = "%(levelname)s %(asctime)s - %(message)s"
     logging.basicConfig(
