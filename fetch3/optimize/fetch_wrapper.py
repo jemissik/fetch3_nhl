@@ -15,6 +15,7 @@ import yaml
 import pandas as pd
 import xarray as xr
 import numpy as np
+import atexit
 
 from pathlib import Path
 import datetime as dt
@@ -191,9 +192,11 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
     obsdf = obsdf.iloc[1:-1]
     modeldf = modeldf.sapflux_scaled.isel(time=np.arange(1,len(modeldf.time)-1))
 
-    #TODO drop nans
+    not_nans = ~obsdf[ex_settings['obsvar']].isna()
+    obsdf_not_nans = obsdf[ex_settings['obsvar']].loc[not_nans]
+    modeldf_not_nans = modeldf.data[not_nans]
 
-    return modeldf.data, obsdf[ex_settings['obsvar']]
+    return modeldf_not_nans, obsdf_not_nans
 
 
 def scale_sapflux(sapflux, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
@@ -210,7 +213,9 @@ def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot
                         / plot_area).sum(dim='z', skipna=True)
     return scaled_trans
 
+
 class Fetch3Wrapper(BaseWrapper):
+    _processes = []
     def __init__(self, ex_settings, model_settings, experiment_dir):
         self.ex_settings = ex_settings
         self.model_settings = model_settings
@@ -231,13 +236,10 @@ class Fetch3Wrapper(BaseWrapper):
                 f" {self.ex_settings['data_path']} --output_path {trial_dir}")
 
         args = cmd.split()
-        result = subprocess.run(
-            args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        popen = subprocess.Popen(
+            args, stdout=subprocess.PIPE, universal_newlines=True
         )
-
-        print(result.stdout)
-        print(result.stderr)
-        print("Done running model")
+        self._processes.append(popen)
 
     def set_trial_status(self, trial: Trial) -> None:
         """ "Get status of the job by a given ID. For simplicity of the example,
@@ -267,3 +269,10 @@ class Fetch3Wrapper(BaseWrapper):
             trial.arm.parameters,
         )
         return dict(y_pred=y_pred, y_true=y_true)
+
+
+def exit_handler():
+    for process in Fetch3Wrapper._processes:
+        process.kill()
+
+atexit.register(exit_handler)
