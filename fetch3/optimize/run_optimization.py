@@ -17,6 +17,7 @@ import datetime as dt
 import logging
 import time
 from pathlib import Path
+import shutil
 
 import click
 # from ax.storage.json_store.save import save_experiment
@@ -29,6 +30,8 @@ from optiwrap import (
     get_scheduler,
     make_experiment_dir,
     load_experiment_config,
+    save_experiment,
+    load_experiment
 )
 
 
@@ -56,6 +59,9 @@ def run(config_file):
     experiment_dir = make_experiment_dir(config["optimization_options"]["output_dir"],
                                          config["optimization_options"]["experiment_name"])
 
+    # Copy the experiment config to the experiment directory
+    shutil.copyfile(config_file, experiment_dir / Path(config_file).name)
+
     log_format = "%(levelname)s %(asctime)s - %(message)s"
     logging.basicConfig(
         filename=Path(experiment_dir) / "optimization.log",
@@ -79,6 +85,9 @@ def run(config_file):
     scheduler = get_scheduler(experiment, config=config)
 
     scheduler.run_all_trials()
+
+    # save_experiment(experiment, "experiment.json")
+    # print(load_experiment("experiment.json.pickle"))
 
     # metric = get_metric_from_config(config["optimization_options"]["metric"])
     # bundle = RegistryBundle(

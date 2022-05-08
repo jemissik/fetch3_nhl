@@ -192,9 +192,11 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
     obsdf = obsdf.iloc[1:-1]
     modeldf = modeldf.sapflux_scaled.isel(time=np.arange(1,len(modeldf.time)-1))
 
-    #TODO drop nans
+    not_nans = ~obsdf[ex_settings['obsvar']].isna()
+    obsdf_not_nans = obsdf[ex_settings['obsvar']].loc[not_nans]
+    modeldf_not_nans = modeldf.data[not_nans]
 
-    return modeldf.data, obsdf[ex_settings['obsvar']]
+    return modeldf_not_nans, obsdf_not_nans
 
 
 def scale_sapflux(sapflux, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
