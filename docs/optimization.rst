@@ -32,9 +32,9 @@ To prepare this file:
 
       - **obsfile**: path to the data file containing sapflux observations
       - **obsvar**: column header for the variable of interest in the observations file
-      - **model_path**: path to the fetch3 repository
+      - **model_dir**: path to the fetch3 repository
       - **data_path**: path to the input data directory for the model
-      - **working_dir**: directory where the optimization output will be written
+      - **output_dir**: directory where the optimization output will be written
       - **output_fname**: *Don't change.* Name of model output file
       - **experiment_name**: Name to label this optimization experiment with
       - **objective_name**: *Don't change for now - future version will have more options*. Objective function to use for optimization.
@@ -49,7 +49,7 @@ To prepare this file:
 
 .. todo::
       Will be updated soon:
-      
+
       - cleaner options for specifying files and directories
       - additional options for objective functions
 
@@ -57,7 +57,7 @@ To prepare this file:
 Running an optimization
 -----------------------
 
-To run an optimization, ``cd`` into the ``optimize`` directory, then run::
+To run an optimization, ``cd`` into the fetch3_nhl directory, then run::
 
       python run_optimization.py --config_path /Users/jmissik/Desktop/fetch_opt/umbs_optimization_config.yml
 

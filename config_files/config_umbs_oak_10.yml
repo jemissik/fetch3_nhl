@@ -142,12 +142,12 @@ parameters:
   # sapwood_area: 0.03397475
   taper_top: 1.0  # Fraction of active xylem area at the top of the tree relative to the bottom
 
-  sapwood_depth: 5.01  # Sapwood depth, measured at breast height [cm]
-  dbh: 33.5  # Diameter of plant at breast height [cm]
+  sapwood_depth: 3.23  # Sapwood depth, measured at breast height [cm]
+  dbh: 23.4  # Diameter of plant at breast height [cm]
   stand_density_sp: 53.96  # Species-specific stand density [trees ha-1]
 
   #TREE PARAMETERS
-  Hspec: 26.31  # Height of tree [m]
+  Hspec: 16.03  # Height of tree [m]
   #From NHL code
   LAI: 0.99                      #[-] Leaf area index (species-specific, plot-level)
 
@@ -156,7 +156,7 @@ parameters:
   ###########################################################################
   scale_nhl:  1
 
-  mean_crown_area_sp:  101.4
+  mean_crown_area_sp:  70
   sum_LAI_plot:  3.66
 
   Cd:  0.1 # Drag coefficient Note: NHL forcing says 0.1, but i think it uses 0.2

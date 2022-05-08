@@ -89,3 +89,27 @@ def calc_Aind_x(xylem_cross_sectional_area, mean_crown_area_sp):
         Mean crown area of species (crown projection to ground) [m2]
     """
     return xylem_cross_sectional_area / mean_crown_area_sp
+
+#[ m3H2O m-2ground s-1 m-1stem]
+def convert_trans2d_to_cm3hr(trans_2d, crown_area, dz):
+    #[ m3H2O m-2crown s-1 m-1stem]
+
+    # convert from per ground to per tree -> [m3h20 s-1]
+    trans = trans2d_to_tree(trans_2d, crown_area, dz)
+
+    # Convert m3/s to cm3/hr 
+    trans = convert_trans_m3s_to_cm3hr(trans)
+
+    return trans
+
+def convert_trans_m3s_to_cm3hr(trans):
+    return trans * (100**3) * 60*60
+
+def integrate_trans2d(trans_2d, dz):
+    trans = (trans_2d * dz).sum(dim='z')
+    return trans
+
+def trans2d_to_tree(trans_2d, crown_area, dz):
+    #[m3h20 s-1]
+    trans = integrate_trans2d(trans_2d, dz) * crown_area
+    return trans

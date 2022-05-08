@@ -30,7 +30,9 @@ Site information
 ----------------
 * **latitude** (float): Latitude of site in decimal degrees
 * **longitude** (longitude): Longitude of site in decimal degrees
-* **time_offset** (float): Offset from UTC time, e.g EST = UTC -5 hrs
+* **time_offset** (float): Offset from UTC time, e.g EST = UTC -5 hrs. This is used in the calculation of the zenith angle
+  to figure out the standard meridian of your location. It is not used to shift the timestamps in your input data. Timestamps
+  in the input data should be in local standard time. 
 
 Run options - printing
 ----------------------
@@ -136,23 +138,16 @@ Tree parameters:
 * **species** (str):  Tree species
 
 
-PHYSICAL CONSTANTS
-^^^^^^^^^^^^^^^^^^
-**Rho**:  float  ##[kg m-3]
-**g**:  float # [m s-2]
-
 Root parameters
 ^^^^^^^^^^^^^^^
-Dividing by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
-
-* **Kr** (float): soil-to-root radial conductance *[m/sPa]*, divided by rho*g
+* **Kr** (float): soil-to-root radial conductance *[m/sPa]*
 * **qz** (float): unitless - parameter for the root mass distribution - Verma et al., 2014
-* **Ksax** (float): specific axial conductivity of roots *[m/s]*, divided by rho*g
+* **Ksax** (float): specific axial conductivity of roots *[m/s]*
 * **Aind_r** (float): *[m2 root xylem/m2 ground]*
 
 Xylem parameters
 ^^^^^^^^^^^^^^^^
-* **kmax** (float): conductivity of xylem *[m2/sPa]*, divided by rho*g
+* **kmax** (float): conductivity of xylem *[m2/sPa]*
 * **ap** (float): xylem cavitation parameter *[Pa-1]*
 * **bp** (float): xylem cavitation parameter *[Pa]*
 * **Aind_x** (float): *[m2 xylem/m2 ground]*
@@ -518,14 +513,14 @@ class ConfigParams:
 # Convert config dict to config dataclass
 
 def setup_config(config_file):
-  logger.info("Reading config file" )
-  with open(config_file, "r") as yml_config:
-      config_dict = yaml.safe_load(yml_config)
-  cfg = ConfigParams(**config_dict['model_options'], **config_dict['parameters'])
-  return cfg
+    logger.info("Reading config file" )
+    with open(config_file, "r") as yml_config:
+        config_dict = yaml.safe_load(yml_config)
+    cfg = ConfigParams(**config_dict['model_options'], **config_dict['parameters'])
+    return cfg
 
-def save_calculated_params(fileout, params):
-      with open(fileout, 'w') as f:
+def save_calculated_params(fileout, cfg):
+    with open(fileout, 'w') as f:
         # Write model options from loaded config
         # Parameters for the trial from Ax
-        yaml.dump(params, f)
+        yaml.dump(cfg, f)
