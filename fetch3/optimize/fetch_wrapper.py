@@ -173,7 +173,7 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
     # Read in observation data
     obsdf = pd.read_csv(obsfile, parse_dates = [0])
     #Converting time since sapfluxnet data is in GMT
-    obsdf["Timestamp"] = obsdf.TIMESTAMP.tz_convert("EST")
+    obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST")
     obsdf = obsdf.set_index('Timestamp')
 
     # Read in model output
