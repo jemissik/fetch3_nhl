@@ -46,6 +46,10 @@ def main(config_file):
     Args:
         config (os.PathLike): Path to configuration YAML file
     """
+    run(config_file)
+
+
+def run(config_file):
     start = time.time()
 
     config = load_experiment_config(config_file)  # Read experiment config'
@@ -84,6 +88,7 @@ def main(config_file):
     # save_experiment(experiment, "experiment.json")
     # from ax.storage.json_store.load import load_experiment
     logging.info("\nTrials completed! Total run time: %d", time.time() - start)
+    return scheduler
 
 
 if __name__ == "__main__":
