@@ -189,7 +189,7 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
 
     # remove first and last timestamp
     obsdf = obsdf.iloc[1:-1]
-    modeldf = modeldf.trans_scaled.isel(time=np.arange(1,len(modeldf.time)-1))
+    modeldf = modeldf.sapflux_scaled.isel(time=np.arange(1,len(modeldf.time)-1))
 
     #TODO drop nans
 

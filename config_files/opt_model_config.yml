@@ -42,7 +42,7 @@ model_options:
   # Printing slows down model run
   # Options to turn printing off or specify print frequency
   print_run_progress:  True  # Turn on/off printing for progress of time steps calculated
-  print_freq:  100  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
+  print_freq:  500  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
 
   ###############################################################################
   #TRANSPIRATION OPTIONS - NHL OR PM
