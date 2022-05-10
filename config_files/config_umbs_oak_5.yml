@@ -92,9 +92,9 @@ parameters:
 
   #TODO - remove these variables? or change ?
   cte_clay: 3 #depth from 0-3m initial condition of clay [and SWC] is constant
-  H_init_soilbottom:  -6.09
-  H_init_soilmid:  -0.402
-  H_init_canopytop:  -23.3
+  H_init_soilbottom:  -6.09  #m? - same as boundary condition? #TODO change to soil water content at bottom layer
+  H_init_soilmid:  -0.402  #change to soil water content at transition from layer 1 to layer 2
+  H_init_canopytop:  -23.3  #should be hydrostatic water potential in m, should change to be calculated
 
   #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
 
