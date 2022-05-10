@@ -30,6 +30,7 @@ from optiwrap import (
     get_scheduler,
     make_experiment_dir,
     load_experiment_config,
+    scheduler_to_json_file,
     save_experiment,
     load_experiment
 )
@@ -97,6 +98,7 @@ def run(config_file):
     # save_experiment(experiment, "experiment.json")
     # from ax.storage.json_store.load import load_experiment
     logging.info("\nTrials completed! Total run time: %d", time.time() - start)
+    scheduler_to_json_file(scheduler, experiment_dir / 'scheduler.json')
     return scheduler
 
 

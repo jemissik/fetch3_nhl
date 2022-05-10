@@ -32,7 +32,7 @@ Site information
 * **longitude** (longitude): Longitude of site in decimal degrees
 * **time_offset** (float): Offset from UTC time, e.g EST = UTC -5 hrs. This is used in the calculation of the zenith angle
   to figure out the standard meridian of your location. It is not used to shift the timestamps in your input data. Timestamps
-  in the input data should be in local standard time. 
+  in the input data should be in local standard time.
 
 Run options - printing
 ----------------------
@@ -102,9 +102,9 @@ from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
 from 4,2 m [sand layer] cte value of -0.402 m
 
 * **cte_clay** (float): depth from 0-3m initial condition of clay [and SWC] is constant
-* **H_init_soilbottom** (float):  #TODO
-* **H_init_soilmid** (float):  #TODO
-* **H_init_canopytop** (float):  #TODO
+* **H_init_soilbottom** (float):
+* **H_init_soilmid** (float):
+* **H_init_canopytop** (float):
 
 Soil parameters - using Van Genuchten relationships
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -150,25 +150,23 @@ Xylem parameters
 * **kmax** (float): conductivity of xylem *[m2/sPa]*
 * **ap** (float): xylem cavitation parameter *[Pa-1]*
 * **bp** (float): xylem cavitation parameter *[Pa]*
-* **Aind_x** (float): *[m2 xylem/m2 ground]*
 * **Phi_0** (float): From bohrer et al 2005
 * **p** (float): From bohrer et al 2005
 * **sat_xylem** (float): From bohrer et al 2005
+* **sapwood_depth**: [cm]
 
 Tree parameters
 ^^^^^^^^^^^^^^^
 * **Hspec** (float): Height average of trees *[m]*
 * **LAI** (float): *[-]* Leaf area index
+* **dbh**: [cm]
+* **stand_density_sp**: species-specific stand density [trees ha-1]
 
 NHL transpiration scheme parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 If using the NHL transpiration scheme.
 
-* **crown_scaling** (float):
-
 * **mean_crown_area_sp** (float):
-* **total_crown_area_sp** (float):
-* **plot_area** (float):
 * **sum_LAI_plot** (float):
 
 * **Cd** (float): Drag coefficient

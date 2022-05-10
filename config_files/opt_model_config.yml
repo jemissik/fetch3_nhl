@@ -1,10 +1,10 @@
 optimization_options:
   metric:  # todo or []
-    metric_name: "RootMeanSquaredError"
+    metric_name: "MeanSquaredError"
   experiment: {}
   generation_strategy: {}
   scheduler:
-    total_trials: 10
+    total_trials: 5
   output_dir: "./output"
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
@@ -22,9 +22,8 @@ model_options:
   # File for input met data
   input_fname: "UMBS_flux_2011.csv"
 
-# Start and end in the fetch2 example
   start_time: "2011-06-12 00:00:00" #begining of simulation #DOY 160
-  end_time: "2011-06-12 01:00:00" #end #DOY190 - 7/10 is doy 191
+  end_time: "2011-06-13 00:00:00" #end #DOY190 - 7/10 is doy 191
 
   dt:  1800  #seconds - input data resolution
   tmin:  0  #tmin [s]
@@ -57,7 +56,7 @@ model_options:
   dt0:  20  #model temporal resolution [s]
   dz:  0.1  #model spatial resolution [m]
 
-  stop_tol:  0.01  #stop tolerance of equation converging
+  stop_tol:  0.001  #stop tolerance of equation converging
 
   #############################################################################
   #MODEL PARAMETERS

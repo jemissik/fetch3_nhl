@@ -59,7 +59,7 @@ Running an optimization
 
 To run an optimization, ``cd`` into the fetch3_nhl directory, then run::
 
-      python run_optimization.py --config_path /Users/jmissik/Desktop/fetch_opt/umbs_optimization_config.yml
+      python optimization_run.py  --config_path your_config_path
 
 Outputs will be saved in a folder inside the ``working_dir`` you specified, labeled with the experiment name and timestamp
 of the optimization run.

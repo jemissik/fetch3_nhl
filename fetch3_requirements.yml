@@ -17,7 +17,7 @@ dependencies:
   - pip
   - pip:
     - ax-platform
-    # - git+https://github.com/madeline-scyphers/optiwrap.git
+    - git+https://github.com/madeline-scyphers/optiwrap.git
     - click
     - PyYAML
     - conda-merge

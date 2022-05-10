@@ -1,18 +1,20 @@
 """
-Provides scaling functions to convert common parameters to model parameters
+Provides scaling functions to convert common parameters to model parameters,
+and convenience functions for unit conversions of transpiration.
 
 Config parameters that will be provided by the user:
 
 - :math:`\mathrm{LAI_p^{(sp)} \ [m^2_{leaf (sp)} / m^2_{ground}]}`: species-specific plot-level LAI
 - :math:`\mathrm{SD [trees \ hectare^{-1}]}`: stand density [# trees per hectare]
 - DBH (stem diameter at breast height [cm])
-- Active xylem fraction (or depth?) [cm]
-- Crown Area (Ac_sp)
+- Sapwood depth [cm]
+- :math:`\mathrm{A_c^{(sp)} [m^2]}`: Mean crown area (species-specific)
 
-Need to calculate:
+Calculated parameters:
 
 - species-specific crown-level LAI (LAIc_sp) [m2 leaf (sp) / m2 ground]
-- Stem area / xylem area
+- sapwood area [m2]
+- xylem area index (Aind_x) : [m2 xylem m-2 ground]
 """
 
 import numpy as np
@@ -97,7 +99,7 @@ def convert_trans2d_to_cm3hr(trans_2d, crown_area, dz):
     # convert from per ground to per tree -> [m3h20 s-1]
     trans = trans2d_to_tree(trans_2d, crown_area, dz)
 
-    # Convert m3/s to cm3/hr 
+    # Convert m3/s to cm3/hr
     trans = convert_trans_m3s_to_cm3hr(trans)
 
     return trans
