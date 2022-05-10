@@ -1,18 +1,20 @@
 """
-Provides scaling functions to convert common parameters to model parameters
+Provides scaling functions to convert common parameters to model parameters,
+and convenience functions for unit conversions of transpiration.
 
 Config parameters that will be provided by the user:
 
 - :math:`\mathrm{LAI_p^{(sp)} \ [m^2_{leaf (sp)} / m^2_{ground}]}`: species-specific plot-level LAI
-- :math:`SD [trees \ hectare^{-1}]`: stand density [# trees per hectare]
-- DBH (stem diameter at breast height #TODO units [m or cm])
-- Active xylem fraction (or depth?) #TODO[m or cm]
-- Crown Area (Ac_sp)
+- :math:`\mathrm{SD [trees \ hectare^{-1}]}`: stand density [# trees per hectare]
+- DBH (stem diameter at breast height [cm])
+- Sapwood depth [cm]
+- :math:`\mathrm{A_c^{(sp)} [m^2]}`: Mean crown area (species-specific)
 
-Need to calculate:
+Calculated parameters:
 
 - species-specific crown-level LAI (LAIc_sp) [m2 leaf (sp) / m2 ground]
-- Stem area / xylem area
+- sapwood area [m2]
+- xylem area index (Aind_x) : [m2 xylem m-2 ground]
 """
 
 import numpy as np
@@ -46,29 +48,70 @@ def calc_LAIc_sp(LAIp_sp, mean_crown_area_sp, stand_density_sp):
     LAIc_sp = LAIp_sp / (mean_crown_area_sp * 10**-4 * stand_density_sp)
     return LAIc_sp
 
-def calc_xylem_cross_sectional_area(DBH, active_xylem_depth):
+def calc_xylem_cross_sectional_area(DBH_cm, active_xylem_depth_cm):
     """
     Calculate xylem cross-sectional area from DBH and active xylem depth
 
     Parameters
     ----------
-    DBH : float
+    DBH : float or array
         Diameter at breast height [cm]
-    active_xylem_depth : float
+    active_xylem_depth : float or array
         Active xylem depth [cm]
 
     Returns
     -------
-    xylem_cross_sectional_area : float
-        Cross-sectional area of active xylem [cm2]
+    xylem_cross_sectional_area : float or array
+        Cross-sectional area of active xylem [m2]
     """
-    # Calculate stem cross-sectional area
-    stem_cross_sectional_area = np.pi * (DBH/2) ** 2
+    # Convert DBH and active xylem depth to m
+    DBH_m = DBH_cm / 100
+    active_xylem_depth_m = active_xylem_depth_cm / 100
 
-    # Calculate cross-sectional area of inner portion of stem below sapwood
-    inner_cross_sectional_area = np.pi * (DBH/2 - active_xylem_depth) ** 2
+    # Calculate stem cross-sectional area
+    stem_cross_sectional_area = np.pi * (DBH_m/2) ** 2
+
+    # Calculate cross-sectional area of inner portion of stem (that is not active xylem)
+    inner_cross_sectional_area = np.pi * (DBH_m/2 - active_xylem_depth_m) ** 2
 
     # Xylem cross-sectional area
     xylem_cross_sectional_area = stem_cross_sectional_area - inner_cross_sectional_area
 
     return xylem_cross_sectional_area
+
+def calc_Aind_x(xylem_cross_sectional_area, mean_crown_area_sp):
+    """
+    Calculates the crown-level xylem area index [m2 xylem m-2 crown projection]
+
+    Parameters
+    ----------
+    xylem_cross_sectional_area : float
+        sapwood area [m2]
+    mean_crown_area_sp : float
+        Mean crown area of species (crown projection to ground) [m2]
+    """
+    return xylem_cross_sectional_area / mean_crown_area_sp
+
+#[ m3H2O m-2ground s-1 m-1stem]
+def convert_trans2d_to_cm3hr(trans_2d, crown_area, dz):
+    #[ m3H2O m-2crown s-1 m-1stem]
+
+    # convert from per ground to per tree -> [m3h20 s-1]
+    trans = trans2d_to_tree(trans_2d, crown_area, dz)
+
+    # Convert m3/s to cm3/hr
+    trans = convert_trans_m3s_to_cm3hr(trans)
+
+    return trans
+
+def convert_trans_m3s_to_cm3hr(trans):
+    return trans * (100**3) * 60*60
+
+def integrate_trans2d(trans_2d, dz):
+    trans = (trans_2d * dz).sum(dim='z')
+    return trans
+
+def trans2d_to_tree(trans_2d, crown_area, dz):
+    #[m3h20 s-1]
+    trans = integrate_trans2d(trans_2d, dz) * crown_area
+    return trans

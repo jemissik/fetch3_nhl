@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 
 from fetch3.model_setup import spatial_discretization, temporal_discretization
-from fetch3.model_config import setup_config
+from fetch3.model_config import setup_config, save_calculated_params
 from fetch3.met_data import prepare_met_data
 
 
@@ -57,46 +57,55 @@ def run(config_file, data_dir, output_dir):
     # Start logger
     start_logger(output_dir=output_dir)
     logger = logging.getLogger(__file__)
-    # Log the directories being used
-    logger.info("Using config file: " + str(config_file) )
-    logger.info("Using output directory: " + str(output_dir) )
+    try:
+        # Log the directories being used
+        logger.info("Using config file: " + str(config_file) )
+        logger.info("Using output directory: " + str(output_dir) )
 
-    cfg = setup_config(config_file)
+        cfg = setup_config(config_file)
 
-    ##########Set up spatial discretization
-    zind = spatial_discretization(
-    cfg.dz, cfg.Soil_depth, cfg.Root_depth, cfg.Hspec, cfg.sand_d, cfg.clay_d)
-    ######prepare met data
-    met, tmax, start_time, end_time = prepare_met_data(cfg, data_dir, zind.z_upper)
+        #save the calculated params to a file
+        save_calculated_params(str(output_dir / 'calculated_params.yml'), cfg)
 
-    t_num, nt = temporal_discretization(cfg, tmax)
+        ##########Set up spatial discretization
+        zind = spatial_discretization(
+        cfg.dz, cfg.Soil_depth, cfg.Root_depth, cfg.Hspec, cfg.sand_d, cfg.clay_d)
+        ######prepare met data
+        met, tmax, start_time, end_time = prepare_met_data(cfg, data_dir, zind.z_upper)
 
-    ############## Calculate initial conditions #######################
-    logger.info("Calculating initial conditions " )
-    H_initial, Head_bottom_H = initial_conditions(cfg, met.q_rain, zind)
+        t_num, nt = temporal_discretization(cfg, tmax)
+
+        ############## Calculate initial conditions #######################
+        logger.info("Calculating initial conditions " )
+        H_initial, Head_bottom_H = initial_conditions(cfg, met.q_rain, zind)
 
 
-    ############## Run the model #######################
-    logger.info("Running the model ")
-    H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink,EVsink_ts, THETA, infiltration,trans_2d = Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data_dir)
+        ############## Run the model #######################
+        logger.info("Running the model ")
+        H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink,EVsink_ts, THETA, infiltration,trans_2d = Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data_dir)
 
-    ############## Calculate water balance and format model outputs #######################
-    df_waterbal, df_EP, nc_output = format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink, EVsink_ts, THETA,
-                       infiltration,trans_2d, cfg.dt, start_time, end_time, cfg.dz, cfg, zind)
+        ############## Calculate water balance and format model outputs #######################
+        df_waterbal, df_EP, nc_output = format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink, EVsink_ts, THETA,
+                        infiltration,trans_2d, cfg.dt, start_time, end_time, cfg.dz, cfg, zind)
 
-    # Calculate sapflux and aboveground storage
-    H_above, trans_kg = format_inputs(nc_output)
+        # Calculate sapflux and aboveground storage
+        H_above, trans_2d_tree = format_inputs(nc_output, cfg.mean_crown_area_sp)
 
-    ds_sapflux = calc_sapflux(H_above, trans_kg, cfg)
+        ds_sapflux = calc_sapflux(H_above, trans_2d_tree, cfg)
 
-    nc_output['sapflux'] = ds_sapflux
+        nc_output['sapflux'] = ds_sapflux
 
-    ####################### Save model outputs ###################################
-    logger.info("Saving outputs")
-    save_csv(output_dir, df_waterbal, df_EP)
-    save_nc(output_dir, nc_output)
+        ####################### Save model outputs ###################################
+        logger.info("Saving outputs")
+        save_csv(output_dir, df_waterbal, df_EP)
+        save_nc(output_dir, nc_output)
+    except Exception as e:
+        logger.error("Error completing Run! Reason: %s" % e)
 
-    logger.info(f"run time: {time.time() - start} s")  # end run clock
+    finally:
+        logger.info(f"run time: {time.time() - start} s")  # end run clock
+        logger.info("run complete")
+
 
 
 def start_logger(output_dir):

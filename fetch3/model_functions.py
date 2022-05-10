@@ -13,6 +13,7 @@ import xarray as xr
 from scipy import linalg
 from numpy.linalg import multi_dot
 import logging
+import torch
 
 
 logger = logging.getLogger(__file__)
@@ -332,6 +333,9 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
 #######################################################################
             #tridiagonal matrix
+            # LA note:
+            # This matrix is invertable because kbarplus and kbarminus should never be 0 at the same place (under reasonable situatisn)
+            # and then with deltaplus and deltaminus you atridiagonal matrix with values defined on every diagonal
             A = (1/cfg.dt0)*C - (1/(cfg.dz**2))*(np.dot(Kbarplus,DeltaPlus) - np.dot(Kbarminus,DeltaMinus))
 
 
@@ -428,7 +432,10 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
 
             #Compute deltam for iteration level m+1 : equations S.25 to S.41 (matrix)
-            deltam = np.dot(linalg.pinv2(A),R_MPFD)
+            # deltam = np.dot(linalg.pinv2(A),R_MPFD)
+            A_ = torch.from_numpy(A)
+            R_MPFD_ = torch.from_numpy(R_MPFD)
+            deltam = torch.linalg.lstsq(A_, R_MPFD_, rcond=-1).solution.numpy()
 
 
             if  np.max(np.abs(deltam[:])) < cfg.stop_tol:  #equation S.42
@@ -495,6 +502,7 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
     root_water=sum(EVsink_total)*1000*dt #mm
     #############################
 
+    #trans_2d [ m3H2O m-2ground s-1 m-1stem]
     transpiration_tot=sum(sum(trans_2d))*1000*dt*dz ##mm
 
     df_waterbal = pd.DataFrame(data={'theta_i':theta_i,
