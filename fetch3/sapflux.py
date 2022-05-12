@@ -21,14 +21,14 @@ def format_inputs(nc_out, crown_area):
 
     return H_above, trans_2d_tree
 
-def calc_sap_storage(H, cfg):
+def calc_sap_storage(H_MPa, cfg):
     """
     _summary_
 
     Parameters
     ----------
     H : xarray.dataarray
-        Water potential [Pa]
+        Water potential [MPa]
     cfg : dataclass
         Model configuration parameters
 
@@ -41,6 +41,9 @@ def calc_sap_storage(H, cfg):
     dz = cfg.dz
     Phi0x = cfg.Phi_0
     p = cfg.p
+
+    #Convert H to Pa
+    H = H_MPa * 10**6
 
     #cfg.sat_xylem is in [m3 h2o/m3xylem]
     thetasat = cfg.sat_xylem
