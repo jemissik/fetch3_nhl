@@ -72,6 +72,7 @@ Contents
    optimization
    scaling
    roadmap
+   changelog
    FETCH3 code reference <ftch/fetch3>
 
 
