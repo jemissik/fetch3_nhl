@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Roadmap &#8212; FETCH3  documentation</title>
+    <title>Using git &#8212; FETCH3  documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -32,8 +32,8 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Using git" href="git_stuff.html" />
-    <link rel="prev" title="Scaling" href="scaling.html" />
+    <link rel="next" title="fetch3" href="ftch/fetch3.html" />
+    <link rel="prev" title="Roadmap" href="roadmap.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -98,14 +98,14 @@
  </a>
 </li>
 
-<li class="toctree-l1 current active nav-item">
- <a class="current reference internal nav-link" href="#">
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="roadmap.html">
   Roadmap
  </a>
 </li>
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="git_stuff.html">
+<li class="toctree-l1 current active nav-item">
+ <a class="current reference internal nav-link" href="#">
   Using git
  </a>
 </li>
@@ -166,39 +166,9 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage mt-5 pt-1 pb-3">
-    <i class="fas fa-list"></i> On this page
-</div>
 
 <nav id="bd-toc-nav">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#in-progress">
-   In progress:
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#to-be-added-soon">
-   To be added soon:
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#future">
-   Future:
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#change-log">
-   Change log
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#id1">
-   5-7-22:
-  </a>
- </li>
-</ul>
-
+    
 </nav>
               </div>
               
@@ -218,42 +188,18 @@
               
               <div>
                 
-  <section id="roadmap">
-<h1>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this headline">#</a></h1>
-<section id="in-progress">
-<h2>In progress:<a class="headerlink" href="#in-progress" title="Permalink to this headline">#</a></h2>
-<ul class="simple">
-<li><p>Examples for exploring model output</p></li>
-<li><p>Code refactoring</p></li>
-<li><p>Better documentation of model inputs, outputs, and units</p></li>
-</ul>
-</section>
-<section id="to-be-added-soon">
-<h2>To be added soon:<a class="headerlink" href="#to-be-added-soon" title="Permalink to this headline">#</a></h2>
-<ul class="simple">
-<li><p>Additional optimization objective function options</p></li>
-</ul>
-</section>
-<section id="future">
-<h2>Future:<a class="headerlink" href="#future" title="Permalink to this headline">#</a></h2>
-<ul class="simple">
-<li><p>code performance enhancements</p></li>
-<li><p>multi-objective optimization</p></li>
-<li><p>plot-scale version of model &amp; optimization</p></li>
-<li><p>Improvements to NHL transpiration module</p></li>
-</ul>
-</section>
-<section id="change-log">
-<h2>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">#</a></h2>
-</section>
-<section id="id1">
-<h2>5-7-22:<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
-<ul class="simple">
-<li><p>Performance improvements: Replaced scipy.lingalg.pinv2 with torch.linalg.lstqr for ~75% performance improvement</p></li>
-<li><p>Updates to required input parameters (uses DBH, sapwood depth to calculate sapwood area)</p></li>
-<li><p>Updates to use new version of optimization package</p></li>
-</ul>
-</section>
+  <section id="using-git">
+<h1>Using git<a class="headerlink" href="#using-git" title="Permalink to this headline">#</a></h1>
+<p>If you are going to be editing the FETCH3 code, you should work from your own fork
+so that you can easily merge changes from the FETCH3 repository as it is updated.</p>
+<p>Some instructions for merging upstream changes to your own branch:</p>
+<p><a class="reference external" href="https://www.atlassian.com/git/tutorials/git-forks-and-upstreams">https://www.atlassian.com/git/tutorials/git-forks-and-upstreams</a></p>
+<p>Note that the default branch of fetch3 is called <cite>develop</cite>, so from your branch that
+you want to merge changes into, you will run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+<span class="n">git</span> <span class="n">merge</span> <span class="n">upstream</span><span class="o">/</span><span class="n">develop</span>
+</pre></div>
+</div>
 </section>
 
 
@@ -262,17 +208,17 @@
               
               <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="scaling.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="roadmap.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Scaling</p>
+            <p class="prev-next-title">Roadmap</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="git_stuff.html" title="next page">
+    <a class='right-next' id="next-link" href="ftch/fetch3.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Using git</p>
+        <p class="prev-next-title">fetch3</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>

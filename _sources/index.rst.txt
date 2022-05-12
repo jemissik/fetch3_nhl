@@ -72,7 +72,7 @@ Contents
    optimization
    scaling
    roadmap
-   changelog
+   git_stuff
    FETCH3 code reference <ftch/fetch3>
 
 
