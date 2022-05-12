@@ -183,7 +183,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     dim=np.mod(t_num,1800)==0
     dim=sum(bool(x) for x in dim)
 
-    H = np.zeros(shape=(nz,dim)) #Stem water potential [Pa]
+    H = np.zeros(shape=(nz,dim)) # Water potential [Pa]
     trans_2d=np.zeros(shape=(len(z_upper),dim))
     K=np.zeros(shape=(nz,dim))
     Capac=np.zeros(shape=(nz,dim))
