@@ -74,6 +74,7 @@ def run(config_file, data_dir, output_dir):
         met, tmax, start_time, end_time = prepare_met_data(cfg, data_dir, zind.z_upper)
 
         t_num, nt = temporal_discretization(cfg, tmax)
+        logger.info("Total timesteps to calculate: : %d" % nt)
 
         ############## Calculate initial conditions #######################
         logger.info("Calculating initial conditions " )
