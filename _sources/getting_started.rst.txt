@@ -49,18 +49,24 @@ It is recommended to create a new conda environment for FETCH3, using the provid
 **To install using the command line**:
 
 1. Use ``cd`` to navigate into the FETCH3 directory that you cloned from GitHub.
-2. Create FETCH3's conda environment::
+2. Create FETCH3's conda environment.
 
-    conda env create --file fetch3_requirements.yml
+   For Linux, Windows, and Intel Macs::
+
+     conda env create --file fetch3_requirements.yml
+
+   For M1 Macs::
+
+     conda env create --file fetch3_requirements_m1.yml
 
 3. To activate the conda environment, run::
 
     conda activate fetch3-dev
 
-  Make sure you're using the FETCH3 conda environment when you try to run the model.
+   Make sure you're using the FETCH3 conda environment when you try to run the model.
 
-  See this `cheat sheet for working with conda <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_ for
-  a helpful list of conda commands.
+   See this `cheat sheet for working with conda <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_ for
+   a helpful list of conda commands.
 
 .. note::
     For Windows users, use the **Anaconda Prompt** application that was installed with Anaconda Navigator

@@ -301,8 +301,13 @@ and Python. To install Miniconda, see
 <p><strong>To install using the command line</strong>:</p>
 <ol class="arabic">
 <li><p>Use <code class="docutils literal notranslate"><span class="pre">cd</span></code> to navigate into the FETCH3 directory that you cloned from GitHub.</p></li>
-<li><p>Create FETCH3’s conda environment:</p>
+<li><p>Create FETCH3’s conda environment.</p>
+<p>For Linux, Windows, and Intel Macs:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">--</span><span class="n">file</span> <span class="n">fetch3_requirements</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+<p>For M1 Macs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">--</span><span class="n">file</span> <span class="n">fetch3_requirements_m1</span><span class="o">.</span><span class="n">yml</span>
 </pre></div>
 </div>
 </li>
@@ -310,13 +315,11 @@ and Python. To install Miniconda, see
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">fetch3</span><span class="o">-</span><span class="n">dev</span>
 </pre></div>
 </div>
-</li>
-</ol>
-<blockquote>
-<div><p>Make sure you’re using the FETCH3 conda environment when you try to run the model.</p>
+<p>Make sure you’re using the FETCH3 conda environment when you try to run the model.</p>
 <p>See this <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf">cheat sheet for working with conda</a> for
 a helpful list of conda commands.</p>
-</div></blockquote>
+</li>
+</ol>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For Windows users, use the <strong>Anaconda Prompt</strong> application that was installed with Anaconda Navigator
