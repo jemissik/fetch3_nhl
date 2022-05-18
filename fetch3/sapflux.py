@@ -6,24 +6,38 @@ import numpy as np
 import xarray as xr
 from fetch3.scaling import integrate_trans2d
 
-def format_inputs(nc_out, crown_area):
-    H = nc_out["ds_all"].H
+def format_inputs(canopy_ds, crown_area):
+    """
+    Formats variables for sapflux calculation
+
+    Parameters
+    ----------
+    canopy_ds : xarray.Dataset
+        Canopy dataset containing:
+        - trans_2d: Transpiration[ m3H2O m-2crown_projection s-1 m-1stem]
+        - H: Water potential [MPa]
+    crown_area : float
+        Crown area [m2]
+
+    Returns
+    -------
+    H_above: xarray.DataArray
+        Canopy water potential [MPa]
+    trans_2d_tree: xarray.DataArray
+        Transpiration [m3H2O s-1 m-1stem]
+    """
 
     #trans_2d [ m3H2O m-2crown_projection s-1 m-1stem]
-    # 10**3 to convert m to kg
     # multiply by crown area to get transpiration in [m3 s-1 m-1stem]
-    trans_2d_tree = nc_out["ds_canopy"].trans_2d * crown_area
+    trans_2d_tree = canopy_ds.trans_2d * crown_area
 
-    #Get aboveground z indexes to slice the H dataset
-    zind_canopy = np.arange(len(nc_out['ds_all'].z) - len(nc_out['ds_canopy'].z),len(nc_out['ds_all'].z))
-
-    H_above = H.isel(z=zind_canopy)
+    H_above = canopy_ds.H
 
     return H_above, trans_2d_tree
 
 def calc_sap_storage(H_MPa, cfg):
     """
-    _summary_
+    Calculates sap storage based on water potential
 
     Parameters
     ----------
@@ -61,25 +75,26 @@ def calc_sap_storage(H_MPa, cfg):
 
     return storage
 
-def calc_sapflux(H, trans_2d, cfg):
+def calc_sapflux(H, trans_2d_tree, cfg):
     """
     Calculates sapflux and total aboveground water storage of the tree.
 
     Parameters
     ----------
-    H : _type_
-        Water potential [Pa]
-    trans_2d : datarray
+    H : xarray.DataArray
+        Water potential [MPa]
+    trans_2d_tree : xarray.DataArray
         transpiration [m3 s-1 m-1stem]
-    params : _type_
-        _description_
+    cfg : dataclass
+        Model configuration parameters
 
     Returns
     -------
-    sapflux : array-like
-        Tree-level sap flux [m3 s-1]
-    storage : array-like
-        Total aboveground water storage [m3]
+    ds_sapflux : xarray.Dataset
+        Dataset containing:
+        - sapflux: Tree-level sap flux [m3 s-1]
+        - storage: Total aboveground water storage [m3]
+        - delta_s: Change in aboveground water storage from the previous timestep [m3]
 
     """
     dt = cfg.dt
@@ -88,7 +103,7 @@ def calc_sapflux(H, trans_2d, cfg):
     storage = calc_sap_storage(H, cfg)
     storage.name = 'storage'
 
-    trans_tot = integrate_trans2d(trans_2d, dz)  #[m3 s-1]
+    trans_tot = integrate_trans2d(trans_2d_tree, dz)  #[m3 s-1]
 
     # Change in storage
     delta_S = storage.pad(time=(1,0)).diff(dim='time') / dt
@@ -105,6 +120,6 @@ def calc_sapflux(H, trans_2d, cfg):
     ds_sapflux.storage.attrs = dict(units="m3",
                                     description="Total aboveground water storage")
     ds_sapflux.delta_S.attrs = dict(units="m3",
-                              description="Change in aboveground water storagefrom the previous timestep")
+                              description="Change in aboveground water storage from the previous timestep")
 
     return ds_sapflux

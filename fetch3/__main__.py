@@ -90,7 +90,7 @@ def run(config_file, data_dir, output_dir):
                         infiltration,trans_2d, cfg.dt, start_time, end_time, cfg.dz, cfg, zind)
 
         # Calculate sapflux and aboveground storage
-        H_above, trans_2d_tree = format_inputs(nc_output, cfg.mean_crown_area_sp)
+        H_above, trans_2d_tree = format_inputs(nc_output['ds_canopy'], cfg.mean_crown_area_sp)
 
         ds_sapflux = calc_sapflux(H_above, trans_2d_tree, cfg)
 
