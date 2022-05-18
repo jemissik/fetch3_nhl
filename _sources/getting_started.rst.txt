@@ -38,6 +38,10 @@ Install FETCH3
 
 Clone the FETCH3 repository from `FETCH3's GitHub page <https://github.com/jemissik/fetch3_nhl>`_.
 
+.. note::
+  If you have plans to modify the FETCH3 source code itself, see the :ref:`Developer guide` for instructions about
+  forking the FETCH3 repository and working with git. 
+
 .. todo::
     - Eventually FETCH3 will be released as a package to make installation simpler
 
@@ -72,86 +76,37 @@ It is recommended to create a new conda environment for FETCH3, using the provid
     For Windows users, use the **Anaconda Prompt** application that was installed with Anaconda Navigator
     to run these commands. See `Instructions for Anaconda Prompt <https://docs.anaconda.com/anaconda/user-guide/getting-started/#cli-hello>`_
 
-*********************************
-Prepare input files for the model
-*********************************
 
-Meteorological data
-===================
+*********************
+Test run of the model
+*********************
 
-Prepare a .csv file with the required variables. See ``UMBS_flux_2011.csv`` in the data folder for an example,
-although your file doesn't need to have all of the variables that are included in this file.
+Once everything is installed, try to run FETCH3 using the default test files that are installed with the model. This way,
+you can make sure everything is working correctly before you move on to using your own data and configuration files.
 
-The meteorological variables that are required depend on whether you are using PM or NHL transpiration.
-
-.. note::
-    - The column headers in the .csv file must match the names used below. Most of these names/units
-      match those used by AmeriFlux, except for Timestamp and VPD_kPa
-    - The data should be gap-filled.
-
-**If using the PM transpiration scheme, the file must include:**
-
-- *Timestamp*
-- *P_F*: Precipitation [mm]
-- *TA_F*: Air temperature [deg C]
-- *SW_IN_F*: Incoming shortwave radiation [W m-2]
-- *VPD_kPa*: Vapor pressure deficit [kPa]
+To run the test case, use ``cd`` to navigate inside the directory with the FETCH3 code. To check that you're in the right place,
+run ``ls`` and check that there is a file called ``main.py`` in the current directory, for example::
 
 
-**If using the NHL transpiration scheme, the file must include:**
+  >>> ls
+  README.md                          optimization.ipynb
+  __pycache__                        optimization_results.ipynb
+  config_files                       optimization_run.py
+  data                               output
+  docs                               read_sapfluxnet_data.ipynb
+  example_model_output.ipynb         run_debug.py
+  explore_optimization_results.ipynb sapflux_test.ipynb
+  fetch3                             scratch
+  fetch3_requirements.yml            speed_test
+  fetch3_requirements_m1.yml         test_output_slice.ipynb
+  main.py                            umbs_census.ipynb
 
-- *Timestamp*
-- *P_F*: Precipitation [mm]
-- *TA_F*: Air temperature [deg C]
-- *SW_IN_F*: Incoming shortwave radiation [W m-2]
-- *VPD_kPa*: Vapor pressure deficit [kPa]
-- *WS_F*: Wind speed above the canopy [m s-1]
-- *USTAR*: Friction velocity [m s-1]
-- *PPFD_IN*: Incoming photosynthetic photon flux density (PAR) [µmolPhoton m-2 s-1]
-- *CO2_F*: CO2 concentration [µmolCO2 mol-1]
-- *RH*: Relative humidity [%]
-- *PA_F*: Atmospheric pressure [kPa]
+Once you're in the correct directory, you can run the model using the provided test files by running ``main.py``::
 
-.. todo::
-    A future version will allow the user to specify different column names for the required met data
+  python main.py
 
-Leaf area density profile
-=========================
-
-If using the NHL transpiration scheme, you must also include a .csv file with the normalized leaf
-area density profile.
-
-This file should include:
-
-- *z_h*: The normalized height for each layer (i.e. the height of the
-  canopy layer z divided by the tree height h)
-- Normalized LAD of each layer. You can include data for more than one species in
-  this file, and each column should be labeled with the species name or abbreviation.
-
-See ``LAD_data.csv`` for an example.
-
-
-If using the PM transpiration scheme, the LAD profile will be calculated using a builtin function,
-using parameters specified in the config file.
-
-****************************************
-Prepare configuration file for the model
-****************************************
-
-Model setup options and model parameters are read from a .yml file.
-
-See :ref:`Model Configuration` for instructions about preparing this file.
-
-*****************
-Running the model
-*****************
-
-Setting input and output directories
-====================================
-
-The input data files, config file, and output directory can all be in locations of your
-choice, and these locations are specified as command line arguments when you run the model.
-If they aren't specified, defaults will be used.
+For runs using your own data and configuration file, you will specify the configuration file, data directory, and output directory
+as command line arguments. Since we are ommitting these arguments, the default files will be used instead.
 
 **Default input and output directories:**
 
@@ -161,18 +116,4 @@ If they aren't specified, defaults will be used.
   If using the default output directory, a directory ``./output/`` will be created
   if it doesn't already exist.
 
-Running the model from the command line
-========================================
-
-Run the model by running ``main.py``
-
-To specify an input config file, data directory, or output directory in a location other than the
-default, different directories can be specified as command line arguments, for example::
-      python main.py --config_path /Users/username/fetch3/user_model_config.yml
-      --data_path /Users/username/fetch3/user_data/ --output_path /Users/username/fetch3/output/
-
-.. note::
-    Replace the paths and filenames in this example with the actual paths and files you are using.
-
-If the arguments ``--config_path``, ``--data_path``, and ``--output_path`` are omitted when running the
-model from the command line, the defaults will be used.
+If this test case runs successfully, you can move on to preparing your own data and configuration files.

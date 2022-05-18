@@ -32,7 +32,7 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Model configuration" href="model_config.html" />
+    <link rel="next" title="User guide" href="user_guide/index.html" />
     <link rel="prev" title="Welcome to FETCH3’s documentation!" href="index.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
@@ -75,20 +75,8 @@
 </li>
 
 <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="model_config.html">
-  Model configuration
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="model_outputs.html">
-  Model outputs
- </a>
-</li>
-
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="optimization.html">
-  Optimization
+ <a class="reference internal nav-link" href="user_guide/index.html">
+  User guide
  </a>
 </li>
 
@@ -105,8 +93,8 @@
 </li>
 
 <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="git_stuff.html">
-  Using git
+ <a class="reference internal nav-link" href="developer_guide.html">
+  Developer guide
  </a>
 </li>
 
@@ -195,43 +183,9 @@
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#prepare-input-files-for-the-model">
-   Prepare input files for the model
+  <a class="reference internal nav-link" href="#test-run-of-the-model">
+   Test run of the model
   </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#meteorological-data">
-     Meteorological data
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#leaf-area-density-profile">
-     Leaf area density profile
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#prepare-configuration-file-for-the-model">
-   Prepare configuration file for the model
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#running-the-model">
-   Running the model
-  </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#setting-input-and-output-directories">
-     Setting input and output directories
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#running-the-model-from-the-command-line">
-     Running the model from the command line
-    </a>
-   </li>
-  </ul>
  </li>
 </ul>
 
@@ -288,6 +242,11 @@ and Python. To install Miniconda, see
 <section id="install-fetch3">
 <h3>Install FETCH3<a class="headerlink" href="#install-fetch3" title="Permalink to this headline">#</a></h3>
 <p>Clone the FETCH3 repository from <a class="reference external" href="https://github.com/jemissik/fetch3_nhl">FETCH3’s GitHub page</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you have plans to modify the FETCH3 source code itself, see the <a class="reference internal" href="developer_guide.html#developer-guide"><span class="std std-ref">Developer guide</span></a> for instructions about
+forking the FETCH3 repository and working with git.</p>
+</div>
 <div class="admonition-todo admonition" id="id1">
 <p class="admonition-title">Todo</p>
 <ul class="simple">
@@ -327,76 +286,32 @@ to run these commands. See <a class="reference external" href="https://docs.anac
 </div>
 </section>
 </section>
-<section id="prepare-input-files-for-the-model">
-<h2>Prepare input files for the model<a class="headerlink" href="#prepare-input-files-for-the-model" title="Permalink to this headline">#</a></h2>
-<section id="meteorological-data">
-<h3>Meteorological data<a class="headerlink" href="#meteorological-data" title="Permalink to this headline">#</a></h3>
-<p>Prepare a .csv file with the required variables. See <code class="docutils literal notranslate"><span class="pre">UMBS_flux_2011.csv</span></code> in the data folder for an example,
-although your file doesn’t need to have all of the variables that are included in this file.</p>
-<p>The meteorological variables that are required depend on whether you are using PM or NHL transpiration.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>The column headers in the .csv file must match the names used below. Most of these names/units
-match those used by AmeriFlux, except for Timestamp and VPD_kPa</p></li>
-<li><p>The data should be gap-filled.</p></li>
-</ul>
+<section id="test-run-of-the-model">
+<h2>Test run of the model<a class="headerlink" href="#test-run-of-the-model" title="Permalink to this headline">#</a></h2>
+<p>Once everything is installed, try to run FETCH3 using the default test files that are installed with the model. This way,
+you can make sure everything is working correctly before you move on to using your own data and configuration files.</p>
+<p>To run the test case, use <code class="docutils literal notranslate"><span class="pre">cd</span></code> to navigate inside the directory with the FETCH3 code. To check that you’re in the right place,
+run <code class="docutils literal notranslate"><span class="pre">ls</span></code> and check that there is a file called <code class="docutils literal notranslate"><span class="pre">main.py</span></code> in the current directory, for example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ls</span>
+<span class="go">README.md                          optimization.ipynb</span>
+<span class="go">__pycache__                        optimization_results.ipynb</span>
+<span class="go">config_files                       optimization_run.py</span>
+<span class="go">data                               output</span>
+<span class="go">docs                               read_sapfluxnet_data.ipynb</span>
+<span class="go">example_model_output.ipynb         run_debug.py</span>
+<span class="go">explore_optimization_results.ipynb sapflux_test.ipynb</span>
+<span class="go">fetch3                             scratch</span>
+<span class="go">fetch3_requirements.yml            speed_test</span>
+<span class="go">fetch3_requirements_m1.yml         test_output_slice.ipynb</span>
+<span class="go">main.py                            umbs_census.ipynb</span>
+</pre></div>
 </div>
-<p><strong>If using the PM transpiration scheme, the file must include:</strong></p>
-<ul class="simple">
-<li><p><em>Timestamp</em></p></li>
-<li><p><em>P_F</em>: Precipitation [mm]</p></li>
-<li><p><em>TA_F</em>: Air temperature [deg C]</p></li>
-<li><p><em>SW_IN_F</em>: Incoming shortwave radiation [W m-2]</p></li>
-<li><p><em>VPD_kPa</em>: Vapor pressure deficit [kPa]</p></li>
-</ul>
-<p><strong>If using the NHL transpiration scheme, the file must include:</strong></p>
-<ul class="simple">
-<li><p><em>Timestamp</em></p></li>
-<li><p><em>P_F</em>: Precipitation [mm]</p></li>
-<li><p><em>TA_F</em>: Air temperature [deg C]</p></li>
-<li><p><em>SW_IN_F</em>: Incoming shortwave radiation [W m-2]</p></li>
-<li><p><em>VPD_kPa</em>: Vapor pressure deficit [kPa]</p></li>
-<li><p><em>WS_F</em>: Wind speed above the canopy [m s-1]</p></li>
-<li><p><em>USTAR</em>: Friction velocity [m s-1]</p></li>
-<li><p><em>PPFD_IN</em>: Incoming photosynthetic photon flux density (PAR) [µmolPhoton m-2 s-1]</p></li>
-<li><p><em>CO2_F</em>: CO2 concentration [µmolCO2 mol-1]</p></li>
-<li><p><em>RH</em>: Relative humidity [%]</p></li>
-<li><p><em>PA_F</em>: Atmospheric pressure [kPa]</p></li>
-</ul>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>A future version will allow the user to specify different column names for the required met data</p>
+<p>Once you’re in the correct directory, you can run the model using the provided test files by running <code class="docutils literal notranslate"><span class="pre">main.py</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">main</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
 </div>
-</section>
-<section id="leaf-area-density-profile">
-<h3>Leaf area density profile<a class="headerlink" href="#leaf-area-density-profile" title="Permalink to this headline">#</a></h3>
-<p>If using the NHL transpiration scheme, you must also include a .csv file with the normalized leaf
-area density profile.</p>
-<p>This file should include:</p>
-<ul class="simple">
-<li><p><em>z_h</em>: The normalized height for each layer (i.e. the height of the
-canopy layer z divided by the tree height h)</p></li>
-<li><p>Normalized LAD of each layer. You can include data for more than one species in
-this file, and each column should be labeled with the species name or abbreviation.</p></li>
-</ul>
-<p>See <code class="docutils literal notranslate"><span class="pre">LAD_data.csv</span></code> for an example.</p>
-<p>If using the PM transpiration scheme, the LAD profile will be calculated using a builtin function,
-using parameters specified in the config file.</p>
-</section>
-</section>
-<section id="prepare-configuration-file-for-the-model">
-<h2>Prepare configuration file for the model<a class="headerlink" href="#prepare-configuration-file-for-the-model" title="Permalink to this headline">#</a></h2>
-<p>Model setup options and model parameters are read from a .yml file.</p>
-<p>See <a class="reference internal" href="model_config.html#model-configuration"><span class="std std-ref">Model configuration</span></a> for instructions about preparing this file.</p>
-</section>
-<section id="running-the-model">
-<h2>Running the model<a class="headerlink" href="#running-the-model" title="Permalink to this headline">#</a></h2>
-<section id="setting-input-and-output-directories">
-<h3>Setting input and output directories<a class="headerlink" href="#setting-input-and-output-directories" title="Permalink to this headline">#</a></h3>
-<p>The input data files, config file, and output directory can all be in locations of your
-choice, and these locations are specified as command line arguments when you run the model.
-If they aren’t specified, defaults will be used.</p>
+<p>For runs using your own data and configuration file, you will specify the configuration file, data directory, and output directory
+as command line arguments. Since we are ommitting these arguments, the default files will be used instead.</p>
 <p><strong>Default input and output directories:</strong></p>
 <ul class="simple">
 <li><p>Input meteorological data: <code class="docutils literal notranslate"><span class="pre">./data/</span></code></p></li>
@@ -405,23 +320,7 @@ If they aren’t specified, defaults will be used.</p>
 If using the default output directory, a directory <code class="docutils literal notranslate"><span class="pre">./output/</span></code> will be created
 if it doesn’t already exist.</p></li>
 </ul>
-</section>
-<section id="running-the-model-from-the-command-line">
-<h3>Running the model from the command line<a class="headerlink" href="#running-the-model-from-the-command-line" title="Permalink to this headline">#</a></h3>
-<p>Run the model by running <code class="docutils literal notranslate"><span class="pre">main.py</span></code></p>
-<p>To specify an input config file, data directory, or output directory in a location other than the
-default, different directories can be specified as command line arguments, for example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">config_path</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="n">fetch3</span><span class="o">/</span><span class="n">user_model_config</span><span class="o">.</span><span class="n">yml</span>
-<span class="o">--</span><span class="n">data_path</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="n">fetch3</span><span class="o">/</span><span class="n">user_data</span><span class="o">/</span> <span class="o">--</span><span class="n">output_path</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">username</span><span class="o">/</span><span class="n">fetch3</span><span class="o">/</span><span class="n">output</span><span class="o">/</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Replace the paths and filenames in this example with the actual paths and files you are using.</p>
-</div>
-<p>If the arguments <code class="docutils literal notranslate"><span class="pre">--config_path</span></code>, <code class="docutils literal notranslate"><span class="pre">--data_path</span></code>, and <code class="docutils literal notranslate"><span class="pre">--output_path</span></code> are omitted when running the
-model from the command line, the defaults will be used.</p>
-</section>
+<p>If this test case runs successfully, you can move on to preparing your own data and configuration files.</p>
 </section>
 </section>
 
@@ -438,10 +337,10 @@ model from the command line, the defaults will be used.</p>
             <p class="prev-next-title">Welcome to FETCH3’s documentation!</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="model_config.html" title="next page">
+    <a class='right-next' id="next-link" href="user_guide/index.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Model configuration</p>
+        <p class="prev-next-title">User guide</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>

@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Model outputs &#8212; FETCH3  documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Optimization" href="optimization.html" />
+    <link rel="prev" title="Running the model" href="running_model.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../index.html">
+<p class="title">FETCH3</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../getting_started.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="index.html">
+  User guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../scaling.html">
+  Scaling
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../roadmap.html">
+  Roadmap
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../developer_guide.html">
+  Developer guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../ftch/fetch3.html">
+  FETCH3 code reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/jemissik/fetch3_nhl" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="input_files.html">
+   Prepare input files for the model
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="model_config.html">
+   Model configuration
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="running_model.html">
+   Running the model
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Model outputs
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="optimization.html">
+   Optimization
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+
+<nav id="bd-toc-nav">
+    
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <section id="model-outputs">
+<h1>Model outputs<a class="headerlink" href="#model-outputs" title="Permalink to this headline">#</a></h1>
+<p>The following files will be created in the output directory:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">fetch3.log</span></code>: Log file for the model run</p></li>
+<li><dl class="simple">
+<dt>outputs from the NHL module:</dt><dd><ul class="simple">
+<li><p>nhl_zenith.csv: Timeseries of calculated zenith angle</p></li>
+<li><p>nhl_out.nc: NHL transpiration</p></li>
+<li><p>nhl_out_modelres: NHL trasnpiration interpolated to the resolution used by FETCH3</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>FETCH3 outputs:</dt><dd><ul class="simple">
+<li><dl class="simple">
+<dt>ds_canopy.nc: Dataset with the canopy variables:</dt><dd><ul>
+<li><p>S_kx: [unitless] Cavitation of stem xylem, given by eqn S.79 in Silva et al 2022</p></li>
+<li><p>trans_2d: [m3H2O m-2crown_projection m-1stem s-1] Transpiration</p></li>
+<li><p>H: [MPa] Water potential</p></li>
+<li><p>K: [m s-1] Hydraulic conductivity</p></li>
+<li><p>Capac: [Pa-1] Capacitance</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ds_root.nc: Dataset with the root variables:</dt><dd><ul>
+<li><p>Kr_sink [1/sPa]: Effective root radial conductivity</p></li>
+<li><p>S_kr [unitless]: Cavitation of root xylem, given by eqn S.77 in Silva et al 2022</p></li>
+<li><p>S_sink [unitless]: Feddes root water uptake stress function, given by equations S.73, 74 and 75 in Silva et al 2022</p></li>
+<li><p>EVsink_ts [m3H2O m-2ground m-1depth s-1]: Root water uptake</p></li>
+<li><p>H: [MPa] Water potential</p></li>
+<li><p>K: [m s-1] Hydraulic conductivity</p></li>
+<li><p>Capac: [Pa-1] Capacitance</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ds_soil.nc: Dataset with the soil variables:</dt><dd><ul>
+<li><p>THETA: [m3 m-3] Volumetric water content</p></li>
+<li><p>H: [MPa] Water potential</p></li>
+<li><p>K: [m s-1] Hydraulic conductivity</p></li>
+<li><p>Capac: [Pa-1] Capacitance</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>ds_all.nc: Dataset with H, Capac, and K concatenated for the entire z array</p></li>
+</ul>
+<p>(these variables are also written in ds_canopy, ds_root, and ds_soil, so in most
+cases it is easier to use those datasets instead)</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="running_model.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Running the model</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="optimization.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Optimization</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Justine Missik.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>
