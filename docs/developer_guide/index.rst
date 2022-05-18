@@ -7,3 +7,4 @@ Developer guide
 
     git_instructions
     debugging
+    contributing
