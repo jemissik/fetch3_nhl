@@ -33,7 +33,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Troubleshooting" href="troubleshooting.html" />
-    <link rel="prev" title="Using git" href="git_stuff.html" />
+    <link rel="prev" title="Debugging" href="developer_guide/debugging.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -81,7 +81,7 @@
 </li>
 
 <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="developer_guide.html">
+ <a class="reference internal nav-link" href="developer_guide/index.html">
   Developer guide
  </a>
 </li>
@@ -173,6 +173,11 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#running-fetch3">
+   Running FETCH3
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#working-with-git">
    Working with git
   </a>
@@ -180,11 +185,6 @@
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#working-with-conda">
    Working with conda
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#running-fetch3">
-   Running FETCH3
   </a>
  </li>
 </ul>
@@ -210,21 +210,11 @@
                 
   <section id="quick-reference">
 <h1>Quick reference<a class="headerlink" href="#quick-reference" title="Permalink to this headline">#</a></h1>
-<section id="working-with-git">
-<h2>Working with git<a class="headerlink" href="#working-with-git" title="Permalink to this headline">#</a></h2>
-<p>To merge upstream changes into your branch:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
-<span class="n">git</span> <span class="n">merge</span> <span class="n">upstream</span><span class="o">/</span><span class="n">develop</span>
-</pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This page is intended to serve as a convenient reference of commonly-used commands for those who are already familiar
+with using the model. Please read the full instruction pages first!</p>
 </div>
-</section>
-<section id="working-with-conda">
-<h2>Working with conda<a class="headerlink" href="#working-with-conda" title="Permalink to this headline">#</a></h2>
-<p>To activate the fetch3 environment:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">fetch3</span><span class="o">-</span><span class="n">dev</span>
-</pre></div>
-</div>
-</section>
 <section id="running-fetch3">
 <h2>Running FETCH3<a class="headerlink" href="#running-fetch3" title="Permalink to this headline">#</a></h2>
 <p>Running FETCH3 (without optimization):</p>
@@ -242,6 +232,54 @@
 directory when you run the model.</p>
 </div>
 </section>
+<section id="working-with-git">
+<h2>Working with git<a class="headerlink" href="#working-with-git" title="Permalink to this headline">#</a></h2>
+<p>To see the current state of your git repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">status</span>
+</pre></div>
+</div>
+<p>To stage changes to be committed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">add</span> <span class="o">&lt;</span><span class="n">filename</span><span class="o">&gt;</span>  <span class="c1"># Stages a specific file</span>
+<span class="n">git</span> <span class="n">add</span> <span class="o">.</span>  <span class="c1"># Stages all changed files</span>
+</pre></div>
+</div>
+<p>To commit changes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">commit</span> <span class="o">-</span><span class="n">m</span> <span class="s2">&quot;&lt;commit_message&gt;&quot;</span>
+</pre></div>
+</div>
+<p>To push changes to GitHub:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">push</span>
+</pre></div>
+</div>
+<p>To merge upstream changes into your branch (run from the branch you want to merge changes into):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+<span class="n">git</span> <span class="n">merge</span> <span class="n">upstream</span><span class="o">/</span><span class="n">develop</span>
+</pre></div>
+</div>
+<p>To switch to another branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">&lt;</span><span class="n">branch_name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>To create a new branch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="o">&lt;</span><span class="n">new_branch_name</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>To stash changes (when you have changes you aren’t ready to commit, but want to switch branches):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">stash</span>
+</pre></div>
+</div>
+<p>To apply changes that were stashed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">stash</span> <span class="n">pop</span>
+</pre></div>
+</div>
+</section>
+<section id="working-with-conda">
+<h2>Working with conda<a class="headerlink" href="#working-with-conda" title="Permalink to this headline">#</a></h2>
+<p>To activate the fetch3 environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">fetch3</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</section>
 </section>
 
 
@@ -250,11 +288,11 @@ directory when you run the model.</p>
               
               <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="git_stuff.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="developer_guide/debugging.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Using git</p>
+            <p class="prev-next-title">Debugging</p>
         </div>
     </a>
     <a class='right-next' id="next-link" href="troubleshooting.html" title="next page">

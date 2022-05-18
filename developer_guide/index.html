@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Prepare input files for the model &#8212; FETCH3  documentation</title>
+    <title>Developer guide &#8212; FETCH3  documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -32,8 +32,8 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Model configuration" href="model_config.html" />
-    <link rel="prev" title="User guide" href="index.html" />
+    <link rel="next" title="Using git" href="git_instructions.html" />
+    <link rel="prev" title="Optimization" href="../user_guide/optimization.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -74,14 +74,14 @@
  </a>
 </li>
 
-<li class="toctree-l1 current active nav-item">
- <a class="reference internal nav-link" href="index.html">
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../user_guide/index.html">
   User guide
  </a>
 </li>
 
-<li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../developer_guide/index.html">
+<li class="toctree-l1 current active nav-item">
+ <a class="current reference internal nav-link" href="#">
   Developer guide
  </a>
 </li>
@@ -150,30 +150,15 @@
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
   <div class="bd-toc-item active">
-    <ul class="current nav bd-sidenav">
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   Prepare input files for the model
+    <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="git_instructions.html">
+   Using git
   </a>
  </li>
  <li class="toctree-l1">
-  <a class="reference internal" href="model_config.html">
-   Model configuration
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="running_model.html">
-   Running the model
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="model_outputs.html">
-   Model outputs
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="optimization.html">
-   Optimization
+  <a class="reference internal" href="debugging.html">
+   Debugging
   </a>
  </li>
 </ul>
@@ -193,36 +178,9 @@
               
               <div class="toc-item">
                 
-<div class="tocsection onthispage mt-5 pt-1 pb-3">
-    <i class="fas fa-list"></i> On this page
-</div>
 
 <nav id="bd-toc-nav">
-    <ul class="visible nav section-nav flex-column">
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#">
-   Prepare input files for the model
-  </a>
-  <ul class="visible nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#meteorological-data">
-     Meteorological data
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#leaf-area-density-profile">
-     Leaf area density profile
-    </a>
-   </li>
-  </ul>
- </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#prepare-configuration-file-for-the-model">
-   Prepare configuration file for the model
-  </a>
- </li>
-</ul>
-
+    
 </nav>
               </div>
               
@@ -242,68 +200,14 @@
               
               <div>
                 
-  <section id="prepare-input-files-for-the-model">
-<h1>Prepare input files for the model<a class="headerlink" href="#prepare-input-files-for-the-model" title="Permalink to this headline">#</a></h1>
-<section id="meteorological-data">
-<h2>Meteorological data<a class="headerlink" href="#meteorological-data" title="Permalink to this headline">#</a></h2>
-<p>Prepare a .csv file with the required variables. See <code class="docutils literal notranslate"><span class="pre">UMBS_flux_2011.csv</span></code> in the data folder for an example,
-although your file doesn’t need to have all of the variables that are included in this file.</p>
-<p>The meteorological variables that are required depend on whether you are using PM or NHL transpiration.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<ul class="simple">
-<li><p>The column headers in the .csv file must match the names used below. Most of these names/units
-match those used by AmeriFlux, except for Timestamp and VPD_kPa</p></li>
-<li><p>The data should be gap-filled.</p></li>
+  <section id="developer-guide">
+<h1>Developer guide<a class="headerlink" href="#developer-guide" title="Permalink to this headline">#</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="git_instructions.html">Using git</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging</a></li>
 </ul>
 </div>
-<p><strong>If using the PM transpiration scheme, the file must include:</strong></p>
-<ul class="simple">
-<li><p><em>Timestamp</em></p></li>
-<li><p><em>P_F</em>: Precipitation [mm]</p></li>
-<li><p><em>TA_F</em>: Air temperature [deg C]</p></li>
-<li><p><em>SW_IN_F</em>: Incoming shortwave radiation [W m-2]</p></li>
-<li><p><em>VPD_kPa</em>: Vapor pressure deficit [kPa]</p></li>
-</ul>
-<p><strong>If using the NHL transpiration scheme, the file must include:</strong></p>
-<ul class="simple">
-<li><p><em>Timestamp</em></p></li>
-<li><p><em>P_F</em>: Precipitation [mm]</p></li>
-<li><p><em>TA_F</em>: Air temperature [deg C]</p></li>
-<li><p><em>SW_IN_F</em>: Incoming shortwave radiation [W m-2]</p></li>
-<li><p><em>VPD_kPa</em>: Vapor pressure deficit [kPa]</p></li>
-<li><p><em>WS_F</em>: Wind speed above the canopy [m s-1]</p></li>
-<li><p><em>USTAR</em>: Friction velocity [m s-1]</p></li>
-<li><p><em>PPFD_IN</em>: Incoming photosynthetic photon flux density (PAR) [µmolPhoton m-2 s-1]</p></li>
-<li><p><em>CO2_F</em>: CO2 concentration [µmolCO2 mol-1]</p></li>
-<li><p><em>RH</em>: Relative humidity [%]</p></li>
-<li><p><em>PA_F</em>: Atmospheric pressure [kPa]</p></li>
-</ul>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>A future version will allow the user to specify different column names for the required met data</p>
-</div>
-</section>
-<section id="leaf-area-density-profile">
-<h2>Leaf area density profile<a class="headerlink" href="#leaf-area-density-profile" title="Permalink to this headline">#</a></h2>
-<p>If using the NHL transpiration scheme, you must also include a .csv file with the normalized leaf
-area density profile.</p>
-<p>This file should include:</p>
-<ul class="simple">
-<li><p><em>z_h</em>: The normalized height for each layer (i.e. the height of the
-canopy layer z divided by the tree height h)</p></li>
-<li><p>Normalized LAD of each layer. You can include data for more than one species in
-this file, and each column should be labeled with the species name or abbreviation.</p></li>
-</ul>
-<p>See <code class="docutils literal notranslate"><span class="pre">LAD_data.csv</span></code> for an example.</p>
-<p>If using the PM transpiration scheme, the LAD profile will be calculated using a builtin function,
-using parameters specified in the config file.</p>
-</section>
-</section>
-<section id="prepare-configuration-file-for-the-model">
-<h1>Prepare configuration file for the model<a class="headerlink" href="#prepare-configuration-file-for-the-model" title="Permalink to this headline">#</a></h1>
-<p>Model setup options and model parameters are read from a .yml file.</p>
-<p>See <a class="reference internal" href="model_config.html#model-configuration"><span class="std std-ref">Model configuration</span></a> for instructions about preparing this file.</p>
 </section>
 
 
@@ -312,17 +216,17 @@ using parameters specified in the config file.</p>
               
               <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="index.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="../user_guide/optimization.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">User guide</p>
+            <p class="prev-next-title">Optimization</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="model_config.html" title="next page">
+    <a class='right-next' id="next-link" href="git_instructions.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Model configuration</p>
+        <p class="prev-next-title">Using git</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
