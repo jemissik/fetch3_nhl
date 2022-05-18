@@ -14,8 +14,8 @@ def format_inputs(canopy_ds, crown_area):
     ----------
     canopy_ds : xarray.Dataset
         Canopy dataset containing:
-        - trans_2d: Transpiration[ m3H2O m-2crown_projection s-1 m-1stem]
-        - H: Water potential [MPa]
+            - trans_2d: Transpiration[ m3H2O m-2crown_projection s-1 m-1stem]
+            - H: Water potential [MPa]
     crown_area : float
         Crown area [m2]
 
@@ -41,14 +41,14 @@ def calc_sap_storage(H_MPa, cfg):
 
     Parameters
     ----------
-    H : xarray.dataarray
+    H : xarray.DataArray
         Water potential [MPa]
     cfg : dataclass
         Model configuration parameters
 
     Returns
     -------
-    storage: xarray.dataarray
+    storage: xarray.DataArray
         Sap storage [m3]
     """
     sapwood_area = cfg.sapwood_area # m2
@@ -92,9 +92,9 @@ def calc_sapflux(H, trans_2d_tree, cfg):
     -------
     ds_sapflux : xarray.Dataset
         Dataset containing:
-        - sapflux: Tree-level sap flux [m3 s-1]
-        - storage: Total aboveground water storage [m3]
-        - delta_s: Change in aboveground water storage from the previous timestep [m3]
+            - sapflux: Tree-level sap flux [m3 s-1]
+            - storage: Total aboveground water storage [m3]
+            - delta_s: Change in aboveground water storage from the previous timestep [m3]
 
     """
     dt = cfg.dt

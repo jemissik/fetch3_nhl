@@ -533,13 +533,6 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
     attrs=dict(description="Model output")
     )
 
-    # trans_h = dt*df_EP['trans'].resample('60T').sum() # hourly accumulated simulated transpiration
-
-    # output_vars = {'H':H.transpose(), 'K': K.transpose(), 'S_stomata':S_stomata, 'theta':theta, 'S_kx':S_kx.transpose(),
-    #                'S_kr':S_kr.transpose(), 'C':C, 'Kr_sink':Kr_sink.transpose(), 'Capac':Capac.transpose(), 'S_sink': S_sink.transpose(),
-    #                'EVsink_ts':EVsink_ts.transpose(), 'trans_h':trans_h,'THETA':THETA.transpose(), 'infiltration':infiltration,
-    #                'trans_2d':trans_2d.transpose(),'EVsink_total':EVsink_total}
-
     #datasets for output vars
     ds_EP = xr.Dataset(data_vars=dict(
 
@@ -582,10 +575,18 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
     #root TODO
     ds_root2 = xr.Dataset(
         {
-            "Kr_sink": (["time", "z"], Kr_sink.transpose()),
-            "S_kr": (["time", "z"], S_kr.transpose()),
-            "S_sink": (["time", "z"], S_sink.transpose()),
-            "EVsink_ts": (["time", "z"], EVsink_ts.transpose()),
+            "Kr_sink": (["time", "z"], Kr_sink.transpose(),
+                        dict(description="Effective root radial conductivity",
+                             units='1/sPa')),#TODO
+            "S_kr": (["time", "z"], S_kr.transpose(),
+                     dict(description="Cavitation of root xylem, given by eqn S.77 in Silva et al 2022",
+                          units="unitless")),
+            "S_sink": (["time", "z"], S_sink.transpose(),
+                       dict(description="Feddes root water uptake stress function, given by equations S.73, 74 and 75 in Silva et al 2022",
+                       units="unitless")),
+            "EVsink_ts": (["time", "z"], EVsink_ts.transpose(),
+                          dict(description="Root water uptake",
+                               units="m3H2O m-2ground m-1depth s-1")),
         },
         coords={
             "time": df_EP.index,
@@ -594,7 +595,9 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
     #canopy
     ds_canopy2 = xr.Dataset(
         {
-            "S_kx": (["time", "z"], S_kx.transpose()),
+            "S_kx": (["time", "z"], S_kx.transpose(),
+                     dict(description="Cavitation of stem xylem, given by eqn S.79 in Silva et al 2022",
+                          units="unitless")),
             "trans_2d": (["time", "z"], trans_2d.transpose(),
                          dict(description = "transpiration",
                               units="m3H2O m-2crown_projection m-1stem s-1")),
