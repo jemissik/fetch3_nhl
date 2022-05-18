@@ -8,6 +8,8 @@ Reads in model configuration from .yml file
 Model setup options and model parameters are read from a .yml file, which can be
 modified by the user.
 
+See :ref:`scaling` for details about how parameters are converted.
+
 
 *************************
 Modifying the config file

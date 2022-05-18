@@ -68,7 +68,6 @@ Contents
 
    getting_started
    user_guide/index
-   scaling
    roadmap
    developer_guide
    FETCH3 code reference <ftch/fetch3>
