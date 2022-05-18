@@ -67,12 +67,10 @@ Contents
    :maxdepth: 2
 
    getting_started
-   model_config
-   model_outputs
-   optimization
+   user_guide/index
    scaling
    roadmap
-   git_stuff
+   developer_guide
    FETCH3 code reference <ftch/fetch3>
 
 
