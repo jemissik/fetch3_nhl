@@ -68,7 +68,7 @@ Contents
 
   getting_started
   user_guide/index
-  developer_guide
+  developer_guide/index
   quick_reference
   troubleshooting
   changelog
