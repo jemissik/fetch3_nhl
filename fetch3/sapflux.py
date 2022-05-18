@@ -99,4 +99,12 @@ def calc_sapflux(H, trans_2d, cfg):
 
     ds_sapflux = xr.merge([sapflux, storage, delta_S])
 
+    # Add metadata to dataset
+    ds_sapflux.sapflux.attrs = dict(units="m3 s-1",
+                                    description="Tree-level sap flux")
+    ds_sapflux.storage.attrs = dict(units="m3",
+                                    description="Total aboveground water storage")
+    ds_sapflux.delta_S.attrs = dict(units="m3",
+                              description="Change in aboveground water storagefrom the previous timestep")
+
     return ds_sapflux
