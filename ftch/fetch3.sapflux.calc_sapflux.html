@@ -642,22 +642,24 @@
 <h1>fetch3.sapflux.calc_sapflux<a class="headerlink" href="#fetch3-sapflux-calc-sapflux" title="Permalink to this headline">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="fetch3.sapflux.calc_sapflux">
-<span class="sig-name descname"><span class="pre">calc_sapflux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trans_2d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fetch3.sapflux.calc_sapflux" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">calc_sapflux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">H</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trans_2d_tree</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fetch3.sapflux.calc_sapflux" title="Permalink to this definition">#</a></dt>
 <dd><p>Calculates sapflux and total aboveground water storage of the tree.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>H</strong> (<em>_type_</em>) – Water potential [Pa]</p></li>
-<li><p><strong>trans_2d</strong> (<em>datarray</em>) – transpiration [m3 s-1 m-1stem]</p></li>
-<li><p><strong>params</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>H</strong> (<em>xarray.DataArray</em>) – Water potential [MPa]</p></li>
+<li><p><strong>trans_2d_tree</strong> (<em>xarray.DataArray</em>) – transpiration [m3 s-1 m-1stem]</p></li>
+<li><p><strong>cfg</strong> (<em>dataclass</em>) – Model configuration parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>sapflux</strong> (<em>array-like</em>) – Tree-level sap flux [m3 s-1]</p></li>
-<li><p><strong>storage</strong> (<em>array-like</em>) – Total aboveground water storage [m3]</p></li>
-</ul>
-</p>
+<dd class="field-even"><p><strong>ds_sapflux</strong> – Dataset containing:
+- sapflux: Tree-level sap flux [m3 s-1]
+- storage: Total aboveground water storage [m3]
+- delta_s: Change in aboveground water storage from the previous timestep [m3]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>xarray.Dataset</p>
 </dd>
 </dl>
 </dd></dl>

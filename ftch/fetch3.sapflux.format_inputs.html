@@ -642,8 +642,26 @@
 <h1>fetch3.sapflux.format_inputs<a class="headerlink" href="#fetch3-sapflux-format-inputs" title="Permalink to this headline">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="fetch3.sapflux.format_inputs">
-<span class="sig-name descname"><span class="pre">format_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nc_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crown_area</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fetch3.sapflux.format_inputs" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">format_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canopy_ds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crown_area</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fetch3.sapflux.format_inputs" title="Permalink to this definition">#</a></dt>
+<dd><p>Formats variables for sapflux calculation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>canopy_ds</strong> (<em>xarray.Dataset</em>) – Canopy dataset containing:
+- trans_2d: Transpiration[ m3H2O m-2crown_projection s-1 m-1stem]
+- H: Water potential [MPa]</p></li>
+<li><p><strong>crown_area</strong> (<em>float</em>) – Crown area [m2]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>H_above</strong> (<em>xarray.DataArray</em>) – Canopy water potential [MPa]</p></li>
+<li><p><strong>trans_2d_tree</strong> (<em>xarray.DataArray</em>) – Transpiration [m3H2O s-1 m-1stem]</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
 
 </section>
 
