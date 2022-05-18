@@ -69,6 +69,7 @@ Contents
   getting_started
   user_guide/index
   developer_guide
+  quick_reference
   troubleshooting
   changelog
   roadmap
