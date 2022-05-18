@@ -72,7 +72,6 @@ Contents
   quick_reference
   troubleshooting
   changelog
-  roadmap
   FETCH3 code reference <ftch/fetch3>
 
 
