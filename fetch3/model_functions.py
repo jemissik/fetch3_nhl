@@ -550,17 +550,37 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
     attrs=dict(description="Model output")
     )
 
-    #soil
-    ds_soil = xr.Dataset(
+    #whole system
+    ds_all = xr.Dataset(
         {
-            "THETA": (["time", "z"], THETA.transpose()),
+            "H": (["time", "z"], H.transpose(),
+                  dict(description="Water potential", units="MPa")),
+            "K": (["time", "z"], K.transpose(),
+                  dict(description="Hydraulic conductivity", units="m s-1")),
+            "Capac": (["time", "z"], Capac.transpose(),
+                      dict(description="Capacitance", units="Pa-1")), #TODO
+        },
+        coords={
+            "time": df_EP.index,
+            "z": zind.z,
+        })
+
+    # slice H, K, and Capac for soil, roots, and xylem
+    ds_soil1, ds_root1, ds_canopy1 = slice_dsall(ds_all, zind)
+
+    #soil
+    ds_soil2 = xr.Dataset(
+        {
+            "THETA": (["time", "z"], THETA.transpose(),
+                      dict(description="Volumetric water content",
+                           units="m3 m-3")),
         },
         coords={
             "time": df_EP.index,
             "z": zind.z_soil,
         })
     #root TODO
-    ds_root = xr.Dataset(
+    ds_root2 = xr.Dataset(
         {
             "Kr_sink": (["time", "z"], Kr_sink.transpose()),
             "S_kr": (["time", "z"], S_kr.transpose()),
@@ -572,28 +592,36 @@ def format_model_output(H,K,S_stomata,theta, S_kx, S_kr,C,Kr_sink, Capac, S_sink
             "z": zind.z_root,
         })
     #canopy
-    ds_canopy = xr.Dataset(
+    ds_canopy2 = xr.Dataset(
         {
             "S_kx": (["time", "z"], S_kx.transpose()),
-            "trans_2d": (["time", "z"], trans_2d.transpose()),
+            "trans_2d": (["time", "z"], trans_2d.transpose(),
+                         dict(description = "transpiration",
+                              units="m3H2O m-2crown_projection m-1stem s-1")),
         },
         coords={
             "time": df_EP.index,
             "z": zind.z_upper,
         })
-    #whole system
-    ds_all = xr.Dataset(
-        {
-            "H": (["time", "z"], H.transpose()),
-            "K": (["time", "z"], K.transpose()),
-            "Capac": (["time", "z"], Capac.transpose()),
-        },
-        coords={
-            "time": df_EP.index,
-            "z": zind.z,
-        })
+
+    # Add H, K, and Capac to ds_soil, ds_roots, and ds_canopy
+    ds_soil = xr.merge([ds_soil1, ds_soil2])
+    ds_root = xr.merge([ds_root1, ds_root2])
+    ds_canopy = xr.merge([ds_canopy1, ds_canopy2])
 
     return df_waterbal, df_EP, {'ds_EP': ds_EP, 'ds_soil': ds_soil, 'ds_root': ds_root, 'ds_canopy': ds_canopy, 'ds_all':ds_all}
+
+def slice_dsall(ds_all, zind):
+
+    zind_soil = np.arange(0,zind.nz_s)
+    zind_root = np.arange(zind.nz_s, zind.nz_r)
+    zind_canopy = np.arange(zind.nz_r, zind.nz)
+
+    ds_soil = ds_all.isel(z=zind_soil)
+    ds_root = ds_all.isel(z=zind_root)
+    ds_canopy = ds_all.isel(z=zind_canopy)
+
+    return ds_soil, ds_root, ds_canopy
 
 ####################### Save model outputs ###################################
 def save_csv(dir, df_waterbal, df_EP):
