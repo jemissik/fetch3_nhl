@@ -12,6 +12,9 @@ dependencies:
   - pandas
   - scipy
   - xarray
+  - netCDF4
+  - dask
+  - bottleneck
   - ipympl
   - pip
   - pip:
