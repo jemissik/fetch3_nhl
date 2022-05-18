@@ -1,0 +1,377 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Troubleshooting &#8212; FETCH3  documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Change log" href="changelog.html" />
+    <link rel="prev" title="Quick reference" href="quick_reference.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="index.html">
+<p class="title">FETCH3</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="getting_started.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="user_guide/index.html">
+  User guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="developer_guide.html">
+  Developer guide
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="current reference internal nav-link" href="#">
+  Troubleshooting
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="changelog.html">
+  Change log
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="roadmap.html">
+  Roadmap
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="ftch/fetch3.html">
+  FETCH3 code reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/jemissik/fetch3_nhl" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#common-issues">
+   Common issues
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#modulenotfounderror">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       ModuleNotFoundError
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#no-such-file-or-directory">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       No
+      </span>
+      <span class="pre">
+       such
+      </span>
+      <span class="pre">
+       file
+      </span>
+      <span class="pre">
+       or
+      </span>
+      <span class="pre">
+       directory
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#installation-errors">
+     Installation errors
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#permissions-issues-in-windows">
+     Permissions issues in Windows
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#other-issues">
+   Other issues
+  </a>
+ </li>
+</ul>
+
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <section id="troubleshooting">
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">#</a></h1>
+<section id="common-issues">
+<h2>Common issues<a class="headerlink" href="#common-issues" title="Permalink to this headline">#</a></h2>
+<section id="modulenotfounderror">
+<h3><code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code><a class="headerlink" href="#modulenotfounderror" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>Are you sure you’re using the fetch3 conda environment? (Remember that if you
+open a new terminal, you need to activate the environment again)</p></li>
+<li><p>Depending on the terminal you’re using, you should probably see <code class="docutils literal notranslate"><span class="pre">fetch3-dev</span></code> in parentheses somewhere in the command line.
+If you see <code class="docutils literal notranslate"><span class="pre">base</span></code> in parentheses, this means you’re using the base conda environment instead of the fetch3 environment.</p>
+<ul>
+<li><p>You can run <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">env</span> <span class="pre">list</span></code> to check which environment is active (there is a <code class="docutils literal notranslate"><span class="pre">*</span></code> next to the active environment)</p></li>
+<li><p>If you’re running one of the .ipynb notebooks to look at the model output, make sure that the notebook is using the fetch3-dev environment</p></li>
+</ul>
+</li>
+<li><p>If you’re sure you’re using the fetch3-dev environment and still getting a <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code>, see <a class="reference internal" href="#installation-errors"><span class="std std-ref">Installation errors</span></a></p></li>
+</ul>
+</section>
+<section id="no-such-file-or-directory">
+<h3><code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">such</span> <span class="pre">file</span> <span class="pre">or</span> <span class="pre">directory</span></code><a class="headerlink" href="#no-such-file-or-directory" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>Are you sure you’re using the correct directory?</p>
+<ul>
+<li><p>For example, if you get this error when you run <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">main.py</span></code>, run <code class="docutils literal notranslate"><span class="pre">ls</span></code> and check that there is a <code class="docutils literal notranslate"><span class="pre">main.py</span></code> file
+in the current directory.</p></li>
+<li><p>If you change the directories in the notebooks, double-check that you’re giving it the correct directory.</p></li>
+<li><p>If you changed the output path for the model, make sure you specified an output directory that exists on your computer.</p></li>
+<li><p>Check whether a full filepath or a directory was supposed to be provided, and that you provided the correct one
+(e.g., if the error was with the path to the config file, did you provide the full filepath including the
+filename and extension, or just a directory?)</p></li>
+</ul>
+</li>
+<li><p>For directory errors in Windows:</p>
+<ul>
+<li><p>If you’re sure  you’re using the correct directory and still getting an error, it’s probably an issue with parsing
+the Windows path correctly. There might be characters (like spaces) that need to be escaped for the path to be
+parsed properly.</p>
+<ul>
+<li><p>Try using double backslashes in the file paths (i.e., change <code class="docutils literal notranslate"><span class="pre">\</span></code> to <code class="docutils literal notranslate"><span class="pre">\\</span></code>)</p></li>
+<li><p>Try keeping things in directories that don’t have any special characters or
+spaces in the path</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="installation-errors">
+<h3>Installation errors<a class="headerlink" href="#installation-errors" title="Permalink to this headline">#</a></h3>
+<ul>
+<li><p>For Windows, make sure git is installed before you install the fetch3 conda environment</p></li>
+<li><p>If you are using the fetch3 environment and are still getting a <code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code>, check that the module in question was actually installed in
+the fetch3-dev environment. With the fetch3-dev environment active, run <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">list</span></code> to see the packages that are installed in fetch3-dev.</p></li>
+<li><p>If you find that the fetch3 environment is missing packages that should have been installed, try removing and re-installing the
+environment.</p>
+<ul>
+<li><p>To remove the fetch3 environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">deactivate</span>
+<span class="n">conda</span> <span class="n">remove</span> <span class="o">-</span><span class="n">n</span> <span class="n">fetch3</span><span class="o">-</span><span class="n">dev</span> <span class="o">--</span><span class="nb">all</span>
+</pre></div>
+</div>
+</li>
+<li><p>Next, make sure you have the latest version of the FETCH3 code, and re-install the fetch3-dev environment. See <span class="xref std std-ref">Install FETCH3’s dependencies</span></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="permissions-issues-in-windows">
+<h3>Permissions issues in Windows<a class="headerlink" href="#permissions-issues-in-windows" title="Permalink to this headline">#</a></h3>
+<ul class="simple">
+<li><p>If you’re getting an error about not having permission to access files in Windows, you might need to change
+your permissions settings.</p></li>
+</ul>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Add instructions about changing permissions settings in powershell to run as admin
+by default</p>
+</div>
+</section>
+</section>
+<section id="other-issues">
+<h2>Other issues<a class="headerlink" href="#other-issues" title="Permalink to this headline">#</a></h2>
+<p>If you’re having issues not covered in this section, please <a class="reference external" href="https://github.com/jemissik/fetch3_nhl/issues">submit a GitHub issue</a></p>
+</section>
+</section>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="quick_reference.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Quick reference</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="changelog.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Change log</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Justine Missik.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

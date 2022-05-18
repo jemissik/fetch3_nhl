@@ -40,7 +40,7 @@ Clone the FETCH3 repository from `FETCH3's GitHub page <https://github.com/jemis
 
 .. note::
   If you have plans to modify the FETCH3 source code itself, see the :ref:`Developer guide` for instructions about
-  forking the FETCH3 repository and working with git. 
+  forking the FETCH3 repository and working with git.
 
 .. todo::
     - Eventually FETCH3 will be released as a package to make installation simpler
@@ -117,3 +117,4 @@ as command line arguments. Since we are ommitting these arguments, the default f
   if it doesn't already exist.
 
 If this test case runs successfully, you can move on to preparing your own data and configuration files.
+If you have errors, see the :ref:`Troubleshooting` section.
