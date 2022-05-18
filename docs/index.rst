@@ -69,6 +69,7 @@ Contents
   getting_started
   user_guide/index
   developer_guide
+  troubleshooting
   changelog
   roadmap
   FETCH3 code reference <ftch/fetch3>
