@@ -191,10 +191,10 @@
   <section id="model-outputs">
 <h1>Model outputs<a class="headerlink" href="#model-outputs" title="Permalink to this headline">#</a></h1>
 <p>The following files will be created in the output directory:</p>
-<ul class="simple">
+<ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">fetch3.log</span></code>: Log file for the model run</p></li>
 <li><dl class="simple">
-<dt>outputs from the NHL module:</dt><dd><ul>
+<dt>outputs from the NHL module:</dt><dd><ul class="simple">
 <li><p>nhl_zenith.csv: Timeseries of calculated zenith angle</p></li>
 <li><p>nhl_out.nc: NHL transpiration</p></li>
 <li><p>nhl_out_modelres: NHL trasnpiration interpolated to the resolution used by FETCH3</p></li>
@@ -202,13 +202,46 @@
 </dd>
 </dl>
 </li>
+<li><dl>
+<dt>FETCH3 outputs:</dt><dd><ul class="simple">
 <li><dl class="simple">
-<dt>FETCH3 outputs:</dt><dd><ul>
-<li><p>ds_all.nc</p></li>
-<li><p>ds_canopy.nc</p></li>
-<li><p>ds_root.nc</p></li>
-<li><p>ds_soil.nc</p></li>
+<dt>ds_canopy.nc: Dataset with the canopy variables:</dt><dd><ul>
+<li><p>S_kx: [unitless] Cavitation of stem xylem, given by eqn S.79 in Silva et al 2022</p></li>
+<li><p>trans_2d: [m3H2O m-2crown_projection m-1stem s-1] Transpiration</p></li>
+<li><p>H: [MPa] Water potential</p></li>
+<li><p>K: [m s-1] Hydraulic conductivity</p></li>
+<li><p>Capac: [Pa-1] Capacitance</p></li>
 </ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ds_root.nc: Dataset with the root variables:</dt><dd><ul>
+<li><p>Kr_sink [1/sPa]: Effective root radial conductivity</p></li>
+<li><p>S_kr [unitless]: Cavitation of root xylem, given by eqn S.77 in Silva et al 2022</p></li>
+<li><p>S_sink [unitless]: Feddes root water uptake stress function, given by equations S.73, 74 and 75 in Silva et al 2022</p></li>
+<li><p>EVsink_ts [m3H2O m-2ground m-1depth s-1]: Root water uptake</p></li>
+<li><p>H: [MPa] Water potential</p></li>
+<li><p>K: [m s-1] Hydraulic conductivity</p></li>
+<li><p>Capac: [Pa-1] Capacitance</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>ds_soil.nc: Dataset with the soil variables:</dt><dd><ul>
+<li><p>THETA: [m3 m-3] Volumetric water content</p></li>
+<li><p>H: [MPa] Water potential</p></li>
+<li><p>K: [m s-1] Hydraulic conductivity</p></li>
+<li><p>Capac: [Pa-1] Capacitance</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>ds_all.nc: Dataset with H, Capac, and K concatenated for the entire z array</p></li>
+</ul>
+<p>(these variables are also written in ds_canopy, ds_root, and ds_soil, so in most
+cases it is easier to use those datasets instead)</p>
 </dd>
 </dl>
 </li>
