@@ -4,6 +4,9 @@ output/
 # Scratch folder
 scratch/
 
+#.ipynb checkpoints
+.ipynb_checkpoints
+
 # Output from speed testing
 speed_test/output/
 

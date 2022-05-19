@@ -19,6 +19,10 @@ Modifying the config file
 ==================
 See ``model_config.yml`` for an example.
 
+.. note::
+FETCH3 can also use the config file format that is used for optimization runs, as long as ``value`` is specified for every
+parameter.
+
 Model options
 -------------
 * **input_fname** (str): File for input met data
@@ -514,10 +518,21 @@ class ConfigParams:
 
 def setup_config(config_file):
     logger.info("Reading config file" )
+
     with open(config_file, "r") as yml_config:
-        config_dict = yaml.safe_load(yml_config)
-    cfg = ConfigParams(**config_dict['model_options'], **config_dict['parameters'])
+        loaded_configs = yaml.safe_load(yml_config)
+
+    # Check if the config file was the optimization config file format, and convert
+    if 'optimization_options' in list(loaded_configs):
+        param_dict = {}
+        for param in loaded_configs['parameters'].keys():
+            param_dict[param] = loaded_configs['parameters'][param]['value']
+    else:
+        param_dict = loaded_configs['parameters']
+
+    cfg = ConfigParams(**loaded_configs['model_options'], **param_dict)
     return cfg
+
 
 def save_calculated_params(fileout, cfg):
     with open(fileout, 'w') as f:
