@@ -20,8 +20,8 @@ Modifying the config file
 See ``model_config.yml`` for an example.
 
 .. note::
-FETCH3 can also use the config file format that is used for optimization runs, as long as ``value`` is specified for every
-parameter.
+    FETCH3 can also use the config file format that is used for optimization runs, as long as ``value`` is specified for
+    every parameter.
 
 Model options
 -------------
