@@ -29,6 +29,10 @@ The following files will be created in the output directory:
         - H: [MPa] Water potential
         - K: [m s-1] Hydraulic conductivity
         - Capac: [Pa-1] Capacitance
+    - sapflux.nc: Dataset with sapflux and aboveground water storage
+        - sapflux: [m3 s-1] Tree-level sap flux
+        - storage: [m3] Total aboveground water storage
+        - delta_s: [m3] Change in aboveground water storage from the previous timestep
     - ds_all.nc: Dataset with H, Capac, and K concatenated for the entire z array
     (these variables are also written in ds_canopy, ds_root, and ds_soil, so in most
     cases it is easier to use those datasets instead)

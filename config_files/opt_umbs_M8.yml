@@ -1,10 +1,10 @@
 optimization_options:
   metric:  # todo or []
-    metric_name: "MeanSquaredError"
+    metric_name: "RootMeanSquaredError"
   experiment: {}
   generation_strategy: {}
   scheduler:
-    total_trials: 1
+    total_trials: 50
   output_dir: "./output"
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
@@ -294,8 +294,9 @@ parameters:
   ###########################################################################
 
   scale_nhl:
-    type: range
-    bounds: [0.1, 2.0]
+    type: fixed
+    value: 1.0
+    # bounds: [0.1, 2.0]
 
   mean_crown_area_sp: #[m2]
   # From 2011 Tree info in FETCH2 Matlab example
@@ -317,24 +318,28 @@ parameters:
     value: 0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
   x:
     type: fixed
-    value: 1  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+    value: 1  # FETCH2: 2-6 #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
 
   Vcmax25:
-    type: fixed
-    value: 59.9300000000000
+    type: range
+    bounds: [20.0, 85.0]
+    # value: oak 59.9 pine 31.1
   alpha_gs:
-    type: fixed
-    value: 6.67330000000000
+    type: range
+    bounds: [4.0, 9.0]
+    # value: #6.7 oak, 7.3 pine
   alpha_p:
     type: fixed
     value: 1
 
   wp_s50:
-    type: fixed
-    value: -9.1e+5 #value for oak from Mirfenderesgi
+    type: range
+    bounds: [-2.0e+6, -1.0e+5]
+    # value: #-9.1e+5 oak -1.8e+5 #value for oak from Mirfenderesgi
   c3:
-    type: fixed
-    value: 12.3 #value for oak from Mirfenderesgi
+    type: range
+    bounds: [0.1, 20.0]
+    # value: #12.3 oak 10.3 pint#value for oak from Mirfenderesgi
 
 
 
