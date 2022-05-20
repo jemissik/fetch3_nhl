@@ -173,6 +173,16 @@
   <ul class="visible nav section-nav flex-column">
    <li class="toc-h2 nav-item toc-entry">
     <a class="reference internal nav-link" href="#id1">
+     5-19-22:
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id2">
+     5-18-22:
+    </a>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id3">
      5-7-22:
     </a>
    </li>
@@ -224,7 +234,30 @@
   <section id="change-log">
 <h1>Change log<a class="headerlink" href="#change-log" title="Permalink to this headline">#</a></h1>
 <section id="id1">
-<h2>5-7-22:<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<h2>5-19-22:<a class="headerlink" href="#id1" title="Permalink to this headline">#</a></h2>
+<ul class="simple">
+<li><p>FETCH3 can use the optimization configuration file format for standalone runs, so you can use the same configuration
+file for both optimization runs and standalone runs.</p></li>
+<li><p>Updated notebooks for example model output and optimization results</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>5-18-22:<a class="headerlink" href="#id2" title="Permalink to this headline">#</a></h2>
+<ul class="simple">
+<li><p>Many documentation updates</p></li>
+<li><p>Bug fixes</p></li>
+<li><p>Updates to conda environment</p></li>
+<li><p>Updates to model output files:</p>
+<ul>
+<li><p>added H, K, and Capac to the soil, root, and canopy outputs (so these variables are no
+longer only in the ds_all.nc output)</p></li>
+<li><p>added metadata (including units) to output files</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h2>5-7-22:<a class="headerlink" href="#id3" title="Permalink to this headline">#</a></h2>
 <ul class="simple">
 <li><p>Performance improvements: Replaced scipy.lingalg.pinv2 with torch.linalg.lstqr for ~75% performance improvement</p></li>
 <li><p>Updates to required input parameters (uses DBH, sapwood depth to calculate sapwood area)</p></li>
