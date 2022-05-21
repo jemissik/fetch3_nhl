@@ -68,8 +68,7 @@ def run(config_file, data_dir, output_dir):
         save_calculated_params(str(output_dir / 'calculated_params.yml'), cfg)
 
         ##########Set up spatial discretization
-        zind = spatial_discretization(
-        cfg.dz, cfg.Soil_depth, cfg.Root_depth, cfg.Hspec, cfg.sand_d, cfg.clay_d)
+        zind = spatial_discretization(cfg)
         ######prepare met data
         met, tmax, start_time, end_time = prepare_met_data(cfg, data_dir, zind.z_upper)
 

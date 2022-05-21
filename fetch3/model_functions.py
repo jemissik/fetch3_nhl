@@ -6,14 +6,15 @@ Model functions
 Core functions of FETCH3
 Porous media flow, Picard iteration, etc
 """
-#importing libraries
+
 import numpy as np
 import pandas as pd
 import xarray as xr
-from scipy import linalg
 from numpy.linalg import multi_dot
 import logging
 import torch
+
+from fetch3.roots import feddes_root_stress
 
 
 logger = logging.getLogger(__file__)
@@ -225,7 +226,6 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     knp1m=np.zeros(shape=(nz))
     stress_kx=np.zeros(shape=(nz-nz_r))
     stress_kr=np.zeros(shape=(nz_r-nz_s))
-    stress_roots=np.zeros(shape=(nz_r-nz_s))
     deltam=np.zeros(shape=(nz))
 
 
@@ -298,27 +298,12 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
             Kbarminus = np.diagflat(kbarminus)
 
             ##########ROOT WATER UPTAKE TERM ############################
-            stress_roots=np.zeros(shape=(len(z[nz_s-(nz_r-nz_s):nz_s])))
-
             #FEDDES root water uptake stress function
             #parameters from VERMA ET AL 2014: Equations S.73, 74 and 75 supplementary material
 
-            #clay
-            for k,j in zip(np.arange(nz_s-(nz_r-nz_s),nz_clay+1,1),np.arange(0,((len(stress_roots-1))-(nz_sand-nz_clay)),1)): #clay
-                if theta[k]<=cfg.theta_1_clay:
-                    stress_roots[j]=0
-                if cfg.theta_1_clay < theta[k] and theta[k]<= cfg.theta_2_clay:
-                    stress_roots[j]=(theta[k]-cfg.theta_1_clay)/(cfg.theta_2_clay-cfg.theta_1_clay)
-                if theta[k] > cfg.theta_2_clay:
-                    stress_roots[j]=1
-            #sand
-            for k,j in zip(np.arange(nz_clay+1,nz_s,1),np.arange(len(stress_roots)-(nz_sand-nz_clay),len(stress_roots),1)): #sand
-               if theta[k]<=cfg.theta_1_sand:
-                    stress_roots[j]=0
-               if cfg.theta_1_sand < theta[k] and theta[k] <=cfg.theta_2_sand:
-                    stress_roots[j]=(theta[k]-cfg.theta_1_sand)/(cfg.theta_2_sand-cfg.theta_1_sand)
-               if theta[k] > cfg.theta_2_sand:
-                    stress_roots[j]=1
+            stress_roots = feddes_root_stress(theta[nz_s - len(zind.z_root):nz_s],
+                                              zind.theta_1[nz_s - len(zind.z_root):nz_s],
+                                              zind.theta_2[nz_s - len(zind.z_root):nz_s])
 
 
             #specific radial conductivity under saturated soil conditions

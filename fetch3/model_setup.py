@@ -13,7 +13,13 @@ from dataclasses import dataclass
 #Discretization
 ###########################################################
 
-def spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d):
+def spatial_discretization(cfg):
+    dz = cfg.dz
+    Soil_depth = cfg.Soil_depth
+    Root_depth = cfg.Root_depth
+    Hspec = cfg.Hspec
+    sand_d = cfg.sand_d
+    clay_d = cfg.clay_d
 
     ##########################################
     #below-ground spatial discretization
@@ -45,6 +51,14 @@ def spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d):
     nz_sand=int(np.flatnonzero(z_soil==sand_d)) #node where sand layer finishes
     nz_clay=int(np.flatnonzero(z_soil==clay_d)) #node where clay layer finishes- sand starts
 
+    # Create arrays for theta_1 and theta_2
+    theta_1 = np.piecewise(z_soil,
+                          [z_soil <= clay_d, z_soil > clay_d],
+                          [cfg.theta_1_clay, cfg.theta_1_sand])
+    theta_2 = np.piecewise(z_soil,
+                          [z_soil <= clay_d, z_soil > clay_d],
+                          [cfg.theta_2_clay, cfg.theta_2_sand])
+
     zind = Zind(z_soil=z_soil,
                 nz_s=nz_s,
                 z_root=z_root,
@@ -55,7 +69,9 @@ def spatial_discretization(dz, Soil_depth, Root_depth, Hspec, sand_d, clay_d):
                 z=z,
                 nz=nz,
                 nz_sand=nz_sand,
-                nz_clay=nz_clay)
+                nz_clay=nz_clay,
+                theta_1=theta_1,
+                theta_2=theta_2)
 
     return zind
 
@@ -78,3 +94,5 @@ class Zind:
     nz: int
     nz_sand: int
     nz_clay: int
+    theta_1: np.ndarray
+    theta_2: np.ndarray
