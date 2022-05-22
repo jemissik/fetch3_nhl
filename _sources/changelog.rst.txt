@@ -2,6 +2,11 @@
 Change log
 ##########
 
+5-22-22:
+--------
+- Bug fixes for Feddes water stress function
+- Moved root functions to a separate module
+
 5-19-22:
 --------
 - FETCH3 can use the optimization configuration file format for standalone runs, so you can use the same configuration
