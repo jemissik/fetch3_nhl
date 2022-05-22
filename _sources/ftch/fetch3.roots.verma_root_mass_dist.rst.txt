@@ -1,0 +1,6 @@
+fetch3.roots.verma\_root\_mass\_dist
+====================================
+
+.. currentmodule:: fetch3.roots
+
+.. autofunction:: verma_root_mass_dist

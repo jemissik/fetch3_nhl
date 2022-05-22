@@ -1,0 +1,6 @@
+fetch3.roots.calc\_root\_K
+==========================
+
+.. currentmodule:: fetch3.roots
+
+.. autofunction:: calc_root_K

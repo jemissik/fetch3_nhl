@@ -1,0 +1,33 @@
+fetch3.roots
+============
+
+.. automodule:: fetch3.roots
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+   
+      calc_root_K
+      feddes_root_stress
+      verma_root_mass_dist
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

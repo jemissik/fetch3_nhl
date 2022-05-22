@@ -36,6 +36,7 @@
    fetch3.nhl_transpiration
    fetch3.optimize
    fetch3.pm_transpiration
+   fetch3.roots
    fetch3.sapflux
    fetch3.scaling
    fetch3.tests

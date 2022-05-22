@@ -1,0 +1,6 @@
+fetch3.roots.feddes\_root\_stress
+=================================
+
+.. currentmodule:: fetch3.roots
+
+.. autofunction:: feddes_root_stress

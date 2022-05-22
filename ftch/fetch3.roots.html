@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>fetch3.nhl_transpiration.NHL_functions.calc_Kg &#8212; FETCH3  documentation</title>
+    <title>fetch3.roots &#8212; FETCH3  documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -32,8 +32,8 @@
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="fetch3.nhl_transpiration.NHL_functions.calc_LAI_vertical" href="fetch3.nhl_transpiration.NHL_functions.calc_LAI_vertical.html" />
-    <link rel="prev" title="fetch3.nhl_transpiration.NHL_functions" href="fetch3.nhl_transpiration.NHL_functions.html" />
+    <link rel="next" title="fetch3.roots.calc_root_K" href="fetch3.roots.calc_root_K.html" />
+    <link rel="prev" title="fetch3.optimize" href="fetch3.optimize.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -285,28 +285,28 @@
    </li>
   </ul>
  </li>
- <li class="toctree-l1 current active has-children">
+ <li class="toctree-l1 has-children">
   <a class="reference internal" href="fetch3.nhl_transpiration.html">
    fetch3.nhl_transpiration
   </a>
-  <input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+  <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
   <label for="toctree-checkbox-6">
    <i class="fas fa-chevron-down">
    </i>
   </label>
-  <ul class="current">
-   <li class="toctree-l2 current active has-children">
+  <ul>
+   <li class="toctree-l2 has-children">
     <a class="reference internal" href="fetch3.nhl_transpiration.NHL_functions.html">
      fetch3.nhl_transpiration.NHL_functions
     </a>
-    <input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+    <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
     <label for="toctree-checkbox-7">
      <i class="fas fa-chevron-down">
      </i>
     </label>
-    <ul class="current">
-     <li class="toctree-l3 current active">
-      <a class="current reference internal" href="#">
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="fetch3.nhl_transpiration.NHL_functions.calc_Kg.html">
        fetch3.nhl_transpiration.NHL_functions.calc_Kg
       </a>
      </li>
@@ -468,11 +468,11 @@
    fetch3.optimize
   </a>
  </li>
- <li class="toctree-l1 has-children">
-  <a class="reference internal" href="fetch3.roots.html">
+ <li class="toctree-l1 current active has-children">
+  <a class="current reference internal" href="#">
    fetch3.roots
   </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
   <label for="toctree-checkbox-10">
    <i class="fas fa-chevron-down">
    </i>
@@ -659,27 +659,31 @@
               
               <div>
                 
-  <section id="fetch3-nhl-transpiration-nhl-functions-calc-kg">
-<h1>fetch3.nhl_transpiration.NHL_functions.calc_Kg<a class="headerlink" href="#fetch3-nhl-transpiration-nhl-functions-calc-kg" title="Permalink to this headline">#</a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="fetch3.nhl_transpiration.NHL_functions.calc_Kg">
-<span class="sig-name descname"><span class="pre">calc_Kg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Tair</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#fetch3.nhl_transpiration.NHL_functions.calc_Kg" title="Permalink to this definition">#</a></dt>
-<dd><p>Calculates the temperature-dependent conductance coefficient.
-Formulation from Ewers et al 2007
-Equation A.2 from Mirfenderesgi et al 2016</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>Tair</strong> (<em>array_like</em>) – Air temperature [deg C]</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>Kg</strong> – Temperature-dependent conductance coefficient [kPa m3 kg-1]</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
+  <section id="module-fetch3.roots">
+<span id="fetch3-roots"></span><h1>fetch3.roots<a class="headerlink" href="#module-fetch3.roots" title="Permalink to this headline">#</a></h1>
+<p>Root functions</p>
+<p class="rubric">Functions</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="fetch3.roots.calc_root_K.html#fetch3.roots.calc_root_K" title="fetch3.roots.calc_root_K"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calc_root_K</span></code></a></p></td>
+<td><p><dl class="field-list simple">
+<dt class="field-odd">param r_dist</dt>
+<dd class="field-odd"><p></p></dd>
 </dl>
-</dd></dl>
-
+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="fetch3.roots.feddes_root_stress.html#fetch3.roots.feddes_root_stress" title="fetch3.roots.feddes_root_stress"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feddes_root_stress</span></code></a></p></td>
+<td><p>Calculates Feddes root water uptake stress function, from equations S.73, S.74, and S.75 of Silva et al. 2022.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="fetch3.roots.verma_root_mass_dist.html#fetch3.roots.verma_root_mass_dist" title="fetch3.roots.verma_root_mass_dist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verma_root_mass_dist</span></code></a></p></td>
+<td><p>Root mass distribution following Verma et al. 2014.</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 
 
@@ -688,17 +692,17 @@ Equation A.2 from Mirfenderesgi et al 2016</p>
               
               <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="fetch3.nhl_transpiration.NHL_functions.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="fetch3.optimize.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">fetch3.nhl_transpiration.NHL_functions</p>
+            <p class="prev-next-title">fetch3.optimize</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="fetch3.nhl_transpiration.NHL_functions.calc_LAI_vertical.html" title="next page">
+    <a class='right-next' id="next-link" href="fetch3.roots.calc_root_K.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">fetch3.nhl_transpiration.NHL_functions.calc_LAI_vertical</p>
+        <p class="prev-next-title">fetch3.roots.calc_root_K</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
