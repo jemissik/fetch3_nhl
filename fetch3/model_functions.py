@@ -6,14 +6,15 @@ Model functions
 Core functions of FETCH3
 Porous media flow, Picard iteration, etc
 """
-#importing libraries
+
 import numpy as np
 import pandas as pd
 import xarray as xr
-from scipy import linalg
 from numpy.linalg import multi_dot
 import logging
 import torch
+
+from fetch3.roots import feddes_root_stress, verma_root_mass_dist, calc_root_K
 
 
 logger = logging.getLogger(__file__)
@@ -133,7 +134,6 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     #picard iteration solver, as described in the supplementary material
     #solution following Celia et al., 1990
     z_soil = zind.z_soil
-    z_root = zind.z_root
     nz_s = zind.nz_s
     nz_r = zind.nz_r
     z_upper =zind.z_upper
@@ -201,19 +201,13 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     S_S=np.zeros(shape=(nz,nt))
     theta=np.zeros(shape=(nz_s))
     Se=np.zeros(shape=(nz_s,nt))
-    Kr=np.zeros(shape=(nz_r-nz_s))
 
     #H_initial = inital water potential [Pa]
     H[:,0] = H_initial[:]
 
-#################################### ROOT MASS DISTRIBUTION FORMULATION ############################################
 
     #root mass distribution following VERMA ET AL 2O14
-
-    z_dist=np.arange(0,cfg.Root_depth+cfg.dz,cfg.dz)
-    z_dist=np.flipud(z_dist)
-
-    r_dist=(np.exp(cfg.qz-((cfg.qz*z_dist)/cfg.Root_depth))*cfg.qz**2*(cfg.Root_depth-z_dist))/(cfg.Root_depth**2*(1+np.exp(cfg.qz)*(-1+cfg.qz)))
+    r_dist = verma_root_mass_dist(cfg)
 
 
 ####################################################################################################################################
@@ -225,7 +219,6 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     knp1m=np.zeros(shape=(nz))
     stress_kx=np.zeros(shape=(nz-nz_r))
     stress_kr=np.zeros(shape=(nz_r-nz_s))
-    stress_roots=np.zeros(shape=(nz_r-nz_s))
     deltam=np.zeros(shape=(nz))
 
 
@@ -297,38 +290,13 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
             Kbarminus = np.diagflat(kbarminus)
 
-            ##########ROOT WATER UPTAKE TERM ############################
-            stress_roots=np.zeros(shape=(len(z[nz_s-(nz_r-nz_s):nz_s])))
+            ##########ROOT WATER UPTAKE TERM ###########################
 
-            #FEDDES root water uptake stress function
-            #parameters from VERMA ET AL 2014: Equations S.73, 74 and 75 supplementary material
+            stress_roots = feddes_root_stress(theta[nz_s - len(zind.z_root):nz_s],
+                                              zind.theta_1[nz_s - len(zind.z_root):nz_s],
+                                              zind.theta_2[nz_s - len(zind.z_root):nz_s])
 
-            #clay
-            for k,j in zip(np.arange(nz_s-(nz_r-nz_s),nz_clay+1,1),np.arange(0,((len(stress_roots-1))-(nz_sand-nz_clay)),1)): #clay
-                if theta[k]<=cfg.theta_1_clay:
-                    stress_roots[j]=0
-                if cfg.theta_1_clay < theta[k] and theta[k]<= cfg.theta_2_clay:
-                    stress_roots[j]=(theta[k]-cfg.theta_1_clay)/(cfg.theta_2_clay-cfg.theta_1_clay)
-                if theta[k] > cfg.theta_2_clay:
-                    stress_roots[j]=1
-            #sand
-            for k,j in zip(np.arange(nz_clay+1,nz_s,1),np.arange(len(stress_roots)-(nz_sand-nz_clay),len(stress_roots),1)): #sand
-               if theta[k]<=cfg.theta_1_sand:
-                    stress_roots[j]=0
-               if cfg.theta_1_sand < theta[k] and theta[k] <=cfg.theta_2_sand:
-                    stress_roots[j]=(theta[k]-cfg.theta_1_sand)/(cfg.theta_2_sand-cfg.theta_1_sand)
-               if theta[k] > cfg.theta_2_sand:
-                    stress_roots[j]=1
-
-
-            #specific radial conductivity under saturated soil conditions
-            Ksrad=stress_roots*cfg.Kr #stress function is unitless
-
-            #effective root radial conductivity
-            Kerad=Ksrad*r_dist  #[1/sPa] #Kr is already divided by Rho*g
-
-            #effective root radial conductivity
-            Kr=Kerad
+            Kr = calc_root_K(r_dist, stress_roots, cfg)
 
 
 #######################################################################
