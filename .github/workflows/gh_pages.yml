@@ -14,7 +14,7 @@ jobs:
         with:
             miniforge-variant: Mambaforge
             miniforge-version: latest
-            activate-environment: anaconda-client-env
+            activate-environment: fetch3-docs
             use-mamba: true
 
       - name: Get Date
@@ -33,7 +33,7 @@ jobs:
         id: cache
 
       - name: Update environment
-        run: mamba env update -n anaconda-client-env -f docs/fetch3_doc_env.yml
+        run: mamba env update -n fetch3-docs -f docs/fetch3_doc_env.yml
         if: steps.cache.outputs.cache-hit != 'true'
       - name: Checkout
         uses: actions/checkout@master
