@@ -1,8 +1,0 @@
-m2r2
-pydata-sphinx-theme
-matplotlib
-numpy
-pandas
-PyYAML
-scipy
-xarray

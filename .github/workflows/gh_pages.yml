@@ -3,22 +3,46 @@ on:
   push:
     branches:
     - develop
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-python@v2
-    - uses: actions/checkout@master
-      with:
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
-        submodules: 'true'
-        token: ${{ secrets.PAT }}
-    - name: Build and Commit
-      uses: sphinx-notes/pages@v2
-      with:
-        requirements_path: ./docs/requirements.txt
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: gh-pages
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+            miniforge-variant: Mambaforge
+            miniforge-version: latest
+            activate-environment: anaconda-client-env
+            use-mamba: true
+
+      - name: Get Date
+        id: get-date
+        run: echo "::set-output name=today::$(/bin/date -u '+%Y%m%d')"
+        shell: bash
+
+      - name: Cache Conda env
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.CONDA }}/envs
+          key: conda-${{ runner.os }}--${{ runner.arch }}--${{ steps.get-date.outputs.today }}-${{ hashFiles('docs/fetch3_doc_env.yml') }}-${{ env.CACHE_NUMBER }}
+        env:
+          # Increase this value to reset cache if docs/fetch3_doc_env.yml has not changed
+          CACHE_NUMBER: 0
+        id: cache
+
+      - name: Update environment
+        run: mamba env update -n anaconda-client-env -f docs/fetch3_doc_env.yml
+        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Checkout
+        uses: actions/checkout@master
+        with:
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+
+      - name: Running the Sphinx to gh-pages Action
+        uses: uibcdf/action-sphinx-docs-to-gh-pages@v1.0-beta.2
+        with:
+          branch: develop
+          dir_docs: docs
+          sphinxopts: ''

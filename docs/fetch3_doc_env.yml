@@ -1,0 +1,29 @@
+channels:
+- pytorch
+- conda-forge
+- defaults
+dependencies:
+- bottleneck
+- dask
+- ipympl
+- matplotlib
+- netCDF4
+- numpy
+- pandas
+- pip
+- python=3.9
+- pytorch
+- scipy
+- torchvision
+- xarray
+- pip:
+  - PyYAML
+  - ax-platform
+  - click
+  - conda-merge
+  - git+https://github.com/madeline-scyphers/optiwrap.git
+  - m2r2
+  - pydata-sphinx-theme
+  - pytest
+  - snakeviz
+name: fetch3-docs
