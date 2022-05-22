@@ -100,63 +100,42 @@ model_options:
 
 parameters:
 
-  #SOIL SPATIAL DISCRETIZATION
-
-  # Root_depth:
-  #   type: fixed
-  #   value: 0.6 #[m] depth of root column
-  # Soil_depth:
-  #   type: fixed
-  #   value: 6.0   #[m]depth of soil column
-
-  # ####################################################################
-  # #CONFIGURATION OF SOIL DUPLEX
-  # #depths of layer/clay interface
-  # #####################################################################
-
-  # sand_d:
-  #   type: fixed
-  #   value: 6.0 #4.2----top soil #m
-  # clay_d:
-  #   type: fixed
-  #   value: 1.0 #0------4.2 #m
+#SOIL SPATIAL DISCRETIZATION
+#
   Root_depth:
     type: fixed
-    value: 3.2 #[m] depth of root column
+    value: 0.6 #[m] depth of root column
   Soil_depth:
     type: fixed
-    value: 5   #[m]depth of soil column
-
-  ####################################################################
-  #CONFIGURATION OF SOIL DUPLEX
-  #depths of layer/clay interface
-  #####################################################################
+    value: 6.0   #[m]depth of soil column
 
   sand_d:
     type: fixed
-    value: 5.0 #4.2----top soil #m
+    value: 6.0 #4.2----top soil #m
   clay_d:
     type: fixed
-    value: 4.2 #0------4.2 #m
+    value: 1.0 #0------4.2 #m
 
-  #SOIL INITIAL CONDITIONS
-  #soil initial conditions as described in the paper [VERMA et al., 2014]
-  #the initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
-  #from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
-  #from 4,2 m [sand layer] cte value of -0.402 m
 
-  # cte_clay:
-  #   type: fixed
-  #   value: 1 #depth from 0-3m initial condition of clay [and SWC] is constant
-  # H_init_soilbottom:
-  #   type: fixed
-  #   value: -6.09
-  # H_init_soilmid:
-  #   type: fixed
-  #   value: -0.402
-  # H_init_canopytop:
-  #   type: fixed
-  #   value: -19.08
+#  SOIL INITIAL CONDITIONS
+#  soil initial conditions as described in the paper [VERMA et al., 2014]
+#  the initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
+#  from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
+#  from 4,2 m [sand layer] cte value of -0.402 m
+
+#   cte_clay:
+#     type: fixed
+#     value: 1 #depth from 0-3m initial condition of clay [and SWC] is constant
+#   H_init_soilbottom:
+#     type: fixed
+#     value: -6.09
+#   H_init_soilmid:
+#     type: fixed
+#     value: -0.402
+#   H_init_canopytop:
+#     type: fixed
+#     value: -19.08
+
   cte_clay:
     type: fixed
     value: 3 #depth from 0-3m initial condition of clay [and SWC] is constant
