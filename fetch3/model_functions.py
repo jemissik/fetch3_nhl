@@ -14,7 +14,7 @@ from numpy.linalg import multi_dot
 import logging
 import torch
 
-from fetch3.roots import feddes_root_stress, verma_root_mass_dist
+from fetch3.roots import feddes_root_stress, verma_root_mass_dist, calc_root_K
 
 
 logger = logging.getLogger(__file__)
@@ -201,7 +201,6 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     S_S=np.zeros(shape=(nz,nt))
     theta=np.zeros(shape=(nz_s))
     Se=np.zeros(shape=(nz_s,nt))
-    Kr=np.zeros(shape=(nz_r-nz_s))
 
     #H_initial = inital water potential [Pa]
     H[:,0] = H_initial[:]
@@ -297,15 +296,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
                                               zind.theta_1[nz_s - len(zind.z_root):nz_s],
                                               zind.theta_2[nz_s - len(zind.z_root):nz_s])
 
-
-            #specific radial conductivity under saturated soil conditions
-            Ksrad=stress_roots*cfg.Kr #stress function is unitless
-
-            #effective root radial conductivity
-            Kerad=Ksrad*r_dist  #[1/sPa] #Kr is already divided by Rho*g
-
-            #effective root radial conductivity
-            Kr=Kerad
+            Kr = calc_root_K(r_dist, stress_roots, cfg)
 
 
 #######################################################################

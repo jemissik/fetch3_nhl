@@ -50,3 +50,27 @@ def verma_root_mass_dist(cfg):
 
     r_dist = (np.exp(cfg.qz-((cfg.qz*z_dist)/cfg.Root_depth))*cfg.qz**2*(cfg.Root_depth-z_dist))/(cfg.Root_depth**2*(1+np.exp(cfg.qz)*(-1+cfg.qz)))
     return r_dist
+
+
+def calc_root_K(r_dist, stress_roots, cfg):
+    """
+
+    Parameters
+    ----------
+    r_dist :
+    stress_roots :
+    cfg :
+
+    Returns
+    -------
+    Effective root radial conductivity
+    """
+
+    # specific radial conductivity under saturated soil conditions
+    Ksrad = stress_roots * cfg.Kr  # stress function is unitless
+
+    # effective root radial conductivity
+    Kerad = Ksrad * r_dist  # [1/sPa] #Kr is already divided by Rho*g
+
+    return Kerad
+
