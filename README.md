@@ -1,7 +1,7 @@
 # FETCH3
 
 Links:
-- [FETCH3 docs](https://jemissik.github.io/fetch3_nhl/)
+- [FETCH3 docs](https://fetch3-nhl.readthedocs.io/)
 
 Create conda environment for FETCH3:
 
