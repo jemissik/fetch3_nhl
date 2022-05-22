@@ -33,7 +33,9 @@ jobs:
         id: cache
 
       - name: Update environment
-        run: mamba env update -n fetch3-docs -f docs/fetch3_doc_env.yml
+        run: |
+          pwd
+          mamba env update -n fetch3-docs -f ./docs/fetch3_doc_env.yml
         if: steps.cache.outputs.cache-hit != 'true'
       - name: Checkout
         uses: actions/checkout@master
