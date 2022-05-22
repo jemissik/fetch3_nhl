@@ -1,3 +1,6 @@
+"""
+Root functions
+"""
 import numpy as np
 
 
@@ -25,3 +28,25 @@ def feddes_root_stress(theta, theta1, theta2):
     stress_roots = np.select(conditions, outputs)
 
     return stress_roots
+
+def verma_root_mass_dist(cfg):
+    """
+    Root mass distribution following Verma et al. 2014
+
+    Parameters
+    ----------
+    cfg : dataclass
+        Model configuration dataclass
+
+    Returns
+    -------
+    r_dist: np.ndarray
+        Root mass distribution
+
+    """
+
+    z_dist = np.arange(0,cfg.Root_depth+cfg.dz,cfg.dz)
+    z_dist = np.flipud(z_dist)
+
+    r_dist = (np.exp(cfg.qz-((cfg.qz*z_dist)/cfg.Root_depth))*cfg.qz**2*(cfg.Root_depth-z_dist))/(cfg.Root_depth**2*(1+np.exp(cfg.qz)*(-1+cfg.qz)))
+    return r_dist

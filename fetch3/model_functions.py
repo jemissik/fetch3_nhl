@@ -14,7 +14,7 @@ from numpy.linalg import multi_dot
 import logging
 import torch
 
-from fetch3.roots import feddes_root_stress
+from fetch3.roots import feddes_root_stress, verma_root_mass_dist
 
 
 logger = logging.getLogger(__file__)
@@ -134,7 +134,6 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     #picard iteration solver, as described in the supplementary material
     #solution following Celia et al., 1990
     z_soil = zind.z_soil
-    z_root = zind.z_root
     nz_s = zind.nz_s
     nz_r = zind.nz_r
     z_upper =zind.z_upper
@@ -207,14 +206,9 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     #H_initial = inital water potential [Pa]
     H[:,0] = H_initial[:]
 
-#################################### ROOT MASS DISTRIBUTION FORMULATION ############################################
 
     #root mass distribution following VERMA ET AL 2O14
-
-    z_dist=np.arange(0,cfg.Root_depth+cfg.dz,cfg.dz)
-    z_dist=np.flipud(z_dist)
-
-    r_dist=(np.exp(cfg.qz-((cfg.qz*z_dist)/cfg.Root_depth))*cfg.qz**2*(cfg.Root_depth-z_dist))/(cfg.Root_depth**2*(1+np.exp(cfg.qz)*(-1+cfg.qz)))
+    r_dist = verma_root_mass_dist(cfg)
 
 
 ####################################################################################################################################
@@ -297,9 +291,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
             Kbarminus = np.diagflat(kbarminus)
 
-            ##########ROOT WATER UPTAKE TERM ############################
-            #FEDDES root water uptake stress function
-            #parameters from VERMA ET AL 2014: Equations S.73, 74 and 75 supplementary material
+            ##########ROOT WATER UPTAKE TERM ###########################
 
             stress_roots = feddes_root_stress(theta[nz_s - len(zind.z_root):nz_s],
                                               zind.theta_1[nz_s - len(zind.z_root):nz_s],
