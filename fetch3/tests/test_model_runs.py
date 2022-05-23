@@ -26,7 +26,7 @@ def test_fetch3_PM_run():
     run(config_path, data_path, output_path)
 
 def test_fetch3_opt_run():
-    config_path = Path(__file__).resolve().parent.parent.parent / 'config_files' / 'opt_umbs_M8.yml'
+    config_path = Path(__file__).resolve().parent / 'config_files' / 'opt_umbs_M8.yml'
     output_path = Path(__file__).resolve().parent.parent.parent / 'output'
     print(output_path)
     from fetch3.optimize.run_optimization import run

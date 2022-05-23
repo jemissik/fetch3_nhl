@@ -146,7 +146,6 @@ parameters:
   kmax: 1.0204081632653063e-09   #conductivity of xylem  [ m2/sPa]
   ap: 2.0e-6                                  #xylem cavitation parameter [Pa-1]
   bp: -1.5e+6                                #xylem cavitation parameter [Pa]
-  Aind_x: 8.62e-4                           #m2 xylem/m2 ground]
   Phi_0: 5.74e+8                               #From bohrer et al 2005
   p: 20                                           #From bohrer et al 2005
   sat_xylem: 0.573                                #From bohrer et al 2005 [m3 h2o/m3xylem]
