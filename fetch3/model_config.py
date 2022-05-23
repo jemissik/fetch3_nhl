@@ -310,6 +310,12 @@ class ConfigParams:
     ###############################################################################
     transpiration_scheme:  int # 0: PM transpiration; 1: NHL transpiration
     zenith_method:  str
+
+    #######################################################################
+    #LEAF AREA DENSITY FORMULATION (LAD) [1/m]
+    #######################################################################
+    lad_scheme: int  #0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
+
     ###############################################################################
     #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
     ###############################################################################
@@ -424,66 +430,59 @@ class ConfigParams:
     #TREE PARAMETERS
     Hspec: float                      #Height average of trees [m]
     LAI: float                       #[-] Leaf area index
+    mean_crown_area_sp:  float
+    sum_LAI_plot:  float
 
     #########################################################################3
     #NHL PARAMETERS
     ###########################################################################
 
-    scale_nhl:  float
+    scale_nhl: float = None
 
-    mean_crown_area_sp:  float
-    sum_LAI_plot:  float
+    Cd: float = None # Drag coefficient
+    alpha_ml: float = None  # Mixing length constant
+    Cf: float = None  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
+    x: float = None #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
 
-    Cd:  float # Drag coefficient
-    alpha_ml:  float  # Mixing length constant
-    Cf:  float  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
-    x:  float  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+    Vcmax25: float = None
+    alpha_gs: float = None
+    alpha_p: float = None
 
-    Vcmax25:  float
-    alpha_gs:  float
-    alpha_p:  float
+    wp_s50: float = None #value for oak from Mirfenderesgi
+    c3: float = None #value for oak from Mirfenderesgi
 
-    wp_s50:  float #value for oak from Mirfenderesgi
-    c3:  float #value for oak from Mirfenderesgi
-
-    LAD_norm:  str #LAD data
-
-
-    #######################################################################
-    #LEAF AREA DENSITY FORMULATION (LAD) [1/m]
-    #######################################################################
-    lad_scheme :  int  #0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
-
-    #parameters if using penman-monteith transpiration scheme, based on Lalic et al 2014
-    #if using NHL transpiration scheme, LAD is calculated in NHL module
-    L_m: float  #maximum value of LAD a canopy layer
-    z_m: float   #height in which L_m is found [m]
+    LAD_norm: str = None #LAD data
 
     ###########################################################################
     #PENMAN-MONTEITH EQUATION PARAMETERS
     ###########################################################################
+
+    #parameters if using penman-monteith transpiration scheme, based on Lalic et al 2014
+    #if using NHL transpiration scheme, LAD is calculated in NHL module
+    L_m: float = None  #maximum value of LAD a canopy layer
+    z_m: float = None   #height in which L_m is found [m]
     #W m^-2 is the same as J s^-1 m^-2
     #1J= 1 kg m2/s2
     #therefore 1W/m2 = kg/s3
 
-    gb: float          #m/s Leaf boundary layer conductance
-    Cp: float                # J/m3 K Heat capacity of air
-    ga: float          #m/s Aerodynamic conductance
-    lamb: float        #J/m3 latent heat of vaporization
-    gama: float             #Pa/K psychrometric constant
+    gb: float = None         #m/s Leaf boundary layer conductance
+    Cp: float = None               # J/m3 K Heat capacity of air
+    ga: float = None         #m/s Aerodynamic conductance
+    lamb: float = None       #J/m3 latent heat of vaporization
+    gama: float = None            #Pa/K psychrometric constant
 
     #########################################################################3
     #JARVIS PARAMETERS
     ###########################################################################
 
-    gsmax: float      #m/s Maximum leaf stomatal conductance
-    kr: float         #m2/W Jarvis radiation parameter
-    kt: float       #K-2  Jarvis temperature parameter
-    Topt: float           #K   Jarvis temperature parameter (optimum temperature)
-    kd: float       #Pa-1 Jarvis vapor pressure deficit temperature
-    hx50: float        #Pa  Jarvis leaf water potential parameter
-    nl: float                   #[-] Jarvis leaf water potential parameter
-    Emax: float        #m/s maximum nightime transpiration
+    gsmax: float = None    #m/s Maximum leaf stomatal conductance
+    kr: float = None     #m2/W Jarvis radiation parameter
+    kt: float = None      #K-2  Jarvis temperature parameter
+    Topt: float = None           #K   Jarvis temperature parameter (optimum temperature)
+    kd: float = None       #Pa-1 Jarvis vapor pressure deficit temperature
+    hx50: float = None        #Pa  Jarvis leaf water potential parameter
+    nl: float = None                  #[-] Jarvis leaf water potential parameter
+    Emax: float = None       #m/s maximum nightime transpiration
 
     ###############################################################################
     # PHYSICAL CONSTANTS
