@@ -2,10 +2,12 @@
 Change log
 ##########
 
+
 5-22-22:
 --------
 - Bug fixes for Feddes water stress function
 - Moved root functions to a separate module
+- Documentation pages moved from GitHub pages to readthedocs
 
 5-19-22:
 --------

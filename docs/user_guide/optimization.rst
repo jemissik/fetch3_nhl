@@ -69,6 +69,15 @@ of the optimization run.
 
 See ``optimization_results.ipynb`` for an example of how to explore the optimization results.
 
+
+Updating optiwrap
+-----------------
+
+To update to the latest version of optiwrap, from your fetch3 conda environment run::
+
+    pip install -U git+https://github.com/madeline-scyphers/optiwrap.git
+
+
 .. ***************************
 .. Optimization code reference
 .. ***************************
