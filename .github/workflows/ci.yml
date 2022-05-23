@@ -1,16 +1,13 @@
 name: ci
 
 on:
-  push:
-    branches:
-      - '*'
+#  push:
+#    branches:
+#      - 'develop'
 
   pull_request:
     branches:
-      - '*'
-
-  schedule:
-    - cron: '0 0 * * *'
+      - 'develop'
 
 env:
   CACHE_NUMBER: 0  # increase to reset cache manually
