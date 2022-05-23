@@ -378,8 +378,6 @@ class ConfigParams:
     theta_S1: float                      #saturated volumetric soil moisture content [-]
     theta_R1: float                     #residual volumetric soil moisture content [-]
     n_1: float                            #soil hydraulic parameter  [-]
-    #m_1 = 1-(1/n_1)
-    m_1: float           #soil hydraulic parameter  [-]
     Ksat_1: float               #saturated hydraulic conductivity  [m/s]
 
     #SAND
@@ -387,8 +385,6 @@ class ConfigParams:
     theta_S2: float
     theta_R2: float
     n_2: float
-    ##m_2 = 1-(1/n_2)
-    m_2: float
     Ksat_2: float
 
     #Soil stress parameters
@@ -497,19 +493,24 @@ class ConfigParams:
 
 
     def __post_init__(self):
-      # divide Kr, Ksax, and kmax by rho*g
-      #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
-      self.Kr = self.Kr / (self.Rho * self.g)
-      self.Ksax = self.Ksax / (self.Rho * self.g)
-      self.kmax = self.kmax / (self.Rho * self.g)
 
-      #Calculate sapwood area
-      self.sapwood_area = calc_xylem_cross_sectional_area(self.dbh, self.sapwood_depth)
+        # Calculate m_1 and m_2
+        self.m_1 = 1 - (1 / self.n_1)
+        self.m_2 = 1 - (1 / self.n_2)
 
-      #Calculate Aind_x
-      self.Aind_x = calc_Aind_x(self.sapwood_area, self.mean_crown_area_sp)
-      #Calculate LAIc_sp
-      self.LAIc_sp = calc_LAIc_sp(self.LAI, self.mean_crown_area_sp, self.stand_density_sp)
+        # divide Kr, Ksax, and kmax by rho*g
+        #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
+        self.Kr = self.Kr / (self.Rho * self.g)
+        self.Ksax = self.Ksax / (self.Rho * self.g)
+        self.kmax = self.kmax / (self.Rho * self.g)
+
+        #Calculate sapwood area
+        self.sapwood_area = calc_xylem_cross_sectional_area(self.dbh, self.sapwood_depth)
+
+        #Calculate Aind_x
+        self.Aind_x = calc_Aind_x(self.sapwood_area, self.mean_crown_area_sp)
+        #Calculate LAIc_sp
+        self.LAIc_sp = calc_LAIc_sp(self.LAI, self.mean_crown_area_sp, self.stand_density_sp)
 
 # Read configs from yaml file
 
