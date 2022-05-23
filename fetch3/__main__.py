@@ -99,8 +99,6 @@ def run(config_file, data_dir, output_dir):
         logger.info("Saving outputs")
         save_csv(output_dir, df_waterbal, df_EP)
         save_nc(output_dir, nc_output)
-    except Exception as e:
-        logger.exception("Error completing Run! Reason: %s" % e)
 
     finally:
         logger.info(f"run time: {time.time() - start} s")  # end run clock
