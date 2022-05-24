@@ -58,4 +58,4 @@ jobs:
 
       - name: Run tests
         shell: bash -l {0}
-        run: pytest ./fetch3/tests
+        run: pytest -s ./fetch3/tests
