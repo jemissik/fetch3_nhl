@@ -44,7 +44,7 @@ def lint(
     print(
         """
 Running flakeheaven, a Python code linter
-===================================
+=========================================
 """
     )
     command.run("flakeheaven lint", echo=True, pty=POSIX)
@@ -103,7 +103,7 @@ Running Sphinx to test the docs building
 def all(
     command,
 ):
-    """Runs black, isort, flake8, and pytest
+    """Runs black, isort, flake8, pytest, and docs
     Arguments:
         command {[type]} -- [description]
     """
@@ -112,7 +112,7 @@ def all(
     if not command.config.run.warn:
         print(
             """
-All Style Checks Tests Passed Successfully
-==========================================
+All Checks Passed Successfully
+==============================
 """
         )
