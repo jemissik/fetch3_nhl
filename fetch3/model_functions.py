@@ -139,6 +139,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     z_upper =zind.z_upper
     z = zind.z
     nz = zind.nz
+    z_Above = zind.z_Above
     nz_sand = zind.nz_sand
     nz_clay = zind.nz_clay
 
@@ -147,12 +148,20 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     SW_in_2d = met.SW_in_2d
     delta_2d = met.delta_2d
     VPD_2d = met.VPD_2d
+    Ta_2d = met.Ta_2d
 
 
     #Imports for PM transpiration
     if cfg.transpiration_scheme == 0:
-        from fetch3.pm_transpiration import jarvis_fleaf, calc_pm_transpiration, f_Ta_2d, f_d_2d, f_s_2d
-        from fetch3.canopy import LAD
+        from fetch3.pm_transpiration import jarvis_fleaf, calc_pm_transpiration, jarvis_fTa, jarvis_fd, jarvis_fs
+        from fetch3.canopy import calc_LAD
+
+        LAD = calc_LAD(z_Above, cfg.dz, cfg.z_m, cfg.Hspec, cfg.L_m)
+
+        # 2D stomata reduction functions and variables for canopy-distributed transpiration
+        f_Ta_2d = jarvis_fTa(Ta_2d, cfg.kt, cfg.Topt)
+        f_d_2d = jarvis_fd(VPD_2d, cfg.kd)
+        f_s_2d = jarvis_fs(SW_in_2d, cfg.kr)
 
     #Imports for NHL transpiration
     elif cfg.transpiration_scheme == 1:

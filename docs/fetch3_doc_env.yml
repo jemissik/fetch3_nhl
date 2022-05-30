@@ -21,7 +21,7 @@ dependencies:
   - ax-platform
   - click
   - conda-merge
-  - git+https://github.com/madeline-scyphers/optiwrap.git
+  - git+https://github.com/madeline-scyphers/boa.git
   - m2r2
   - pydata-sphinx-theme
   - pytest

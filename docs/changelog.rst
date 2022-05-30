@@ -2,10 +2,17 @@
 Change log
 ##########
 
+5-30-22:
+________
+- Added automated testing
+- Fixed bug in PM transpiration
+- Updates for name change of optimization package
+
 5-22-22:
 --------
 - Bug fixes for Feddes water stress function
 - Moved root functions to a separate module
+- Documentation pages moved from GitHub pages to readthedocs
 
 5-19-22:
 --------

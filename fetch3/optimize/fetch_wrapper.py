@@ -25,7 +25,7 @@ import os
 
 from ax import Trial
 
-from optiwrap import (
+from boa import (
     BaseWrapper,
     cd_and_cd_back,
     get_trial_dir,

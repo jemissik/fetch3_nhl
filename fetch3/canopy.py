@@ -1,5 +1,3 @@
-from fetch3.cfg import cfg  # TODO CHANGE THIS 
-from fetch3.model_setup import z_Above
 
 import numpy as np
 #######################################################################
@@ -11,7 +9,7 @@ import numpy as np
 def calc_LAD(z_Above, dz, z_m, Hspec, L_m):
 
     z_LAD=z_Above[1:]
-    LAD=np.zeros(shape=(int(Hspec/dz)))  #[1/m]
+    LAD=np.zeros(shape=(len(z_LAD)))  #[1/m]
 
     #LAD function according to Lalic et al 2014
     for i in np.arange(0,len(z_LAD),1):
@@ -22,4 +20,3 @@ def calc_LAD(z_Above, dz, z_m, Hspec, L_m):
         if z_LAD[i]==Hspec:
             LAD[i]=0
     return LAD
-LAD = calc_LAD(z_Above, cfg.dz, cfg.z_m, cfg.Hspec, cfg.L_m)

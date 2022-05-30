@@ -96,8 +96,6 @@ html_theme_options = {
    ]
 }
 
-print("conf.py stuff!")
-
 
 # For todo extension
 todo_include_todos = True

@@ -1,19 +1,16 @@
 name: ci
 
 on:
-  push:
-    branches:
-      - '*'
+#  push:
+#    branches:
+#      - 'develop'
 
   pull_request:
     branches:
-      - '*'
-
-  schedule:
-    - cron: '0 0 * * *'
+      - 'develop'
 
 env:
-  CACHE_NUMBER: 0  # increase to reset cache manually
+  CACHE_NUMBER: 1  # increase to reset cache manually
 
 jobs:
   build:
@@ -29,9 +26,9 @@ jobs:
             label: osx-64
             prefix: /Users/runner/miniconda3/envs/fetch3-dev
 
-          - os: windows-latest
-            label: win-64
-            prefix: C:\Miniconda3\envs\fetch3-dev
+#          - os: windows-latest
+#            label: win-64
+#            prefix: C:\Miniconda3\envs\fetch3-dev
 
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
@@ -61,4 +58,4 @@ jobs:
 
       - name: Run tests
         shell: bash -l {0}
-        run: pytest ./fetch3/tests
+        run: pytest -s ./fetch3/tests

@@ -74,4 +74,17 @@ Permissions issues in Windows
 Other issues
 ************
 
-If you're having issues not covered in this section, please `submit a GitHub issue <https://github.com/jemissik/fetch3_nhl/issues>`_
+If you're having an issue not covered in the above section, make sure you've updated everything to the latest version.
+
+- Make sure you have the latest version of the FETCH3 code from GitHub
+- Using the most recent version of the FETCH3 repository, update your conda environment. With the fetch3-dev environment
+  active, run::
+
+    conda env update -file fetch3_requirements.yml --prune
+
+- Update boa::
+
+    pip install -U git+https://github.com/madeline-scyphers/boa.git
+
+
+If you're still having issues, please `submit a GitHub issue <https://github.com/jemissik/fetch3_nhl/issues>`_

@@ -8,8 +8,7 @@ Uses Jarvis stomata reduction functions
 """
 import numpy as np
 
-from fetch3.model_setup import neg2zero
-from fetch3.met_data import Ta_2d, VPD_2d, SW_in_2d
+from fetch3.utils import neg2zero
 
 ###################################################################
 #STOMATA REDUCTIONS FUNCTIONS
@@ -39,7 +38,7 @@ def calc_gc(gs, gb):
     return (gs * gb) / (gs + gb)
 
 def pm_trans(NET, delta, Cp, VPD, lamb, gama, gc, ga):
-    return ((NET * delta + Cp * VPD * ga) / (lamb * (delta * gc + cfg.gama * (ga + gc)))) * gc #[m/s]
+    return ((NET * delta + Cp * VPD * ga) / (lamb * (delta * gc + gama * (ga + gc)))) * gc #[m/s]
 
 def night_trans(Emax, f_Ta, f_d, f_leaf):
     # Eqn S.64
@@ -47,17 +46,12 @@ def night_trans(Emax, f_Ta, f_d, f_leaf):
 
 def calc_pm_transpiration(SW_in, NET, delta, Cp, VPD, lamb, gama, gb, ga, gsmax, Emax, f_Ta, f_s, f_d, f_leaf, LAD):
 
-    if SW_in > 5: #income radiation > 5 = daylight
-        gs = calc_gs(gsmax, f_Ta, f_d, f_s, f_leaf)
-        gc = calc_gc(gs, gb)
-        transpiration = pm_trans(NET, delta, Cp, VPD, lamb, gama, gc, ga)
-    else: #nighttime transpiration
-        transpiration = night_trans(Emax, f_Ta, f_d, f_leaf)
-    return transpiration * LAD #m/s * 1/m = [1/s]
+    gs = calc_gs(gsmax, f_Ta, f_d, f_s, f_leaf)
+    gc = calc_gc(gs, gb)
 
-#########################################################################3
-#2D stomata reduction functions and variables for canopy-distributed transpiration
-#############################################################################
-f_Ta_2d = jarvis_fTa(Ta_2d, cfg.kt, cfg.Topt)
-f_d_2d = jarvis_fd(VPD_2d, cfg.kd)
-f_s_2d = jarvis_fs(SW_in_2d, cfg.kr)
+    conditions = [SW_in > 5, SW_in <=5]
+    outputs = [pm_trans(NET, delta, Cp, VPD, lamb, gama, gc, ga), night_trans(Emax, f_Ta, f_d, f_leaf)]
+
+    transpiration = np.select(conditions, outputs)
+
+    return transpiration * LAD #m/s * 1/m = [1/s]
