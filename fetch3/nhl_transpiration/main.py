@@ -35,46 +35,54 @@ def main(cfg, output_dir, data_dir):
     met_data = pd.read_csv(data_dir / cfg.input_fname, parse_dates=[0])
     LADnorm_df = pd.read_csv(data_dir / cfg.LAD_norm)
 
-    met_data = met_data[(met_data.Timestamp >= pd.to_datetime(cfg.start_time)) &
-                        (met_data.Timestamp <= pd.to_datetime(cfg.end_time))].reset_index(drop=True)
-
+    met_data = met_data[
+        (met_data.Timestamp >= pd.to_datetime(cfg.start_time))
+        & (met_data.Timestamp <= pd.to_datetime(cfg.end_time))
+    ].reset_index(drop=True)
 
     logger.info("Calculating NHL...")
 
     ds, LAD, zen = calc_NHL_timesteps(cfg, met_data, LADnorm_df)
 
-    #NHL scaling
-    ds['NHL_trans_sp_stem'] = ds.NHL_trans_sp_stem * cfg.scale_nhl
-    ds['NHL_trans_leaf'] = ds.NHL_trans_leaf * cfg.scale_nhl
+    # NHL scaling
+    ds["NHL_trans_sp_stem"] = ds.NHL_trans_sp_stem * cfg.scale_nhl
+    ds["NHL_trans_leaf"] = ds.NHL_trans_leaf * cfg.scale_nhl
 
-    #Nighttime transpiration
-    ds['NHL_trans_sp_stem'] = calc_nighttime_trans(ds.NHL_trans_sp_stem, cfg.mean_crown_area_sp)
-    ds['NHL_trans_leaf'] = calc_nighttime_trans(ds.NHL_trans_leaf, cfg.mean_crown_area_sp)
-
+    # Nighttime transpiration
+    ds["NHL_trans_sp_stem"] = calc_nighttime_trans(ds.NHL_trans_sp_stem, cfg.mean_crown_area_sp)
+    ds["NHL_trans_leaf"] = calc_nighttime_trans(ds.NHL_trans_leaf, cfg.mean_crown_area_sp)
 
     logger.info(f"NHL calculations finished in {time.time() - start} s")
 
     logger.info("Saving NHL output...")
     write_outputs_netcdf(output_dir, ds)
-    write_outputs({'zenith':zen, 'LAD': LAD}, output_dir)
-
+    write_outputs({"zenith": zen, "LAD": LAD}, output_dir)
 
     logger.info(f"Interpolating NHL to the time resolution for FETCH3...")
-    #Interpolate to model time resolution
-    #time in seconds
-    ds2 = ds.assign_coords({'time': pd.to_timedelta(pd.to_datetime(ds.time.values) - pd.to_datetime(ds.time.values[0]))/ np.timedelta64(1,'s')})
+    # Interpolate to model time resolution
+    # time in seconds
+    ds2 = ds.assign_coords(
+        {
+            "time": pd.to_timedelta(
+                pd.to_datetime(ds.time.values) - pd.to_datetime(ds.time.values[0])
+            )
+            / np.timedelta64(1, "s")
+        }
+    )
 
     # New time and space coordinates matching model resolution
     model_ts = np.arange(0, len(ds.time) * cfg.dt + cfg.dt0, cfg.dt0)
     model_z = np.arange(0, cfg.Hspec, cfg.dz)
 
-    da = ds2.NHL_trans_sp_stem *10**-3   #NHL in units of kg m-2crown m-1stem s-1 #* 10**-3 to convert kg to m
+    da = (
+        ds2.NHL_trans_sp_stem * 10**-3
+    )  # NHL in units of kg m-2crown m-1stem s-1 #* 10**-3 to convert kg to m
 
-    NHL_modelres = da.interp(z = model_z, time = model_ts, assume_sorted = True, kwargs={'fill_value':0})
+    NHL_modelres = da.interp(z=model_z, time=model_ts, assume_sorted=True, kwargs={"fill_value": 0})
 
     logger.info("Saving NHL_modelres output...")
-    #write NHL output to netcdf
-    NHL_modelres.to_netcdf(output_dir / 'nhl_modelres_trans_out.nc')
+    # write NHL output to netcdf
+    NHL_modelres.to_netcdf(output_dir / "nhl_modelres_trans_out.nc")
     NHL_modelres = NHL_modelres.data.transpose()
 
     logger.info(f"NHL module finished in {time.time() - start} s")

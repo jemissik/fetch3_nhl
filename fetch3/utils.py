@@ -17,9 +17,10 @@ def interpolate_2d(x, zdim):
         length of z dimension
     """
     x_2d = np.zeros(shape=(zdim, len(x)))
-    for i in np.arange(0,len(x),1):
-        x_2d[:,i]=x[i]
+    for i in np.arange(0, len(x), 1):
+        x_2d[:, i] = x[i]
     return x_2d
+
 
 def neg2zero(x):
     return np.where(x < 0, 0, x)

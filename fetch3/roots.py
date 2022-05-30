@@ -24,10 +24,11 @@ def feddes_root_stress(theta, theta1, theta2):
     """
 
     conditions = [theta <= theta1, (theta > theta1) & (theta <= theta2), theta > theta2]
-    outputs = [0, (theta - theta1)/(theta2 - theta1), 1]
+    outputs = [0, (theta - theta1) / (theta2 - theta1), 1]
     stress_roots = np.select(conditions, outputs)
 
     return stress_roots
+
 
 def verma_root_mass_dist(cfg):
     """
@@ -45,10 +46,14 @@ def verma_root_mass_dist(cfg):
 
     """
 
-    z_dist = np.arange(0,cfg.Root_depth+cfg.dz,cfg.dz)
+    z_dist = np.arange(0, cfg.Root_depth + cfg.dz, cfg.dz)
     z_dist = np.flipud(z_dist)
 
-    r_dist = (np.exp(cfg.qz-((cfg.qz*z_dist)/cfg.Root_depth))*cfg.qz**2*(cfg.Root_depth-z_dist))/(cfg.Root_depth**2*(1+np.exp(cfg.qz)*(-1+cfg.qz)))
+    r_dist = (
+        np.exp(cfg.qz - ((cfg.qz * z_dist) / cfg.Root_depth))
+        * cfg.qz**2
+        * (cfg.Root_depth - z_dist)
+    ) / (cfg.Root_depth**2 * (1 + np.exp(cfg.qz) * (-1 + cfg.qz)))
     return r_dist
 
 
@@ -73,4 +78,3 @@ def calc_root_K(r_dist, stress_roots, cfg):
     Kerad = Ksrad * r_dist  # [1/sPa] #Kr is already divided by Rho*g
 
     return Kerad
-

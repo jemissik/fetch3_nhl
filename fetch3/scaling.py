@@ -49,6 +49,7 @@ def calc_LAIc_sp(LAIp_sp, mean_crown_area_sp, stand_density_sp):
     LAIc_sp = LAIp_sp / (mean_crown_area_sp * 10**-4 * stand_density_sp)
     return LAIc_sp
 
+
 def calc_xylem_cross_sectional_area(DBH_cm, active_xylem_depth_cm):
     """
     Calculate xylem cross-sectional area from DBH and active xylem depth
@@ -70,15 +71,16 @@ def calc_xylem_cross_sectional_area(DBH_cm, active_xylem_depth_cm):
     active_xylem_depth_m = active_xylem_depth_cm / 100
 
     # Calculate stem cross-sectional area
-    stem_cross_sectional_area = np.pi * (DBH_m/2) ** 2
+    stem_cross_sectional_area = np.pi * (DBH_m / 2) ** 2
 
     # Calculate cross-sectional area of inner portion of stem (that is not active xylem)
-    inner_cross_sectional_area = np.pi * (DBH_m/2 - active_xylem_depth_m) ** 2
+    inner_cross_sectional_area = np.pi * (DBH_m / 2 - active_xylem_depth_m) ** 2
 
     # Xylem cross-sectional area
     xylem_cross_sectional_area = stem_cross_sectional_area - inner_cross_sectional_area
 
     return xylem_cross_sectional_area
+
 
 def calc_Aind_x(xylem_cross_sectional_area, mean_crown_area_sp):
     """
@@ -93,9 +95,10 @@ def calc_Aind_x(xylem_cross_sectional_area, mean_crown_area_sp):
     """
     return xylem_cross_sectional_area / mean_crown_area_sp
 
-#[ m3H2O m-2ground s-1 m-1stem]
+
+# [ m3H2O m-2ground s-1 m-1stem]
 def convert_trans2d_to_cm3hr(trans_2d, crown_area, dz):
-    #[ m3H2O m-2crown s-1 m-1stem]
+    # [ m3H2O m-2crown s-1 m-1stem]
 
     # convert from per ground to per tree -> [m3h20 s-1]
     trans = trans2d_to_tree(trans_2d, crown_area, dz)
@@ -105,14 +108,17 @@ def convert_trans2d_to_cm3hr(trans_2d, crown_area, dz):
 
     return trans
 
+
 def convert_trans_m3s_to_cm3hr(trans):
-    return trans * (100**3) * 60*60
+    return trans * (100**3) * 60 * 60
+
 
 def integrate_trans2d(trans_2d, dz):
-    trans = (trans_2d * dz).sum(dim='z')
+    trans = (trans_2d * dz).sum(dim="z")
     return trans
 
+
 def trans2d_to_tree(trans_2d, crown_area, dz):
-    #[m3h20 s-1]
+    # [m3h20 s-1]
     trans = integrate_trans2d(trans_2d, dz) * crown_area
     return trans

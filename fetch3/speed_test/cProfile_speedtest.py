@@ -17,4 +17,4 @@ with cProfile.Profile() as pr:
 
 stats = pstats.Stats(pr)
 stats.sort_stats(pstats.SortKey.TIME)
-stats.dump_stats(filename = 'speed_test/output/cProfile_speed.prof')
+stats.dump_stats(filename="speed_test/output/cProfile_speed.prof")

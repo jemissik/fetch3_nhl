@@ -37,7 +37,6 @@ from fetch3.optimize.fetch_wrapper import Fetch3Wrapper
 # from ax.storage.registry_bundle import RegistryBundle
 
 
-
 @click.command()
 @click.option(
     "-f",
@@ -59,8 +58,10 @@ def run(config_file):
     start = time.time()
 
     config = load_experiment_config(config_file)  # Read experiment config'
-    experiment_dir = make_experiment_dir(config["optimization_options"]["output_dir"],
-                                         config["optimization_options"]["experiment_name"])
+    experiment_dir = make_experiment_dir(
+        config["optimization_options"]["output_dir"],
+        config["optimization_options"]["experiment_name"],
+    )
 
     # Copy the experiment config to the experiment directory
     shutil.copyfile(config_file, experiment_dir / Path(config_file).name)
@@ -100,7 +101,7 @@ def run(config_file):
     # save_experiment(experiment, "experiment.json")
     # from ax.storage.json_store.load import load_experiment
     logging.info("\nTrials completed! Total run time: %d", time.time() - start)
-    scheduler_to_json_file(scheduler, experiment_dir / 'scheduler.json')
+    scheduler_to_json_file(scheduler, experiment_dir / "scheduler.json")
     return scheduler
 
 
