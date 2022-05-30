@@ -26,9 +26,9 @@ jobs:
             label: osx-64
             prefix: /Users/runner/miniconda3/envs/fetch3-dev
 
-          - os: windows-latest
-            label: win-64
-            prefix: C:\Miniconda3\envs\fetch3-dev
+#          - os: windows-latest
+#            label: win-64
+#            prefix: C:\Miniconda3\envs\fetch3-dev
 
     name: ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
