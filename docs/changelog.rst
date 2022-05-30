@@ -2,6 +2,11 @@
 Change log
 ##########
 
+5-30-22:
+________
+- Added automated testing
+- Fixed bug in PM transpiration
+- Updates for name change of optimization package
 
 5-22-22:
 --------

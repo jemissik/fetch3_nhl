@@ -120,7 +120,6 @@ Clay:
 * **theta_S1** (float): saturated volumetric soil moisture content *[-]*
 * **theta_R1** (float): residual volumetric soil moisture content *[-]*
 * **n_1** (float): soil hydraulic parameter *[-]*
-* **m_1** (float): soil hydraulic parameter *[-]*. m_1 = 1-(1/n_1)
 * **Ksat_1** (float): saturated hydraulic conductivity *[m/s]*
 
 Sand: same definitions as above, but for sand
@@ -129,7 +128,6 @@ Sand: same definitions as above, but for sand
 * **theta_S2** (float):
 * **theta_R2** (float):
 * **n_2** (float):
-* **m_2** (float): m_2 = 1-(1/n_2)
 * **Ksat_2** (float):
 
 Soil stress parameters:
