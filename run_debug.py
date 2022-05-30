@@ -8,6 +8,7 @@ different files or directories.
 """
 
 from pathlib import Path
+
 from fetch3.__main__ import run
 
 # These paths point to the default locations

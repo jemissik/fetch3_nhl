@@ -19,6 +19,7 @@ Calculated parameters:
 
 import numpy as np
 
+
 def calc_LAIc_sp(LAIp_sp, mean_crown_area_sp, stand_density_sp):
     r"""
     Calculates the crown-level species-specific LAI (LAIc_sp [m2 leaf (sp) / m2 ground projection of crown]), using

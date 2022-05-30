@@ -9,21 +9,19 @@ Main model runner
 Note: This is intended to be run from the command line
 """
 import time
+
 start = time.time()  # start run clock
 
-import click
 import logging
 from pathlib import Path
 
-from fetch3.model_setup import spatial_discretization, temporal_discretization
-from fetch3.model_config import setup_config, save_calculated_params
-from fetch3.met_data import prepare_met_data
-
-
+import click
 
 from fetch3.initial_conditions import initial_conditions
-from fetch3.model_functions import format_model_output, Picard, save_csv, save_nc
-
+from fetch3.met_data import prepare_met_data
+from fetch3.model_config import save_calculated_params, setup_config
+from fetch3.model_functions import Picard, format_model_output, save_csv, save_nc
+from fetch3.model_setup import spatial_discretization, temporal_discretization
 from fetch3.sapflux import calc_sapflux, format_inputs
 
 logger = logging.getLogger(__file__)

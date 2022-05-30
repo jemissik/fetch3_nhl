@@ -6,10 +6,12 @@ This module calculates non-hydrodynamically limited transpiration.
 This code was ported from FETCH2's MATLAB code (see Mirfenderesgi et al 2016)
 """
 from pathlib import Path
+
+import numpy as np
 import pandas as pd
 import xarray as xr
-import numpy as np
 from scipy.interpolate import interp1d
+
 
 def calc_esat(Tair):
     """

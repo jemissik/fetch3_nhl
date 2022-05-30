@@ -12,13 +12,15 @@ transpiration to a netcdf file.
 If running NHL as a standalone module, use ``main_standalone.py``.
 """
 
+import logging
+import time
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import logging
 
 from fetch3.nhl_transpiration.NHL_functions import *
-import time
+
 
 def main(cfg, output_dir, data_dir):
     logger = logging.getLogger(__file__)

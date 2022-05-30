@@ -1,12 +1,12 @@
 #This file is no longer used when running NHL through FETCH3.
 
 from pathlib import Path
-import pandas as pd
-import numpy as np
 
 import model_config as cfg
-from fetch3.model_config import model_dir
+import numpy as np
+import pandas as pd
 
+from fetch3.model_config import model_dir
 
 # Helper functions
 

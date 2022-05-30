@@ -15,25 +15,27 @@ See ``optimization_results.ipynb`` for an example of how to explore the optimiza
 
 import datetime as dt
 import logging
+import shutil
 import time
 from pathlib import Path
-import shutil
 
 import click
-# from ax.storage.json_store.save import save_experiment
-# from ax.storage.registry_bundle import RegistryBundle
-
-from fetch3.optimize.fetch_wrapper import Fetch3Wrapper
 from boa import (
     WrappedJobRunner,
     get_experiment,
     get_scheduler,
-    make_experiment_dir,
+    load_experiment,
     load_experiment_config,
-    scheduler_to_json_file,
+    make_experiment_dir,
     save_experiment,
-    load_experiment
+    scheduler_to_json_file,
 )
+
+from fetch3.optimize.fetch_wrapper import Fetch3Wrapper
+
+# from ax.storage.json_store.save import save_experiment
+# from ax.storage.registry_bundle import RegistryBundle
+
 
 
 @click.command()

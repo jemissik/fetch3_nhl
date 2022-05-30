@@ -6,8 +6,9 @@ Model setup
 
 Spatial discretization to set up the model
 """
-import numpy as np
 from dataclasses import dataclass
+
+import numpy as np
 
 ###########################################################
 #Discretization

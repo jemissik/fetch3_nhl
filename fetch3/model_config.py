@@ -224,10 +224,11 @@ Jarvis parameters
 """
 
 import logging
+from dataclasses import dataclass
 
 import yaml
-from dataclasses import dataclass
-from fetch3.scaling import calc_LAIc_sp, calc_Aind_x, calc_xylem_cross_sectional_area
+
+from fetch3.scaling import calc_Aind_x, calc_LAIc_sp, calc_xylem_cross_sectional_area
 
 # # Default paths for config file, input data, and model output
 # parent_path = Path(__file__).resolve().parent.parent

@@ -10,14 +10,14 @@ transpiration to a netcdf file.
 If running NHL inside FETCH3, use main.py in the NHL module instead.
 """
 
+import logging
+import time
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-from pathlib import Path
-import logging
-
-from nhl_config import read_configs, config_file, output_dir, data_dir
+from nhl_config import config_file, data_dir, output_dir, read_configs
 from NHL_functions import *
-import time
 
 logger = logging.getLogger(__file__)
 

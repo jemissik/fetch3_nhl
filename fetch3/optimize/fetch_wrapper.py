@@ -11,20 +11,17 @@ These functions provide the interface between the optimization tool and FETCH3
 - Defines how results of each iteration should be evaluated
 """
 
-import yaml
+import atexit
+import datetime as dt
+import os
+import subprocess
+from pathlib import Path
+
+import numpy as np
 import pandas as pd
 import xarray as xr
-import numpy as np
-import atexit
-
-from pathlib import Path
-import datetime as dt
-
-import subprocess
-import os
-
+import yaml
 from ax import Trial
-
 from boa import (
     BaseWrapper,
     cd_and_cd_back,

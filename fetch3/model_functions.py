@@ -7,15 +7,15 @@ Core functions of FETCH3
 Porous media flow, Picard iteration, etc
 """
 
+import logging
+
 import numpy as np
 import pandas as pd
+import torch
 import xarray as xr
 from numpy.linalg import multi_dot
-import logging
-import torch
 
-from fetch3.roots import feddes_root_stress, verma_root_mass_dist, calc_root_K
-
+from fetch3.roots import calc_root_K, feddes_root_stress, verma_root_mass_dist
 
 logger = logging.getLogger(__file__)
 
@@ -153,8 +153,14 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
     #Imports for PM transpiration
     if cfg.transpiration_scheme == 0:
-        from fetch3.pm_transpiration import jarvis_fleaf, calc_pm_transpiration, jarvis_fTa, jarvis_fd, jarvis_fs
         from fetch3.canopy import calc_LAD
+        from fetch3.pm_transpiration import (
+            calc_pm_transpiration,
+            jarvis_fd,
+            jarvis_fleaf,
+            jarvis_fs,
+            jarvis_fTa,
+        )
 
         LAD = calc_LAD(z_Above, cfg.dz, cfg.z_m, cfg.Hspec, cfg.L_m)
 
@@ -165,8 +171,11 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
     #Imports for NHL transpiration
     elif cfg.transpiration_scheme == 1:
-        from fetch3.nhl_transpiration.NHL_functions import calc_stem_wp_response, calc_transpiration_nhl
         import fetch3.nhl_transpiration.main as nhl
+        from fetch3.nhl_transpiration.NHL_functions import (
+            calc_stem_wp_response,
+            calc_transpiration_nhl,
+        )
         NHL_modelres, LAD = nhl.main(cfg, output_dir, data_dir)
 
     # Stem water potential [Pa]

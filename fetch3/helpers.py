@@ -2,8 +2,10 @@
 Convenience functions:
 - loading model outputs
 """
-import xarray as xr
 from pathlib import Path
+
+import xarray as xr
+
 
 def load_model_outputs(model_output_path):
 

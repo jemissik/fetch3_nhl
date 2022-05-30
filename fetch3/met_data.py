@@ -4,13 +4,14 @@ Met data
 ###################
 """
 
-from pathlib import Path
-import pandas as pd
-import numpy as np
 from dataclasses import dataclass
+from pathlib import Path
 
+import numpy as np
+import pandas as pd
 
 from fetch3.utils import interpolate_2d
+
 
 # Helper functions
 def calc_model_time_grid(df, cfg):

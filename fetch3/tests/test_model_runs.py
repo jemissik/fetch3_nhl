@@ -1,5 +1,7 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 
 def test_fetch3_nhl_run():
     config_path = Path(__file__).resolve().parent.parent.parent / 'config_files' / 'model_config.yml'

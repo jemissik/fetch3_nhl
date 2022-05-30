@@ -1,17 +1,29 @@
-from pathlib import Path
 import cProfile
 import pstats
+from pathlib import Path
 
 try:
-    from fetch3.__main__ import (setup_config, spatial_discretization, prepare_met_data,
-                                 temporal_discretization, initial_conditions, Picard)
+    from fetch3.__main__ import (
+        Picard,
+        initial_conditions,
+        prepare_met_data,
+        setup_config,
+        spatial_discretization,
+        temporal_discretization,
+    )
 except ImportError:
     import os
     fetch_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     import sys
     sys.path.insert(0, fetch_dir)
-    from fetch3.__main__ import (setup_config, spatial_discretization, prepare_met_data,
-                                 temporal_discretization, initial_conditions, Picard)
+    from fetch3.__main__ import (
+        Picard,
+        initial_conditions,
+        prepare_met_data,
+        setup_config,
+        spatial_discretization,
+        temporal_discretization,
+    )
 
 p = (Path(__file__).parent / "output/cProfile_speed2.prof").resolve()
 p.parent.mkdir(exist_ok=True, parents=True)

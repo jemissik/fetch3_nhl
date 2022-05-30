@@ -16,10 +16,10 @@ model from the command line, the defaults will be used.
 
 import argparse
 import logging
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
-from dataclasses import dataclass
 
 # Default paths for config file, input data, and model output
 parent_path = Path(__file__).parent

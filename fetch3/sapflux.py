@@ -4,7 +4,9 @@ Functions for calculating sap storage and sap flux from the model outputs
 
 import numpy as np
 import xarray as xr
+
 from fetch3.scaling import integrate_trans2d
+
 
 def format_inputs(canopy_ds, crown_area):
     """
