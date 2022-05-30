@@ -82,9 +82,9 @@ If you're having an issue not covered in the above section, make sure you've upd
 
     conda env update -file fetch3_requirements.yml --prune
 
-- Update optiwrap::
+- Update boa::
 
-    pip install -U git+https://github.com/madeline-scyphers/optiwrap.git
+    pip install -U git+https://github.com/madeline-scyphers/boa.git
 
 
 If you're still having issues, please `submit a GitHub issue <https://github.com/jemissik/fetch3_nhl/issues>`_

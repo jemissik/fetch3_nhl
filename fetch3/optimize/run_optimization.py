@@ -24,7 +24,7 @@ import click
 # from ax.storage.registry_bundle import RegistryBundle
 
 from fetch3.optimize.fetch_wrapper import Fetch3Wrapper
-from optiwrap import (
+from boa import (
     WrappedJobRunner,
     get_experiment,
     get_scheduler,

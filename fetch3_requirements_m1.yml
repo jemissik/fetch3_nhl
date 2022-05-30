@@ -25,4 +25,4 @@ dependencies:
     - conda-merge
     - pytest
     - snakeviz
-    - git+https://github.com/madeline-scyphers/optiwrap.git
+    - git+https://github.com/madeline-scyphers/boa.git
