@@ -16,6 +16,8 @@ dependencies:
   - dask
   - bottleneck
   - ipympl
+  - invoke
+  - flake8
   - pip
   - pip:
     - ax-platform
@@ -24,4 +26,7 @@ dependencies:
     - conda-merge
     - pytest
     - snakeviz
+    - black
+    - isort
+    - flakeheaven
     - git+https://github.com/madeline-scyphers/boa.git
