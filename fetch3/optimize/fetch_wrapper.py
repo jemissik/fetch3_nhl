@@ -11,20 +11,17 @@ These functions provide the interface between the optimization tool and FETCH3
 - Defines how results of each iteration should be evaluated
 """
 
-import yaml
+import atexit
+import datetime as dt
+import os
+import subprocess
+from pathlib import Path
+
+import numpy as np
 import pandas as pd
 import xarray as xr
-import numpy as np
-import atexit
-
-from pathlib import Path
-import datetime as dt
-
-import subprocess
-import os
-
+import yaml
 from ax import Trial
-
 from boa import (
     BaseWrapper,
     cd_and_cd_back,
@@ -61,13 +58,15 @@ def read_experiment_config(config_file):
         loaded_configs = yaml.safe_load(yml_config)
 
     # Format parameters for Ax experiment
-    for param in loaded_configs['parameters'].keys():
-        loaded_configs['parameters'][param]['name'] = param # Add "name" attribute for each parameter
+    for param in loaded_configs["parameters"].keys():
+        # Add "name" attribute for each parameter
+        loaded_configs["parameters"][param]["name"] = param
     # Parameters from dictionary to list
-    params = [loaded_configs['parameters'][param] for param in list(loaded_configs['parameters'])]
-    experiment_settings = loaded_configs['optimization_options']
-    model_settings = loaded_configs['model_options']
+    params = [loaded_configs["parameters"][param] for param in list(loaded_configs["parameters"])]
+    experiment_settings = loaded_configs["optimization_options"]
+    model_settings = loaded_configs["model_options"]
     return params, experiment_settings, model_settings
+
 
 def create_experiment_dir(working_dir, ax_client):
     """
@@ -87,9 +86,12 @@ def create_experiment_dir(working_dir, ax_client):
         Path to the directory for the experiment
     """
     # Directory named with experiment name and datetime
-    ex_dir = Path(working_dir) / (ax_client.experiment.name + "_" + dt.datetime.now().strftime("%Y%m%dT%H%M%S"))
+    ex_dir = Path(working_dir) / (
+        ax_client.experiment.name + "_" + dt.datetime.now().strftime("%Y%m%dT%H%M%S")
+    )
     ex_dir.mkdir()
     return ex_dir
+
 
 def create_trial_dir(experiment_dir, trial_index):
     """
@@ -109,9 +111,10 @@ def create_trial_dir(experiment_dir, trial_index):
     Path
         Directory for the trial
     """
-    trial_dir = (experiment_dir / str(trial_index).zfill(6)) # zero-padded trial index
+    trial_dir = experiment_dir / str(trial_index).zfill(6)  # zero-padded trial index
     trial_dir.mkdir()
     return trial_dir
+
 
 def write_configs(trial_dir, parameters, model_options):
     """
@@ -134,11 +137,10 @@ def write_configs(trial_dir, parameters, model_options):
     str
         Path for the config file
     """
-    with open(trial_dir / "config.yml", 'w') as f:
+    with open(trial_dir / "config.yml", "w") as f:
         # Write model options from loaded config
         # Parameters for the trial from Ax
-        config_dict = {"model_options": model_options,
-            "parameters": parameters}
+        config_dict = {"model_options": model_options, "parameters": parameters}
         yaml.dump(config_dict, f)
         return f.name
 
@@ -169,31 +171,30 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
         * Add option to read from .nc file
 
     """
-    #Read config file
+    # Read config file
 
     # Read in observation data
-    obsdf = pd.read_csv(obsfile, parse_dates = [0])
-    #Converting time since sapfluxnet data is in GMT
+    obsdf = pd.read_csv(obsfile, parse_dates=[0])
+    # Converting time since sapfluxnet data is in GMT
     obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST")
-    obsdf = obsdf.set_index('Timestamp')
+    obsdf = obsdf.set_index("Timestamp")
 
     # Read in model output
     modeldf = xr.load_dataset(modelfile)
 
-
     # Slice met data to just the time period that was modeled
-    obsdf = obsdf.loc[modeldf.time.data[0]:modeldf.time.data[-1]]
+    obsdf = obsdf.loc[modeldf.time.data[0] : modeldf.time.data[-1]]
 
     # Convert model output to the same units as the input data
     # Sapfluxnet data is in cm3 hr-1
-    modeldf['sapflux_scaled'] = convert_trans_m3s_to_cm3hr(modeldf.sapflux)
+    modeldf["sapflux_scaled"] = convert_trans_m3s_to_cm3hr(modeldf.sapflux)
 
     # remove first and last timestamp
     obsdf = obsdf.iloc[1:-1]
-    modeldf = modeldf.sapflux_scaled.isel(time=np.arange(1,len(modeldf.time)-1))
+    modeldf = modeldf.sapflux_scaled.isel(time=np.arange(1, len(modeldf.time) - 1))
 
-    not_nans = ~obsdf[ex_settings['obsvar']].isna()
-    obsdf_not_nans = obsdf[ex_settings['obsvar']].loc[not_nans]
+    not_nans = ~obsdf[ex_settings["obsvar"]].isna()
+    obsdf_not_nans = obsdf[ex_settings["obsvar"]].loc[not_nans]
     modeldf_not_nans = modeldf.data[not_nans]
 
     return modeldf_not_nans, obsdf_not_nans
@@ -201,21 +202,21 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
 
 def scale_sapflux(sapflux, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
     """Scales sapflux from FETCH output (in kg s-1) to W m-2"""
-    scaled_sapflux = (sapflux * 2440000 /
-                        mean_crown_area_sp * total_crown_area_sp
-                        / plot_area)
+    scaled_sapflux = sapflux * 2440000 / mean_crown_area_sp * total_crown_area_sp / plot_area
     return scaled_sapflux
 
 
 def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
     """Scales transpiration from FETCH output (in m H20 m-2crown m-1stem s-1) to W m-2"""
-    scaled_trans = (trans * 1000 * dz * 2440000 * total_crown_area_sp
-                        / plot_area).sum(dim='z', skipna=True)
+    scaled_trans = (trans * 1000 * dz * 2440000 * total_crown_area_sp / plot_area).sum(
+        dim="z", skipna=True
+    )
     return scaled_trans
 
 
 class Fetch3Wrapper(BaseWrapper):
     _processes = []
+
     def __init__(self, ex_settings, model_settings, experiment_dir):
         self.ex_settings = ex_settings
         self.model_settings = model_settings
@@ -232,13 +233,13 @@ class Fetch3Wrapper(BaseWrapper):
         # with cd_and_cd_back(model_dir):
         os.chdir(model_dir)
 
-        cmd = (f"python main.py --config_path {config_dir} --data_path"
-                f" {self.ex_settings['data_path']} --output_path {trial_dir}")
+        cmd = (
+            f"python main.py --config_path {config_dir} --data_path"
+            f" {self.ex_settings['data_path']} --output_path {trial_dir}"
+        )
 
         args = cmd.split()
-        popen = subprocess.Popen(
-            args, stdout=subprocess.PIPE, universal_newlines=True
-        )
+        popen = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
         self._processes.append(popen)
 
     def set_trial_status(self, trial: Trial) -> None:
@@ -274,5 +275,6 @@ class Fetch3Wrapper(BaseWrapper):
 def exit_handler():
     for process in Fetch3Wrapper._processes:
         process.kill()
+
 
 atexit.register(exit_handler)

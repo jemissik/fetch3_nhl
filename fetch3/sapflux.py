@@ -4,7 +4,9 @@ Functions for calculating sap storage and sap flux from the model outputs
 
 import numpy as np
 import xarray as xr
+
 from fetch3.scaling import integrate_trans2d
+
 
 def format_inputs(canopy_ds, crown_area):
     """
@@ -27,13 +29,14 @@ def format_inputs(canopy_ds, crown_area):
         Transpiration [m3H2O s-1 m-1stem]
     """
 
-    #trans_2d [ m3H2O m-2crown_projection s-1 m-1stem]
+    # trans_2d [ m3H2O m-2crown_projection s-1 m-1stem]
     # multiply by crown area to get transpiration in [m3 s-1 m-1stem]
     trans_2d_tree = canopy_ds.trans_2d * crown_area
 
     H_above = canopy_ds.H
 
     return H_above, trans_2d_tree
+
 
 def calc_sap_storage(H_MPa, cfg):
     """
@@ -51,29 +54,30 @@ def calc_sap_storage(H_MPa, cfg):
     storage: xarray.DataArray
         Sap storage [m3]
     """
-    sapwood_area = cfg.sapwood_area # m2
+    sapwood_area = cfg.sapwood_area  # m2
     dz = cfg.dz
     Phi0x = cfg.Phi_0
     p = cfg.p
 
-    #Convert H to Pa
+    # Convert H to Pa
     H = H_MPa * 10**6
 
-    #cfg.sat_xylem is in [m3 h2o/m3xylem]
+    # cfg.sat_xylem is in [m3 h2o/m3xylem]
     thetasat = cfg.sat_xylem
     taper_top = cfg.taper_top
 
     nz = len(H.z)
 
-    taper = np.linspace(1, taper_top,nz)
+    taper = np.linspace(1, taper_top, nz)
 
     sapwood_area_z = sapwood_area * taper
 
     theta = thetasat * ((Phi0x / (Phi0x - H)) ** p) * sapwood_area_z
 
-    storage = (theta.rolling(z=2).mean() * dz).sum(dim='z', skipna=True) # m3
+    storage = (theta.rolling(z=2).mean() * dz).sum(dim="z", skipna=True)  # m3
 
     return storage
+
 
 def calc_sapflux(H, trans_2d_tree, cfg):
     """
@@ -101,25 +105,24 @@ def calc_sapflux(H, trans_2d_tree, cfg):
     dz = cfg.dz
 
     storage = calc_sap_storage(H, cfg)
-    storage.name = 'storage'
+    storage.name = "storage"
 
-    trans_tot = integrate_trans2d(trans_2d_tree, dz)  #[m3 s-1]
+    trans_tot = integrate_trans2d(trans_2d_tree, dz)  # [m3 s-1]
 
     # Change in storage
-    delta_S = storage.pad(time=(1,0)).diff(dim='time') / dt
-    delta_S.name = 'delta_S'
+    delta_S = storage.pad(time=(1, 0)).diff(dim="time") / dt
+    delta_S.name = "delta_S"
 
     sapflux = trans_tot + delta_S
-    sapflux.name = 'sapflux'
+    sapflux.name = "sapflux"
 
     ds_sapflux = xr.merge([sapflux, storage, delta_S])
 
     # Add metadata to dataset
-    ds_sapflux.sapflux.attrs = dict(units="m3 s-1",
-                                    description="Tree-level sap flux")
-    ds_sapflux.storage.attrs = dict(units="m3",
-                                    description="Total aboveground water storage")
-    ds_sapflux.delta_S.attrs = dict(units="m3",
-                              description="Change in aboveground water storage from the previous timestep")
+    ds_sapflux.sapflux.attrs = dict(units="m3 s-1", description="Tree-level sap flux")
+    ds_sapflux.storage.attrs = dict(units="m3", description="Total aboveground water storage")
+    ds_sapflux.delta_S.attrs = dict(
+        units="m3", description="Change in aboveground water storage from the previous timestep"
+    )
 
     return ds_sapflux

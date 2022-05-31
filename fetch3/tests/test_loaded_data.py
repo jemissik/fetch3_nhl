@@ -1,9 +1,8 @@
-import pytest
 from pathlib import Path
 
 import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal
-
 
 files = [
     # "C.csv"
@@ -26,6 +25,7 @@ files = [
 data_dir = Path("tests/data")
 output_dir = Path("output")
 
+
 @pytest.mark.skip(reason="obsolete test, needs updating")
 def test_output_data_should_be_the_same_as_previously_stored_data():
     # Given previous ran data
@@ -38,5 +38,7 @@ def test_output_data_should_be_the_same_as_previously_stored_data():
         previous_df = pd.read_csv(data_dir / file)
         output_df = pd.read_csv(output_dir / file)
 
-        output_df = output_df.drop(output_df.index[-1], axis = 0) #drop last timestep
-        assert_frame_equal(previous_df.loc[output_df.index], output_df), file  # Selects length of saved data to match length of run
+        output_df = output_df.drop(output_df.index[-1], axis=0)  # drop last timestep
+        assert_frame_equal(
+            previous_df.loc[output_df.index], output_df
+        ), file  # Selects length of saved data to match length of run

@@ -6,10 +6,12 @@ This module calculates non-hydrodynamically limited transpiration.
 This code was ported from FETCH2's MATLAB code (see Mirfenderesgi et al 2016)
 """
 from pathlib import Path
+
+import numpy as np
 import pandas as pd
 import xarray as xr
-import numpy as np
 from scipy.interpolate import interp1d
+
 
 def calc_esat(Tair):
     """
@@ -26,15 +28,16 @@ def calc_esat(Tair):
         The saturation vapor pressure [kPa] corresponding to each element in Tair
     """
 
-    #constants
-    e0 = 0.611 #kPa
-    T0 = 273 #K
-    Rv = 461 #J K-1 kg -1, gas constant for water vapor
-    Lv = 2.5 * 10**6 #J kg-1
+    # constants
+    e0 = 0.611  # kPa
+    T0 = 273  # K
+    Rv = 461  # J K-1 kg -1, gas constant for water vapor
+    Lv = 2.5 * 10**6  # J kg-1
 
-    Tair = Tair + 273.15 #convert temperature to Kelvin
-    es = e0 * np.exp((Lv/Rv)*(1/T0 - 1/Tair))
+    Tair = Tair + 273.15  # convert temperature to Kelvin
+    es = e0 * np.exp((Lv / Rv) * (1 / T0 - 1 / Tair))
     return es
+
 
 def calc_vpd_kPa(RH, Tair):
     """
@@ -54,9 +57,10 @@ def calc_vpd_kPa(RH, Tair):
     """
 
     es = calc_esat(Tair)
-    eactual = RH*es/100
+    eactual = RH * es / 100
 
-    return (es - eactual)
+    return es - eactual
+
 
 def calc_Kg(Tair):
     """
@@ -77,7 +81,8 @@ def calc_Kg(Tair):
     Kg = 115.8 + 0.4226 * Tair
     return Kg
 
-def calc_mixing_length(z, h, alpha_ml = 0.1):
+
+def calc_mixing_length(z, h, alpha_ml=0.1):
     """
     Calculates the mixing length for each height in z.
     Based on Poggi et al 2004
@@ -102,24 +107,28 @@ def calc_mixing_length(z, h, alpha_ml = 0.1):
     d = 0.67 * h  # zero-plane displacement height [m]
     subcanopy_height = (alpha_ml * h - 2 * dz) / 0.2
 
-    mixing_length = np.piecewise(z.astype(float), [z < subcanopy_height, (z >= subcanopy_height) & (z < d), z >= d],
-                                 [lambda z: 0.2 * z + 2 * dz, alpha_ml * h, lambda z: 0.4 * (z - d) + alpha_ml * h])
+    mixing_length = np.piecewise(
+        z.astype(float),
+        [z < subcanopy_height, (z >= subcanopy_height) & (z < d), z >= d],
+        [lambda z: 0.2 * z + 2 * dz, alpha_ml * h, lambda z: 0.4 * (z - d) + alpha_ml * h],
+    )
     return mixing_length
 
-def thomas_tridiagonal (aa, bb, cc, dd):
+
+def thomas_tridiagonal(aa, bb, cc, dd):
     """
     Thomas algorithm for solving tridiagonal matrix
     #TODO update docstring
     """
 
-    #initialize arrays
+    # initialize arrays
     n = len(bb)
     bet = np.zeros(n)
     gam = np.zeros(n)
     q = np.zeros(n)
 
     bet[0] = bb[0]
-    gam[0] = dd[0]/bb[0]
+    gam[0] = dd[0] / bb[0]
 
     for i in range(1, n):
         bet[i] = bb[i] - (aa[i] * cc[i - 1] / bet[i - 1])
@@ -127,12 +136,13 @@ def thomas_tridiagonal (aa, bb, cc, dd):
 
     q[-1] = gam[-1]
 
-    for i in range(n-2, -1, -1):
-        q[i] = gam[i]-(cc[i]*q[i+1]/bet[i])
+    for i in range(n - 2, -1, -1):
+        q[i] = gam[i] - (cc[i] * q[i + 1] / bet[i])
 
     return q
 
-def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
+
+def solve_Uz(z, dz, Cd, a_s, U_top, **kwargs):
     """
     Solves the momentum equation to calculate the vertical wind profile.
     Applies no-slip boundary condition: wind speed=0 at surface (z = 0).
@@ -162,13 +172,15 @@ def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
 
     n = len(z)
     U_bottom = 0  # no-slip boundary
-    U = np.linspace(U_bottom, U_top, n)  # Vertical wind speed profile, beginning iteration with linear profile
+    U = np.linspace(
+        U_bottom, U_top, n
+    )  # Vertical wind speed profile, beginning iteration with linear profile
 
     mixing_length = calc_mixing_length(z, **kwargs)
 
     # model for diffusivity, from Poggi et al 2004, eqn 6
     def calc_Km(mixing_length, dU):
-        Km = (mixing_length ** 2) * np.abs(dU)
+        Km = (mixing_length**2) * np.abs(dU)
         return Km
 
     # start iterative solution
@@ -177,7 +189,7 @@ def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
     while err > 0.0001:
         # dU/dz
         dU = np.zeros(n)
-        dU[1:] = np.diff(U)/dz
+        dU[1:] = np.diff(U) / dz
         dU[0] = dU[1]
 
         # calculate Km
@@ -185,14 +197,16 @@ def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
 
         # Set up coefficients for ODE
         a1 = -Km
-        dKm = np.concatenate(([Km[1]-Km[0]], np.diff(Km)))  # Use Km[1]-Km[0] for first 2 elements of dKm
-        a2 = -dKm/dz
+        dKm = np.concatenate(
+            ([Km[1] - Km[0]], np.diff(Km))
+        )  # Use Km[1]-Km[0] for first 2 elements of dKm
+        a2 = -dKm / dz
         a3 = Cd * a_s * np.abs(U)
 
         # Set the elements of the tridiagonal matrix
-        upd = (a1 / (dz * dz) + a2 / (2 * dz))
-        dia = (-a1 * 2 / (dz * dz) + a3)
-        lod = (a1 / (dz * dz) - a2 / (2 * dz))
+        upd = a1 / (dz * dz) + a2 / (2 * dz)
+        dia = -a1 * 2 / (dz * dz) + a3
+        lod = a1 / (dz * dz) - a2 / (2 * dz)
         co = np.zeros(n)
         co[0] = U_bottom
         co[-1] = U_top
@@ -213,7 +227,8 @@ def solve_Uz(z, dz, Cd ,a_s, U_top, **kwargs):
 
     return U, Km
 
-def calc_gb(uz, d = 0.0015):
+
+def calc_gb(uz, d=0.0015):
     """
     Calculates the leaf boundary layer conductance and resistance, assuming laminar boundary layer.
 
@@ -237,9 +252,10 @@ def calc_gb(uz, d = 0.0015):
     Academic Press; 2013 Jul 26.
 
     """
-    rb = (395 * 29 / 1150) * (d / (np.sqrt(uz ** 2) + 0.001)) ** 0.5
-    gb = 1/rb
+    rb = (395 * 29 / 1150) * (d / (np.sqrt(uz**2) + 0.001)) ** 0.5
+    gb = 1 / rb
     return gb, rb
+
 
 def calc_geff(gb, gs):
     """
@@ -262,7 +278,8 @@ def calc_geff(gb, gs):
     geff = (gb * gs) / (gb + gs)
     return geff
 
-def calc_zenith_angle(doy, lat, long, time_offset, time_of_day, zenith_method='CN'):
+
+def calc_zenith_angle(doy, lat, long, time_offset, time_of_day, zenith_method="CN"):
     """
     Calculates the solar zenith angle, based on Campbell & Norman, 1998.
 
@@ -296,55 +313,87 @@ def calc_zenith_angle(doy, lat, long, time_offset, time_of_day, zenith_method='C
     zenith_angle_deg : zenith angle of the sun [degrees]
 
     """
-    #Calculation if using the Campbell & Norman method
+    # Calculation if using the Campbell & Norman method
     if zenith_method == "CN":
         # Calculate the standard meridian (in degrees) from the time zone offset
         standard_meridian = time_offset * 15
 
         # Calculate the solar declination angle, Eqn 11.2, Campbell & Norman
-        declination_angle_rad = np.arcsin(0.39785 * np.sin(np.deg2rad(278.97 + 0.9856 * doy + 1.9165 * np.sin(np.deg2rad(356.6 + 0.9856 * doy)))))
+        declination_angle_rad = np.arcsin(
+            0.39785
+            * np.sin(
+                np.deg2rad(
+                    278.97 + 0.9856 * doy + 1.9165 * np.sin(np.deg2rad(356.6 + 0.9856 * doy))
+                )
+            )
+        )
 
         # Calculate the equation of time, Eqn 11.4, Campbell & Norman
-        f = np.deg2rad(279.575 + 0.98565 * doy) # in radians. NOTE: typo in my version of Campbell & Norman book
-        ET = (-104.7 * np.sin(f) + 596.2 * np.sin(2 * f) + 4.3 * np.sin (3 * f) - 12.7 * np.sin(4 * f) - 429.3 * np.cos (f) - 2.0 * np.cos(2 * f) + 19.3 * np.cos(3 * f))/3600
+        f = np.deg2rad(
+            279.575 + 0.98565 * doy
+        )  # in radians. NOTE: typo in my version of Campbell & Norman book
+        ET = (
+            -104.7 * np.sin(f)
+            + 596.2 * np.sin(2 * f)
+            + 4.3 * np.sin(3 * f)
+            - 12.7 * np.sin(4 * f)
+            - 429.3 * np.cos(f)
+            - 2.0 * np.cos(2 * f)
+            + 19.3 * np.cos(3 * f)
+        ) / 3600
 
         # Calculate the longitude correction
         # + 1/15 of an hour for each degree east of standard meridian
         # - 1/15 of an hour for each degree west of standard meridian
-        long_correction = (long - standard_meridian) * 1/15
+        long_correction = (long - standard_meridian) * 1 / 15
 
         # Calculate the time of solar noon (t0), Eqn 11.3, Campbell & Norman
         t0 = 12 - long_correction - ET
 
         # Calculate the zenith angle, Eqn 11.1, Campbell & Norman
         lat_rad = np.deg2rad(lat)
-        zenith_angle_rad = np.arccos(np.sin(lat_rad) * np.sin(declination_angle_rad)
-                                    + np.cos(lat_rad) * np.cos(declination_angle_rad) * np.cos(np.deg2rad(15 * (time_of_day - t0))))
+        zenith_angle_rad = np.arccos(
+            np.sin(lat_rad) * np.sin(declination_angle_rad)
+            + np.cos(lat_rad)
+            * np.cos(declination_angle_rad)
+            * np.cos(np.deg2rad(15 * (time_of_day - t0)))
+        )
         zenith_angle_deg = np.rad2deg(zenith_angle_rad)
     elif zenith_method == "constant":
-        zenith_angle_deg = 0;
+        zenith_angle_deg = 0
     elif zenith_method == "fetch2":
         # This code was ported directly from the FETCH2 NHL module
-        #compute Solar declination angle
-        adjusted_time_of_day = time_of_day + 5 #accounts for the adjustment in Time used in the FETCH2 input
-        CF = np.pi/180
-        LAT = lat*CF
+        # compute Solar declination angle
+        adjusted_time_of_day = (
+            time_of_day + 5
+        )  # accounts for the adjustment in Time used in the FETCH2 input
+        CF = np.pi / 180
+        LAT = lat * CF
         xx = 278.97 + 0.9856 * doy + 1.9165 * np.sin((356.6 + 0.9856 * doy) * CF)
         dd = np.arcsin(0.39785 * np.sin(xx * CF))
-        #compute Zenith angle
+        # compute Zenith angle
         f = (279.575 + 0.9856 * doy) * CF
-        ET = (-104.7*np.sin(f) + 596.2*np.sin(2*f) + 4.3*np.sin(3*f)
-              -12.7*np.sin(4*f) -429.3*np.cos(f) - 2*np.cos(2*f)
-              +19.3*np.cos(3*f))/3600
+        ET = (
+            -104.7 * np.sin(f)
+            + 596.2 * np.sin(2 * f)
+            + 4.3 * np.sin(3 * f)
+            - 12.7 * np.sin(4 * f)
+            - 429.3 * np.cos(f)
+            - 2 * np.cos(2 * f)
+            + 19.3 * np.cos(3 * f)
+        ) / 3600
 
-        TF = 0 * (long/15) + ET
-        aa = np.sin(LAT)*np.sin(dd)+(np.cos(LAT))*np.cos(dd)*np.cos(15*(adjusted_time_of_day-12-TF)*CF)
-        ZEN=np.arccos(aa)
+        TF = 0 * (long / 15) + ET
+        aa = np.sin(LAT) * np.sin(dd) + (np.cos(LAT)) * np.cos(dd) * np.cos(
+            15 * (adjusted_time_of_day - 12 - TF) * CF
+        )
+        ZEN = np.arccos(aa)
         zenith_angle_deg = np.rad2deg(ZEN)
 
     return zenith_angle_deg
 
-def calc_rad_attenuation(PAR, LAD, dz, Cf = 0.85, x = 1, **kwargs):
+
+def calc_rad_attenuation(PAR, LAD, dz, Cf=0.85, x=1, **kwargs):
     """
     Calculates the vertical attenuation of radiation through the canopy
 
@@ -372,18 +421,19 @@ def calc_rad_attenuation(PAR, LAD, dz, Cf = 0.85, x = 1, **kwargs):
     """
     zenith_angle = calc_zenith_angle(**kwargs)
     # Calculate the light extinction coefficient (unitless)
-    xn1=np.sqrt(x * x + (np.cos(np.deg2rad(zenith_angle))) ** 2)
-    xd1=(x + 1.774 * np.cos(np.deg2rad(zenith_angle)) * (x + 1.182) **(-0.733))
-    k = xn1/xd1
+    xn1 = np.sqrt(x * x + (np.cos(np.deg2rad(zenith_angle))) ** 2)
+    xd1 = x + 1.774 * np.cos(np.deg2rad(zenith_angle)) * (x + 1.182) ** (-0.733)
+    k = xn1 / xd1
 
-    LAI_cumulative = (LAD*dz)[::-1].cumsum()[::-1] # Cumulative sum from top of canopy
+    LAI_cumulative = (LAD * dz)[::-1].cumsum()[::-1]  # Cumulative sum from top of canopy
     # Calculate P0 and Qp
     P0 = np.exp(-k * LAI_cumulative * Cf)
     Qp = P0 * PAR
 
     return P0, Qp, zenith_angle
 
-def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
+
+def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0=3):
     """
     Calculates gs according to Leuning 1995
 
@@ -411,8 +461,9 @@ def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0 = 3):
         stomatal conductance [mol H2O m-2 s-1]
     """
 
-    gs = g0 + m * abs(A)/((c_s - gamma_star) * (1 + VPD/D0))
+    gs = g0 + m * abs(A) / ((c_s - gamma_star) * (1 + VPD / D0))
     return gs
+
 
 def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
     """
@@ -452,27 +503,27 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
 
     """
     # Parameters
-    #Farquhar model
-    Kc25 = 300 # [µmol mol-1] Michaelis-Menten constant for CO2, at 25 deg C
-    Ko25 = 300 # [mmol mol-1] Michaelis-Menten constant for O2, at 25 deg C
-    e_m = 0.08 # [mol mol-1]
-    o = 210 #[mmol mol-1]
-    #Leuning model
-    g0 = 0.01 #[mol m-2 s-1]
-    m = 4.0  #unitless
+    # Farquhar model
+    Kc25 = 300  # [µmol mol-1] Michaelis-Menten constant for CO2, at 25 deg C
+    Ko25 = 300  # [mmol mol-1] Michaelis-Menten constant for O2, at 25 deg C
+    e_m = 0.08  # [mol mol-1]
+    o = 210  # [mmol mol-1]
+    # Leuning model
+    g0 = 0.01  # [mol m-2 s-1]
+    m = 4.0  # unitless
 
     # Adjust the Farquhar model parameters for temperature
-    Vcmax = Vcmax25 * np.exp( 0.088 * (Tair - 25)) / (1 + np.exp(0.29 * (Tair - 41)))
-    Kc = Kc25 * np.exp(0.074 * (Tair -25))
+    Vcmax = Vcmax25 * np.exp(0.088 * (Tair - 25)) / (1 + np.exp(0.29 * (Tair - 41)))
+    Kc = Kc25 * np.exp(0.074 * (Tair - 25))
     Ko = Ko25 * np.exp(0.018 * (Tair - 25))
 
-    #Calculate gamma_star and Rd
+    # Calculate gamma_star and Rd
     Rd = 0.015 * Vcmax  # Dark respiration [µmol m-2 s-1]
-    gamma_star = (3.69 + 0.188 * (Tair - 25) + 0.0036 * (Tair -25 ) ** 2) * 10
+    gamma_star = (3.69 + 0.188 * (Tair - 25) + 0.0036 * (Tair - 25) ** 2) * 10
 
     # equation for RuBP saturated rate of CO2 assimilation
     def calc_Ac(Vcmax, Ci, gamma_star, Kc, o, Ko, Rd):
-        return Vcmax * (Ci - gamma_star)/(Ci + Kc * (1 + o / Ko)) - Rd
+        return Vcmax * (Ci - gamma_star) / (Ci + Kc * (1 + o / Ko)) - Rd
 
     # equation for RuBP limited rate of CO2 assimilation
     def calc_Aj(alpha_p, e_m, Qp, Ci, gamma_star, Rd):
@@ -485,9 +536,9 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
     count = 0
     while (err > 0.01) & (count < 200):
 
-        #Calculate photosynthesis
+        # Calculate photosynthesis
         Aj = calc_Aj(alpha_p, e_m, Qp, Ci, gamma_star, Rd)
-        Ac = np.full(len(Aj),calc_Ac(Vcmax, Ci, gamma_star, Kc, o, Ko, Rd))
+        Ac = np.full(len(Aj), calc_Ac(Vcmax, Ci, gamma_star, Kc, o, Ko, Rd))
 
         A = np.minimum(Ac, Aj)
 
@@ -506,12 +557,13 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
 
     A[0] = A[1]
     Ci[0] = Ci[1]
-    Cs[0]=Cs[1]
-    gs[0]=gs[1]
-    gb[0]=gb[1]
-    geff[0]=geff[1]
+    Cs[0] = Cs[1]
+    gs[0] = gs[1]
+    gb[0] = gb[1]
+    geff[0] = geff[1]
 
     return A, gs, Ci, Cs, gb, geff
+
 
 def calc_transpiration_leaf(VPD, Tair, geff, Press):
     """
@@ -533,11 +585,12 @@ def calc_transpiration_leaf(VPD, Tair, geff, Press):
     transpiration_leaf : float
         water vapor source per unit leaf area [kg s-1 m-2_leaf]
     """
-    Kg = calc_Kg(Tair)  #kPa m3 kg-1
+    Kg = calc_Kg(Tair)  # kPa m3 kg-1
     rhov = 44.6 * Press / 101.3 * 273.15 / (Tair + 273.15)  # water vapor density, mol m-3
     transpiration_leaf = 0.4 * (geff * VPD) / (Kg * rhov)  # kg s-1 m-2_leaf
 
     return transpiration_leaf
+
 
 def calc_respiration(Tair):
     """
@@ -557,10 +610,11 @@ def calc_respiration(Tair):
     Tr = 10
     RE10 = 2.6
     Q10 = 2.25
-    Re = RE10 * Q10 **((Tair - Tr)/Tr)
+    Re = RE10 * Q10 ** ((Tair - Tr) / Tr)
     return Re
 
-def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, VPD,**kwargs):
+
+def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, VPD, **kwargs):
 
     CF = 1.15 * 1000 / 29
     Re = Re / CF
@@ -569,19 +623,21 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, V
     dz = z[1] - z[0]
     C = Ca
 
-    #start iterative solution
-    err = 10 ** 9
+    # start iterative solution
+    err = 10**9
     while err > 0.0001:
         # set up coefficients for ODE
         a1 = Kc
-        dKc = np.concatenate(([Kc[1]-Kc[0]], np.diff(Kc)))  # Use Kc[1]-Kc[0] for first 2 elements of dKc
+        dKc = np.concatenate(
+            ([Kc[1] - Kc[0]], np.diff(Kc))
+        )  # Use Kc[1]-Kc[0] for first 2 elements of dKc
         a2 = dKc / dz
         a3 = 0 * z
         a4 = S
 
-        upd = (a1 / (dz * dz) + a2 / (2 * dz))
-        dia = (-a1 * 2 / (dz * dz) + a3)
-        lod = (a1 / (dz * dz) - a2 / (2 * dz))
+        upd = a1 / (dz * dz) + a2 / (2 * dz)
+        dia = -a1 * 2 / (dz * dz) + a3
+        lod = a1 / (dz * dz) - a2 / (2 * dz)
         co = a4
 
         lod[0] = 0
@@ -597,11 +653,13 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, V
         Cn = thomas_tridiagonal(lod, dia, upd, co)
         err = np.max(np.abs(Cn - C))
 
-        #use successive relaxations in iterations
+        # use successive relaxations in iterations
         eps1 = 0.1
-        C = (eps1 * Cn + (1 - eps1) * C)
+        C = eps1 * Cn + (1 - eps1) * C
         Ca = C
-        A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs)
+        A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(
+            Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs
+        )
         S = -A * a_s / CF
 
     # Fluxes are computed in µmol/m2/s; Sources are computed in µmol/m3/s
@@ -610,6 +668,7 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, V
     S = S * CF
 
     return C, Fc, S
+
 
 def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h):
     """
@@ -639,25 +698,26 @@ def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h):
     zmin = 0
     z = np.arange(zmin, h, dz)  # New array for vertical resolution
 
-    #Calculate LAD
-    LAD = LADnorm * tot_LAI_crown / dz_LAD  #[m2leaf m-2crown m-1stem]
+    # Calculate LAD
+    LAD = LADnorm * tot_LAI_crown / dz_LAD  # [m2leaf m-2crown m-1stem]
 
     # Interpolate LAD to new vertical resolution
-    f = interp1d(z_LAD, LAD, bounds_error = False, fill_value='extrapolate')
+    f = interp1d(z_LAD, LAD, bounds_error=False, fill_value="extrapolate")
     LAD_z = f(z)
 
     # scale so new integrated LAD matches the original total LAI per crown (corrects for interpolation error)
-    LAD_z = LAD_z * tot_LAI_crown / sum(LAD_z*dz)
+    LAD_z = LAD_z * tot_LAI_crown / sum(LAD_z * dz)
 
     return LAD_z
+
 
 def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     """
     Calculate NHL transpiration
     #TODO make docstring
     """
-    #unpack config parameters
-    dz=cfg.dz
+    # unpack config parameters
+    dz = cfg.dz
     h = cfg.Hspec
     Cd = cfg.Cd
     Vcmax25 = cfg.Vcmax25
@@ -672,7 +732,7 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     Cf = cfg.Cf
     time_offset = cfg.time_offset
 
-    #unpack met data
+    # unpack met data
     U_top = met_data.WS_F[timestep]
     ustar = met_data.USTAR[timestep]
     PAR = met_data.PPFD_IN[timestep]
@@ -681,23 +741,23 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     Tair = met_data.TA_F[timestep]
     Press = met_data.PA_F[timestep]
     doy = met_data.Timestamp.iloc[timestep].dayofyear
-    time_of_day = met_data.Timestamp[timestep].hour + met_data.Timestamp[timestep].minute/60
+    time_of_day = met_data.Timestamp[timestep].hour + met_data.Timestamp[timestep].minute / 60
 
     LADnorm = LADnorm_df[cfg.species]
     z_h_LADnorm = LADnorm_df.z_h
 
     # Calculate VPD
-    VPD = calc_vpd_kPa(RH, Tair = Tair)
+    VPD = calc_vpd_kPa(RH, Tair=Tair)
 
-    #Set up vertical grid
+    # Set up vertical grid
     zmin = 0
     z = np.arange(zmin, h, dz)  # [m]
 
     # Distrubute leaves vertically, and assign leaf area to stem
-    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, LAIc_sp, dz, h) #[m2leaf m-2crown m-1stem]
+    LAD = calc_LAI_vertical(LADnorm, z_h_LADnorm, LAIc_sp, dz, h)  # [m2leaf m-2crown m-1stem]
 
     # Calculate wind speed at each layer
-    U, Km = solve_Uz(z, dz, Cd , LAD , U_top, h = h)
+    U, Km = solve_Uz(z, dz, Cd, LAD, U_top, h=h)
 
     # Adjust the diffusivity and velocity by Ustar
     # Eqn A.5 from Mirfenderesgi et al 2016
@@ -706,38 +766,49 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     Km = Km * ustar
 
     # Calculate radiation at each layer
-    P0, Qp, zenith_angle = calc_rad_attenuation(PAR, LAD, dz, Cf = Cf, x = x, lat = latitude, long=longitude,
-                                                doy = doy, time_of_day = time_of_day, time_offset=time_offset,
-                                                zenith_method = zenith_method)
+    P0, Qp, zenith_angle = calc_rad_attenuation(
+        PAR,
+        LAD,
+        dz,
+        Cf=Cf,
+        x=x,
+        lat=latitude,
+        long=longitude,
+        doy=doy,
+        time_of_day=time_of_day,
+        time_offset=time_offset,
+        zenith_method=zenith_method,
+    )
 
     # Solve conductances
-    A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD = VPD, uz = U)
+    A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD=VPD, uz=U)
 
     # Calculate the transpiration per m-1 [ kg H2O s-1 m-1_stem]
-    NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)  #[kg H2O m-2leaf s-1]
-    NHL_trans_sp_stem = NHL_trans_leaf * LAD # [kg H2O s-1 m-1stem m-2crown]
+    NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)  # [kg H2O m-2leaf s-1]
+    NHL_trans_sp_stem = NHL_trans_leaf * LAD  # [kg H2O s-1 m-1stem m-2crown]
 
-    #Add data to dataset
-    ds = xr.Dataset(data_vars=dict(
-        U = (["z"], U),
-        Km = (["z"],Km),
-        P0 = (["z"], P0),
-        Qp = (["z"], Qp),
-        A = (["z"], A),
-        gs = (["z"], gs),
-        Ci = (["z"], Ci),
-        Cs = (["z"], Cs),
-        gb = (["z"], gb),
-        geff = (["z"], geff),
-
-        NHL_trans_leaf=(["z"], NHL_trans_leaf),
-        NHL_trans_sp_stem = (["z"], NHL_trans_sp_stem),
+    # Add data to dataset
+    ds = xr.Dataset(
+        data_vars=dict(
+            U=(["z"], U),
+            Km=(["z"], Km),
+            P0=(["z"], P0),
+            Qp=(["z"], Qp),
+            A=(["z"], A),
+            gs=(["z"], gs),
+            Ci=(["z"], Ci),
+            Cs=(["z"], Cs),
+            gb=(["z"], gb),
+            geff=(["z"], geff),
+            NHL_trans_leaf=(["z"], NHL_trans_leaf),
+            NHL_trans_sp_stem=(["z"], NHL_trans_sp_stem),
         ),
         coords=dict(z=(["z"], z)),
-        attrs=dict(description="Model output")
-        )
+        attrs=dict(description="Model output"),
+    )
 
     return ds, LAD, zenith_angle
+
 
 def calc_NHL_timesteps(cfg, met_data, LADnorm_df, **kwargs):
     """
@@ -793,9 +864,8 @@ def calc_NHL_timesteps(cfg, met_data, LADnorm_df, **kwargs):
     NHL_tot_trans_sp_tree_all = np.empty((len(met_data)))
     zenith_angle_all = np.empty((len(met_data)))
 
-
     datasets = []
-    for i in range(0,len(met_data)):
+    for i in range(0, len(met_data)):
         ds, LAD, zenith_angle = calc_NHL(cfg, met_data, LADnorm_df, i)
 
         # ds, LAD, zenith_angle = calc_NHL(
@@ -809,14 +879,16 @@ def calc_NHL_timesteps(cfg, met_data, LADnorm_df, **kwargs):
     d2 = xr.concat(datasets, pd.Index(met_data.Timestamp, name="time"))
     return d2, LAD, zenith_angle_all
 
+
 def calc_nighttime_trans(trans, crown_area):
     """
     Modifies transpiration timeseries to set nighttime transpiration to be almost zero
     """
-    is_nighttime = (trans.time.dt.hour <=5) | (trans.time.dt.hour > 19)
-    trans2 = trans.where(~(is_nighttime & (trans > 0)), 0.0000001/crown_area)
+    is_nighttime = (trans.time.dt.hour <= 5) | (trans.time.dt.hour > 19)
+    trans2 = trans.where(~(is_nighttime & (trans > 0)), 0.0000001 / crown_area)
 
     return trans2
+
 
 def calc_stem_wp_response(stem_wp, wp_s50, c3):
     """
@@ -839,12 +911,14 @@ def calc_stem_wp_response(stem_wp, wp_s50, c3):
     wp_response: float
         restriction for NHL transpiration
     """
-    wp_response = np.exp(-((stem_wp)/wp_s50)**c3)
+    wp_response = np.exp(-(((stem_wp) / wp_s50) ** c3))
     return wp_response
+
 
 def calc_transpiration_nhl(nhl_transpiration, stem_wp_fn):
     """Calculates transpiration for FETCH3"""
     return nhl_transpiration * stem_wp_fn
+
 
 def write_outputs(output_vars, dir):
     """
@@ -856,10 +930,13 @@ def write_outputs(output_vars, dir):
         _description_
     """
 
-    #Writes model outputs to csv files
+    # Writes model outputs to csv files
 
     for var in output_vars:
-        pd.DataFrame(output_vars[var]).to_csv(dir / ('nhl_' + var + '.csv'), index = False, header=False)
+        pd.DataFrame(output_vars[var]).to_csv(
+            dir / ("nhl_" + var + ".csv"), index=False, header=False
+        )
+
 
 def write_outputs_netcdf(dir, ds):
     """
@@ -870,5 +947,5 @@ def write_outputs_netcdf(dir, ds):
     ds : [xarray dataset]
     """
 
-    #save dataset
-    ds.to_netcdf(dir / 'nhl_out.nc')
+    # save dataset
+    ds.to_netcdf(dir / "nhl_out.nc")

@@ -5,6 +5,8 @@ channels:
 dependencies:
 - bottleneck
 - dask
+- flake8
+- invoke
 - ipympl
 - matplotlib
 - netCDF4
@@ -19,9 +21,12 @@ dependencies:
 - pip:
   - PyYAML
   - ax-platform
+  - black
   - click
   - conda-merge
+  - flakeheaven
   - git+https://github.com/madeline-scyphers/boa.git
+  - isort
   - m2r2
   - pydata-sphinx-theme
   - pytest

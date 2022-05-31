@@ -1,19 +1,32 @@
-
-from pathlib import Path
 import cProfile
 import pstats
+from pathlib import Path
 
 try:
-    from fetch3.__main__ import (setup_config, spatial_discretization, prepare_met_data,
-                                 temporal_discretization, initial_conditions, Picard)
+    from fetch3.__main__ import (
+        Picard,
+        initial_conditions,
+        prepare_met_data,
+        setup_config,
+        spatial_discretization,
+        temporal_discretization,
+    )
     from fetch3.model_functions import *
 except ImportError:
     import os
+
     fetch_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     import sys
+
     sys.path.insert(0, fetch_dir)
-    from fetch3.__main__ import (setup_config, spatial_discretization, prepare_met_data,
-                                 temporal_discretization, initial_conditions, Picard)
+    from fetch3.__main__ import (
+        Picard,
+        initial_conditions,
+        prepare_met_data,
+        setup_config,
+        spatial_discretization,
+        temporal_discretization,
+    )
     from fetch3.model_functions import *
 
 
@@ -27,20 +40,16 @@ Porous_media_xylem = profile(Porous_media_xylem)
 
 def profile_fetch():
 
-
-
-    config_file = Path(__file__).resolve().parent.parent / 'config_files' / 'model_config.yml'
-    data_dir= Path(__file__).resolve().parent.parent / 'data'
-    output_dir = Path(__file__).resolve().parent.parent / 'output'
-
-
-
+    config_file = Path(__file__).resolve().parent.parent / "config_files" / "model_config.yml"
+    data_dir = Path(__file__).resolve().parent.parent / "data"
+    output_dir = Path(__file__).resolve().parent.parent / "output"
 
     cfg = setup_config(config_file)
 
     ##########Set up spatial discretization
     zind = spatial_discretization(
-    cfg.dz, cfg.Soil_depth, cfg.Root_depth, cfg.Hspec, cfg.sand_d, cfg.clay_d)
+        cfg.dz, cfg.Soil_depth, cfg.Root_depth, cfg.Hspec, cfg.sand_d, cfg.clay_d
+    )
     ######prepare met data
     met, tmax, start_time, end_time = prepare_met_data(cfg, data_dir, zind.z_upper)
 
