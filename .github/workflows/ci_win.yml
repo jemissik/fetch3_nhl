@@ -3,7 +3,7 @@ name: ci-win
 on:
   pull_request:
     branches:
-      - 'develop'
+#      - 'develop'
       - 'main'
 
 jobs:
