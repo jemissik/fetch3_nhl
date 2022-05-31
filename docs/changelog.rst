@@ -2,6 +2,10 @@
 Change log
 ##########
 
+5-31-22:
+--------
+- Added soil moisture at bottom boundary as a parameter in the model configuration
+
 5-30-22:
 --------
 - Added automated testing

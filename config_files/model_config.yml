@@ -104,6 +104,8 @@ parameters:
   H_init_soilmid: -0.402
   H_init_canopytop: -23.3
 
+  soil_moisture_bottom_boundary: 0.28  # [m3 m-3] soil moisture for bottom boundary condition
+
   #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
   # Van Genuchten parameters for UMBS from fetch2_example_amf.m
 

@@ -112,6 +112,9 @@ from 4,2 m [sand layer] cte value of -0.402 m
 * **H_init_soilmid** (float):
 * **H_init_canopytop** (float):
 
+* **soil_moisture_bottom_boundary** (float): Soil moisture content [m3 m-3] for bottom boundary. Only used if the Dirichlet
+  bottom boundary condition is used
+
 Soil parameters - using Van Genuchten relationships
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Clay:
@@ -373,6 +376,7 @@ class ConfigParams:
     H_init_soilmid: float
     H_init_canopytop: float
 
+    soil_moisture_bottom_boundary: None  # Soil moisture for bottom boundary condition (if using Dirichlet boundary)
     # SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
 
     # CLAY

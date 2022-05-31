@@ -123,19 +123,20 @@ parameters:
 #  from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
 #  from 4,2 m [sand layer] cte value of -0.402 m
 
-#   cte_clay:
-#     type: fixed
-#     value: 1 #depth from 0-3m initial condition of clay [and SWC] is constant
-#   H_init_soilbottom:
-#     type: fixed
-#     value: -6.09
-#   H_init_soilmid:
-#     type: fixed
-#     value: -0.402
-#   H_init_canopytop:
-#     type: fixed
-#     value: -19.08
+#  cte_clay:
+#    type: fixed
+#    value: 1 #depth from 0-3m initial condition of clay [and SWC] is constant
+#  H_init_soilbottom:
+#    type: fixed
+#    value: -6.09
+#  H_init_soilmid:
+#    type: fixed
+#    value: -0.402
+#  H_init_canopytop:
+#    type: fixed
+#    value: -19.08
 
+#Marcela's initial conditions
   cte_clay:
     type: fixed
     value: 3 #depth from 0-3m initial condition of clay [and SWC] is constant
@@ -151,6 +152,11 @@ parameters:
 
   #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
   # Van Genuchten parameters for UMBS from fetch2_example_amf.m
+
+  # soil bottom boundary condition
+  soil_moisture_bottom_boundary:
+    type: fixed
+    value: 0.28  # [m3/m3]
 
   #CLAY
   alpha_1:
