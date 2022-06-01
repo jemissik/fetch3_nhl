@@ -2,84 +2,109 @@
 ##################
 Initial conditions
 ##################
+Calculates initial conditions based on specified soil moisture and assuming hydrostatic conditions in the plant
 
-Assume hydrostatic conditions in plant
-- potential at bottom equals the potential specified in the soil layer where the root bottom is
-- potential at height z = initial head at bottom or roots + rho*g*h
+Initial conditions in the soil layers
+- initial soil moisture conditions [m3 m-3] for each soil layer are specified in the configuration file
+- corresponding water potential [Pa] is calculated using the van genuchten equation
 
-For soil layers
-- specify an initial soil moisture for each soil layer
-- try just using a constant potential over each layer (but check to see if this causes issues in the solver).
-- might need to do some interpolation between layers
+Initial conditions in the plant:
+- potential at bottom of roots equals the soil potential at that depth
+- potential at height z = potential at bottom of roots + rho*g*z, where z=0 is the bottom of the roots
 """
+
 import numpy as np
 
 
+def calc_potential_vangenuchten(theta, theta_r, theta_s, alpha, m, n, rho, g):
+    """
+    Calculates water potential from soil moisture, using van Genuchten equation
+
+    Parameters
+    ----------
+    theta : float or np.ndarray
+        soil water content [m3 m-3]
+    theta_r : float
+        residual water content [m3 m-3]
+    theta_s : float
+        saturated water content [m3 m-3]
+    alpha : float
+        empirical van Genuchten parameter [m-1]
+    m : float
+        empirical van Genuchten parameter [unitless]
+    n :  float
+        empirical van Genuchten parameter [unitless]
+    rho : float
+        density of water [kg m-3]
+    g : float
+        gravitational constant [m s-2]
+
+    Returns
+    -------
+    water_potential_Pa : float or np.ndarray
+        water potential [Pa]
+
+    """
+
+    effective_saturation = ((theta - theta_r) / (theta_s - theta_r))
+    water_potential_m = - ((((1 / effective_saturation) ** (1 / m) - 1) ** (1 / n)) / alpha)
+    water_potential_Pa = water_potential_m * rho * g
+
+    return water_potential_Pa  # [Pa]
+
+
 def initial_conditions(cfg, q_rain, zind):
+    """
+    Calculate initial water potential conditions
 
-    # clay layer
+    Parameters
+    ----------
+    cfg : dataclass
+        model configuration
+    q_rain : np.ndarray
+        array of rain data
+    zind : dataclass
+        z index dataclass
 
-    # sand layer
+    Returns
+    -------
+    H_initial: np.ndarray
+        initial values for water potential [Pa] over the concatenated z domain (soil, roots, xylem)
+    Head_bottom_H: np.ndarray
+        water potential [Pa] for the bottom boundary. size is len(number of timesteps)
 
-    # roots
-    # P0 = head at the soil layer where the root bottom is [Pa]
-    # xylem
-
-    dz = cfg.dz
-
-    initial_H = np.zeros(shape=zind.nz)
-
-    factor_soil = (cfg.H_init_soilbottom - (cfg.H_init_soilmid)) / (
-        int((cfg.clay_d - cfg.cte_clay) / dz)
-    )  # factor for interpolation
+    """
 
     # soil
-    for i in np.arange(0, len(zind.z_soil), 1):
-        if 0.0 <= zind.z_soil[i] <= cfg.cte_clay:
-            initial_H[i] = cfg.H_init_soilbottom
-        if cfg.cte_clay < zind.z_soil[i] <= zind.z[zind.nz_clay]:
-            initial_H[i] = initial_H[i - 1] - factor_soil  # factor for interpolation
-        if cfg.clay_d < zind.z_soil[i] <= zind.z[zind.nz_r - 1]:
-            initial_H[i] = cfg.H_init_soilmid
+    H_initial_soil = np.piecewise(zind.z_soil,
+                                  [zind.z_soil <= cfg.clay_d, zind.z_soil > cfg.clay_d],
+                                  [calc_potential_vangenuchten(cfg.initial_swc_clay, cfg.theta_R1, cfg.theta_S1,
+                                                               cfg.alpha_1, cfg.m_1, cfg.n_1, cfg.Rho, cfg.g),
+                                   calc_potential_vangenuchten(cfg.initial_swc_sand, cfg.theta_R2, cfg.theta_S2,
+                                                               cfg.alpha_2, cfg.m_2, cfg.n_2, cfg.Rho, cfg.g)]
+                                  )
 
-    initial_H[zind.nz_s - 1] = cfg.H_init_soilmid
+    # roots
 
-    factor_xylem = (cfg.H_init_canopytop - (cfg.H_init_soilbottom)) / (
-        (zind.z[-1] - zind.z[zind.nz_s]) / dz
-    )
+    # z index where roots begin (round to get rid of floating point precision error so it matches the z array)
+    z_root_start = np.round(cfg.Soil_depth - cfg.Root_depth, decimals=5)
+    H_initial_root_bottom = H_initial_soil[zind.z_soil == z_root_start]
+    H_initial_root = H_initial_root_bottom - (zind.z_root - z_root_start) * cfg.Rho * cfg.g
 
-    # roots and xylem
-    initial_H[zind.nz_s] = cfg.H_init_soilbottom
-    for i in np.arange(zind.nz_s + 1, zind.nz, 1):
-        initial_H[i] = initial_H[i - 1] + factor_xylem  # meters
+    # xylem
+    H_initial_xylem = H_initial_root_bottom - (zind.z_upper - z_root_start) * cfg.Rho * cfg.g
 
-    # putting initial condition in Pascal
-    H_initial = initial_H * cfg.g * cfg.Rho  # Pascals
+    # concatenated array for z domain
+    H_initial = np.concatenate((H_initial_soil, H_initial_root, H_initial_xylem))
 
-    ###########################################################################
-    # BOTTOM BOUNDARY CONDITION FOR THE SOIL
-    # The model contains different options, therefore this variable is created but
-    # only used if you choose a  Dirichlet BC
-    ######################################################################
-    soil_bottom = np.zeros(shape=len(q_rain))
-    for i in np.arange(0, len(q_rain), 1):
-        soil_bottom[i] = cfg.soil_moisture_bottom_boundary
+    # calculate water potential for the bottom boundary condition
+    Head_bottom_H = np.full(len(q_rain),
+                            calc_potential_vangenuchten(cfg.soil_moisture_bottom_boundary, cfg.theta_R1, cfg.theta_S1,
+                                                        cfg.alpha_1, cfg.m_1, cfg.n_1, cfg.Rho, cfg.g))
 
-    # clay - van genuchten
-    Head_bottom = (
-        (
-            ((cfg.theta_R1 - cfg.theta_S1) / (cfg.theta_R1 - soil_bottom)) ** (1 / cfg.m_1) - 1
-        )
-        ** (1 / cfg.n_1)
-    ) / cfg.alpha_1
-    Head_bottom_H = -Head_bottom * cfg.g * cfg.Rho  # Pa
-
-    # model starts the simulation at the BOTTOM of the soil
-    Head_bottom_H = np.flipud(Head_bottom_H)
-
-    ############## inital condition #######################
-    # setting profile for initial condition
+    # set bottom boundary for initial condition
     if cfg.BottomBC == 0:
         H_initial[0] = Head_bottom_H[0]
 
     return H_initial, Head_bottom_H
+
