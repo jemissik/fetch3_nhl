@@ -102,15 +102,10 @@ Depths of layer/clay interface
 
 Soil initial conditions
 ^^^^^^^^^^^^^^^^^^^^^^^
-Soil initial conditions as described in the paper [VERMA et al., 2014]
-The initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
-from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
-from 4,2 m [sand layer] cte value of -0.402 m
-
-* **cte_clay** (float): depth from 0-3m initial condition of clay [and SWC] is constant
-* **H_init_soilbottom** (float):
-* **H_init_soilmid** (float):
-* **H_init_canopytop** (float):
+* **initial_swc_clay** (float): initial soil water content for the clay layer [m3 m-3]
+* **initial_swc_sand** (float): initial soil water content for the sand layer [m3 m-3]
+* **soil_moisture_bottom_boundary** (float): Soil moisture content [m3 m-3] for bottom boundary. Only used if the Dirichlet
+  bottom boundary condition is used
 
 Soil parameters - using Van Genuchten relationships
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -363,16 +358,10 @@ class ConfigParams:
     clay_d: float  # 0------4.2 #m
 
     # SOIL INITIAL CONDITIONS
-    # soil initial conditions as described in the paper [VERMA et al., 2014]
-    # the initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
-    # from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
-    # from 4,2 m [sand layer] cte value of -0.402 m
+    initial_swc_clay: float  # [m3 m-3]
+    initial_swc_sand: float  # [m3 m-3]
 
-    cte_clay: float  # depth from 0-3m initial condition of clay [and SWC] is constant
-    H_init_soilbottom: float
-    H_init_soilmid: float
-    H_init_canopytop: float
-
+    soil_moisture_bottom_boundary: None  # Soil moisture for bottom boundary condition (if using Dirichlet boundary)
     # SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
 
     # CLAY
@@ -400,16 +389,12 @@ class ConfigParams:
     species: str
 
     # ROOT PARAMETERS
-    # diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
-    # Kr divided by rho*g
     Kr: float  # soil-to-root radial conductance [m/sPa]
     qz: float
-    # Ksax divided by rho*g                                       #unitless - parameter for the root mass distribution - Verma et al., 2014
     Ksax: float  # specific axial conductivity of roots  [ m/s]
     Aind_r: float  # m2 root xylem/m2 ground]
 
     # XYLEM PARAMETERS
-    # kmax divided by rho*g
     kmax: float  # conductivity of xylem  [ m2/sPa]
     ap: float  # xylem cavitation parameter [Pa-1]
     bp: float  # xylem cavitation parameter [Pa]

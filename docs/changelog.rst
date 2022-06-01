@@ -2,6 +2,14 @@
 Change log
 ##########
 
+5-31-22:
+--------
+- Added soil moisture at bottom boundary as a parameter in the model configuration
+- Fix initial conditions calculation
+
+  - initial soil water potential calculated based on initial soil water content specified in config file
+  - initial water potential in roots and xylem calculated assuming hydrostatic conditions
+
 5-30-22:
 --------
 - Added automated testing

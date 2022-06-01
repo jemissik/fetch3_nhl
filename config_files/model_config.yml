@@ -94,15 +94,10 @@ parameters:
 
 
 #  SOIL INITIAL CONDITIONS
-#  soil initial conditions as described in the paper [VERMA et al., 2014]
-#  the initial conditions were constant -6.09 m drom 0-3 metres (from soil bottom)
-#  from 3 meters, interpolation of -6.09 m to -0.402 m between 3-4.2 m
-#  from 4,2 m [sand layer] cte value of -0.402 m
 
-  cte_clay: 3.0 #depth from 0-3m initial condition of clay [and SWC] is constant
-  H_init_soilbottom: -6.09
-  H_init_soilmid: -0.402
-  H_init_canopytop: -23.3
+  initial_swc_clay: 0.28 # initial swc for clay from Verma et al
+  initial_swc_sand: 0.08  # initial swc for sand [m3 m-3] from Verma et al
+  soil_moisture_bottom_boundary: 0.28  # [m3 m-3] soil moisture for bottom boundary condition
 
   #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
   # Van Genuchten parameters for UMBS from fetch2_example_amf.m
