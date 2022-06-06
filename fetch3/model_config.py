@@ -414,6 +414,8 @@ class ConfigParams:
     mean_crown_area_sp: float
     sum_LAI_plot: float
 
+    met_column_labels: dict = None
+
     #########################################################################3
     # NHL PARAMETERS
     ###########################################################################

@@ -737,7 +737,6 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     ustar = met_data.USTAR[timestep]
     PAR = met_data.PPFD_IN[timestep]
     Ca = met_data.CO2_F[timestep]
-    RH = met_data.RH[timestep]
     Tair = met_data.TA_F[timestep]
     Press = met_data.PA_F[timestep]
     doy = met_data.Timestamp.iloc[timestep].dayofyear
@@ -746,8 +745,7 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     LADnorm = LADnorm_df[cfg.species]
     z_h_LADnorm = LADnorm_df.z_h
 
-    # Calculate VPD
-    VPD = calc_vpd_kPa(RH, Tair=Tair)
+    VPD = met_data.VPD_F_kPa[timestep]
 
     # Set up vertical grid
     zmin = 0
