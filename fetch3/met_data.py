@@ -45,9 +45,10 @@ def prepare_ameriflux_data(filein, cfg):
     # Add VPD in kPa. VPD_F is in hPa
     df["VPD_F_kPa"] = df.VPD_F / 10
 
-    # Keep only variables needed
-    df = df[
-        [
+    if cfg.transpiration_scheme == 0:
+        varlist = ["Timestamp", "TA_F", "VPD_F_kPa", "P_F", "SW_IN_F"]
+    elif cfg.transpiration_scheme == 1:
+        varlist = [
             "Timestamp",
             "TA_F",
             "VPD_F_kPa",
@@ -59,7 +60,9 @@ def prepare_ameriflux_data(filein, cfg):
             "CO2_F",
             "PA_F",
         ]
-    ]
+
+    # Keep only variables needed
+    df = df[varlist]
 
     # Select data for length of run
     df = df[(df.Timestamp >= cfg.start_time) & (df.Timestamp <= cfg.end_time)].reset_index(
