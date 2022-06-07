@@ -26,6 +26,19 @@ See ``model_config.yml`` for an example.
 Model options
 -------------
 * **input_fname** (str): File for input met data
+* **met_column_labels** (dict): Dictionary specifying the mapping of the column headers in your input file to the
+  required input variables. This is needed if your column headers differ from the default variable names. See
+  :ref:`Prepare input files for the model` for a list of the default variable names. Each element in the dictionary
+  should be formatted as <your column header>: <standard variable name>, for example::
+
+    met_column_labels:
+      CO2_F_MDS: CO2_F
+
+  Alternately, the dictionary can also be formatted as::
+
+    met_column_labels: {'CO2_F_MDS': 'CO2_F'}
+
+
 * **start_time** (str): ["YYYY-MM-DD HH:MM:SS"] Begining of simulation
 * **end_time** (str): ["YYYY-MM-DD HH:MM:SS"] End of simulation
 

@@ -5,41 +5,45 @@ Prepare input files for the model
 Meteorological data
 ===================
 
-Prepare a .csv file with the required variables. See ``UMBS_flux_2011.csv`` in the data folder for an example,
-although your file doesn't need to have all of the variables that are included in this file.
+Prepare a .csv file with the required variables. See ``FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv`` in the
+data folder for an example, although your file doesn't need to have all of the variables included in this file.
+
+By default, the column headers in the input data are assumed to match the Ameriflux standard variable names. If
+different column headers are used, the mapping of the column headers to the required variables but be specified in the
+config file.
 
 The meteorological variables that are required depend on whether you are using PM or NHL transpiration.
 
-.. note::
-    - The column headers in the .csv file must match the names used below. Most of these names/units
-      match those used by AmeriFlux, except for Timestamp and VPD_kPa
-    - The data should be gap-filled.
 
 **If using the PM transpiration scheme, the file must include:**
 
-- *Timestamp*
+- *TIMESTAMP_START*: Timestamp (in local standard time) using either Ameriflux format (YYYYMMDDHHMM) or standard format
+  (YYYY-MM-DD HH:MM)
 - *P_F*: Precipitation [mm]
 - *TA_F*: Air temperature [deg C]
 - *SW_IN_F*: Incoming shortwave radiation [W m-2]
-- *VPD_kPa*: Vapor pressure deficit [kPa]
+- *VPD_F*: Vapor pressure deficit [hPa]
 
 
 **If using the NHL transpiration scheme, the file must include:**
 
-- *Timestamp*
+- *TIMESTAMP_START*: Timestamp (in local standard time) using either Ameriflux format (YYYYMMDDHHMM) or standard format
+  (YYYY-MM-DD HH:MM)
 - *P_F*: Precipitation [mm]
 - *TA_F*: Air temperature [deg C]
 - *SW_IN_F*: Incoming shortwave radiation [W m-2]
-- *VPD_kPa*: Vapor pressure deficit [kPa]
+- *VPD_F*: Vapor pressure deficit [hPa]
 - *WS_F*: Wind speed above the canopy [m s-1]
 - *USTAR*: Friction velocity [m s-1]
 - *PPFD_IN*: Incoming photosynthetic photon flux density (PAR) [µmolPhoton m-2 s-1]
 - *CO2_F*: CO2 concentration [µmolCO2 mol-1]
-- *RH*: Relative humidity [%]
 - *PA_F*: Atmospheric pressure [kPa]
 
-.. todo::
-    A future version will allow the user to specify different column names for the required met data
+.. important::
+    - If different column headers are used, this must be specified in the configuration file. See
+      :ref:`Model Configuration`
+    - The data should be gap-filled.
+
 
 Leaf area density profile
 =========================

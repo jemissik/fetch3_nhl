@@ -2,6 +2,17 @@
 Change log
 ##########
 
+6-7-22:
+-------
+- Updates to input file format and options
+
+  - Ameriflux standard variable names and units are used for all variables by default.
+
+    .. important::
+        VPD must now be given in units of hPa (to match the units used by AmeriFlux), rather than kPa
+  - Users can use column headers other than the default variable names, as long as the mapping of these column headers
+    to the default variable names is specified in the configuration file.
+
 5-31-22:
 --------
 - Added soil moisture at bottom boundary as a parameter in the model configuration
