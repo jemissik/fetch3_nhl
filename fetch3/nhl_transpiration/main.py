@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from fetch3.met_data import prepare_ameriflux_data
 from fetch3.nhl_transpiration.NHL_functions import *
 
 
@@ -32,13 +33,8 @@ def main(cfg, output_dir, data_dir):
     ###################################################
 
     # Read in LAD and met data
-    met_data = pd.read_csv(data_dir / cfg.input_fname, parse_dates=[0])
+    met_data = prepare_ameriflux_data(data_dir / cfg.input_fname, cfg)
     LADnorm_df = pd.read_csv(data_dir / cfg.LAD_norm)
-
-    met_data = met_data[
-        (met_data.Timestamp >= pd.to_datetime(cfg.start_time))
-        & (met_data.Timestamp <= pd.to_datetime(cfg.end_time))
-    ].reset_index(drop=True)
 
     logger.info("Calculating NHL...")
 

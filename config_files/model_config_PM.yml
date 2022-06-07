@@ -3,7 +3,9 @@ model_options:
   ###########################
 
   # File for input met data
-  input_fname: "UMBS_flux_2011.csv"
+  input_fname: "FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv"
+  met_column_labels:
+    CO2_F_MDS: CO2_F
 
   # Start and end in the fetch2 example
   # start_time: "2011-06-09 00:00:00" #begining of simulation #DOY 160

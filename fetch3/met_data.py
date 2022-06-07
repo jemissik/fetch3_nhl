@@ -12,6 +12,65 @@ import pandas as pd
 
 from fetch3.utils import interpolate_2d
 
+filepath = "/Users/jmissik/Desktop/repos/fetch3_nhl/data/FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv"
+
+
+def import_ameriflux_data(filein):
+    """
+    Imports AmeriFlux data (in ONEFLUX format) to a DataFrame.
+    Parameters
+    ----------
+    filein : str
+        Filepath to data
+
+    Returns
+    -------
+    df: pd.DataFrame
+        Flux data
+    """
+
+    df = pd.read_csv(filein, parse_dates=["TIMESTAMP_START", "TIMESTAMP_END"], na_values=["-9999"])
+
+    return df
+
+
+def prepare_ameriflux_data(filein, cfg):
+
+    df = import_ameriflux_data(filein)
+    df = df.rename(columns={"TIMESTAMP_START": "Timestamp"})
+
+    # Rename
+    df = df.rename(columns=cfg.met_column_labels)
+
+    # Add VPD in kPa. VPD_F is in hPa
+    df["VPD_F_kPa"] = df.VPD_F / 10
+
+    if cfg.transpiration_scheme == 0:
+        varlist = ["Timestamp", "TA_F", "VPD_F_kPa", "P_F", "SW_IN_F"]
+    elif cfg.transpiration_scheme == 1:
+        varlist = [
+            "Timestamp",
+            "TA_F",
+            "VPD_F_kPa",
+            "P_F",
+            "SW_IN_F",
+            "WS_F",
+            "USTAR",
+            "PPFD_IN",
+            "CO2_F",
+            "PA_F",
+        ]
+
+    # Keep only variables needed
+    df = df[varlist]
+
+    # Select data for length of run
+    df = df[(df.Timestamp >= cfg.start_time) & (df.Timestamp <= cfg.end_time)].reset_index(
+        drop=True
+    )
+
+    return df
+
 
 # Helper functions
 def calc_model_time_grid(df, cfg):
@@ -71,10 +130,8 @@ def prepare_met_data(cfg, data_dir, z_upper):
     end_time = pd.to_datetime(cfg.end_time)
 
     # read input data
-    df = pd.read_csv(data_path, parse_dates=[0])
+    df = prepare_ameriflux_data(data_path, cfg)
 
-    # Select data for length of run
-    df = df[(df.Timestamp >= start_time) & (df.Timestamp <= end_time)]
     df = df.set_index("Timestamp")
 
     tmax, t_data, nt_data = calc_model_time_grid(df, cfg)
@@ -84,7 +141,7 @@ def prepare_met_data(cfg, data_dir, z_upper):
 
     Ta_C = df["TA_F"]
     SW_in = df["SW_IN_F"]
-    VPD = df["VPD_kPa"]
+    VPD = df["VPD_F_kPa"]
 
     # temperature
     Ta = Ta_C + 273.15  # converting temperature from degree Celsius to Kelvin
