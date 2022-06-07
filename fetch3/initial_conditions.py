@@ -46,8 +46,8 @@ def calc_potential_vangenuchten(theta, theta_r, theta_s, alpha, m, n, rho, g):
 
     """
 
-    effective_saturation = ((theta - theta_r) / (theta_s - theta_r))
-    water_potential_m = - ((((1 / effective_saturation) ** (1 / m) - 1) ** (1 / n)) / alpha)
+    effective_saturation = (theta - theta_r) / (theta_s - theta_r)
+    water_potential_m = -((((1 / effective_saturation) ** (1 / m) - 1) ** (1 / n)) / alpha)
     water_potential_Pa = water_potential_m * rho * g
 
     return water_potential_Pa  # [Pa]
@@ -76,13 +76,32 @@ def initial_conditions(cfg, q_rain, zind):
     """
 
     # soil
-    H_initial_soil = np.piecewise(zind.z_soil,
-                                  [zind.z_soil <= cfg.clay_d, zind.z_soil > cfg.clay_d],
-                                  [calc_potential_vangenuchten(cfg.initial_swc_clay, cfg.theta_R1, cfg.theta_S1,
-                                                               cfg.alpha_1, cfg.m_1, cfg.n_1, cfg.Rho, cfg.g),
-                                   calc_potential_vangenuchten(cfg.initial_swc_sand, cfg.theta_R2, cfg.theta_S2,
-                                                               cfg.alpha_2, cfg.m_2, cfg.n_2, cfg.Rho, cfg.g)]
-                                  )
+    H_initial_soil = np.piecewise(
+        zind.z_soil,
+        [zind.z_soil <= cfg.clay_d, zind.z_soil > cfg.clay_d],
+        [
+            calc_potential_vangenuchten(
+                cfg.initial_swc_clay,
+                cfg.theta_R1,
+                cfg.theta_S1,
+                cfg.alpha_1,
+                cfg.m_1,
+                cfg.n_1,
+                cfg.Rho,
+                cfg.g,
+            ),
+            calc_potential_vangenuchten(
+                cfg.initial_swc_sand,
+                cfg.theta_R2,
+                cfg.theta_S2,
+                cfg.alpha_2,
+                cfg.m_2,
+                cfg.n_2,
+                cfg.Rho,
+                cfg.g,
+            ),
+        ],
+    )
 
     # roots
 
@@ -98,13 +117,22 @@ def initial_conditions(cfg, q_rain, zind):
     H_initial = np.concatenate((H_initial_soil, H_initial_root, H_initial_xylem))
 
     # calculate water potential for the bottom boundary condition
-    Head_bottom_H = np.full(len(q_rain),
-                            calc_potential_vangenuchten(cfg.soil_moisture_bottom_boundary, cfg.theta_R1, cfg.theta_S1,
-                                                        cfg.alpha_1, cfg.m_1, cfg.n_1, cfg.Rho, cfg.g))
+    Head_bottom_H = np.full(
+        len(q_rain),
+        calc_potential_vangenuchten(
+            cfg.soil_moisture_bottom_boundary,
+            cfg.theta_R1,
+            cfg.theta_S1,
+            cfg.alpha_1,
+            cfg.m_1,
+            cfg.n_1,
+            cfg.Rho,
+            cfg.g,
+        ),
+    )
 
     # set bottom boundary for initial condition
     if cfg.BottomBC == 0:
         H_initial[0] = Head_bottom_H[0]
 
     return H_initial, Head_bottom_H
-

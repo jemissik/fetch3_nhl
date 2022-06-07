@@ -19,8 +19,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from fetch3.nhl_transpiration.NHL_functions import *
 from fetch3.met_data import prepare_ameriflux_data
+from fetch3.nhl_transpiration.NHL_functions import *
 
 
 def main(cfg, output_dir, data_dir):

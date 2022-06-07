@@ -12,7 +12,7 @@ import pandas as pd
 
 from fetch3.utils import interpolate_2d
 
-filepath = '/Users/jmissik/Desktop/repos/fetch3_nhl/data/FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv'
+filepath = "/Users/jmissik/Desktop/repos/fetch3_nhl/data/FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv"
 
 
 def import_ameriflux_data(filein):
@@ -29,7 +29,7 @@ def import_ameriflux_data(filein):
         Flux data
     """
 
-    df = pd.read_csv(filein, parse_dates=['TIMESTAMP_START', 'TIMESTAMP_END'], na_values=['-9999'])
+    df = pd.read_csv(filein, parse_dates=["TIMESTAMP_START", "TIMESTAMP_END"], na_values=["-9999"])
 
     return df
 
@@ -37,19 +37,34 @@ def import_ameriflux_data(filein):
 def prepare_ameriflux_data(filein, cfg):
 
     df = import_ameriflux_data(filein)
-    df = df.rename(columns={'TIMESTAMP_START': 'Timestamp'})
+    df = df.rename(columns={"TIMESTAMP_START": "Timestamp"})
 
     # Rename
     df = df.rename(columns=cfg.met_column_labels)
 
     # Add VPD in kPa. VPD_F is in hPa
-    df['VPD_F_kPa'] = df.VPD_F / 10
+    df["VPD_F_kPa"] = df.VPD_F / 10
 
     # Keep only variables needed
-    df = df[['Timestamp', 'TA_F', 'VPD_F_kPa', 'P_F', 'SW_IN_F', 'WS_F', 'USTAR', 'PPFD_IN', 'CO2_F', 'PA_F']]
+    df = df[
+        [
+            "Timestamp",
+            "TA_F",
+            "VPD_F_kPa",
+            "P_F",
+            "SW_IN_F",
+            "WS_F",
+            "USTAR",
+            "PPFD_IN",
+            "CO2_F",
+            "PA_F",
+        ]
+    ]
 
     # Select data for length of run
-    df = df[(df.Timestamp >= cfg.start_time) & (df.Timestamp <= cfg.end_time)].reset_index(drop=True)
+    df = df[(df.Timestamp >= cfg.start_time) & (df.Timestamp <= cfg.end_time)].reset_index(
+        drop=True
+    )
 
     return df
 
