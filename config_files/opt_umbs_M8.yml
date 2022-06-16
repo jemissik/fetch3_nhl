@@ -21,8 +21,8 @@ model_options:
   met_column_labels:
     CO2_F_MDS: CO2_F
 
-# Start and end for the model
-  start_time: "2011-07-01 00:00:00" #begining of simulation #6/9 is DOY 160
+  # Start and end for the model
+  start_time: "2011-06-09 00:00:00" #begining of simulation #6/9 is DOY 160
   end_time: "2011-07-10 00:00:00" #end #DOY190 - 7/10 is doy 191
 
   dt:  1800  #seconds - input data resolution
