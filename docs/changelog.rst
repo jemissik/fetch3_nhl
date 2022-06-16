@@ -2,6 +2,11 @@
 Change log
 ##########
 
+6-16-22:
+--------
+- Update nighttime transpiration calculation to identify nighttime based on PPFD rather than time of day
+- Add interpolation for all met variables in case there are any gaps in the input data
+
 6-7-22:
 -------
 - Updates to input file format and options
