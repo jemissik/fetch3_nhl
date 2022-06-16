@@ -878,11 +878,12 @@ def calc_NHL_timesteps(cfg, met_data, LADnorm_df, **kwargs):
     return d2, LAD, zenith_angle_all
 
 
-def calc_nighttime_trans(trans, crown_area):
+def calc_nighttime_trans(trans, PPFD, crown_area):
     """
     Modifies transpiration timeseries to set nighttime transpiration to be almost zero
     """
-    is_nighttime = (trans.time.dt.hour <= 5) | (trans.time.dt.hour > 19)
+    # is_nighttime = (trans.time.dt.hour <= 5) | (trans.time.dt.hour > 19)
+    is_nighttime = xr.DataArray(PPFD <= 5, coords=[trans.time], dims=["time"])
     trans2 = trans.where(~(is_nighttime & (trans > 0)), 0.0000001 / crown_area)
 
     return trans2

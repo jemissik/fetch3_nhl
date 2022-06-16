@@ -45,8 +45,8 @@ def main(cfg, output_dir, data_dir):
     ds["NHL_trans_leaf"] = ds.NHL_trans_leaf * cfg.scale_nhl
 
     # Nighttime transpiration
-    ds["NHL_trans_sp_stem"] = calc_nighttime_trans(ds.NHL_trans_sp_stem, cfg.mean_crown_area_sp)
-    ds["NHL_trans_leaf"] = calc_nighttime_trans(ds.NHL_trans_leaf, cfg.mean_crown_area_sp)
+    ds["NHL_trans_sp_stem"] = calc_nighttime_trans(ds.NHL_trans_sp_stem, met_data.PPFD_IN, cfg.mean_crown_area_sp)
+    ds["NHL_trans_leaf"] = calc_nighttime_trans(ds.NHL_trans_leaf, met_data.PPFD_IN, cfg.mean_crown_area_sp)
 
     logger.info(f"NHL calculations finished in {time.time() - start} s")
 
