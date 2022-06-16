@@ -40,7 +40,8 @@ def prepare_ameriflux_data(filein, cfg):
     df = df.rename(columns={"TIMESTAMP_START": "Timestamp"})
 
     # Rename
-    df = df.rename(columns=cfg.met_column_labels)
+    if cfg.met_column_labels is not None:
+        df = df.rename(columns=cfg.met_column_labels)
 
     # Add VPD in kPa. VPD_F is in hPa
     df["VPD_F_kPa"] = df.VPD_F / 10
@@ -63,6 +64,13 @@ def prepare_ameriflux_data(filein, cfg):
 
     # Keep only variables needed
     df = df[varlist]
+
+    # fill any gaps in the data
+    df = df.set_index('Timestamp')
+    df = df.interpolate(method='linear')
+    # extrapolate in case there were missing values at the endpoints
+    df = df.interpolate(fill_value="extrapolate", limit_direction="both")
+    df = df.reset_index()
 
     # Select data for length of run
     df = df[(df.Timestamp >= cfg.start_time) & (df.Timestamp <= cfg.end_time)].reset_index(
