@@ -35,6 +35,12 @@ model_dir = Path(__file__).parent.resolve()  # File path of model source code
 
 @click.command()
 @click.option(
+    "--species",
+    type=str,
+    default=None,
+    help="species to run the model for"
+)
+@click.option(
     "--config_path",
     type=click.Path(exists=True, dir_okay=False, path_type=Path),
     default=str(default_config_path),
@@ -52,11 +58,11 @@ model_dir = Path(__file__).parent.resolve()  # File path of model source code
     default=str(default_output_path),
     help="Path to output directory",
 )
-def main(config_path, data_path, output_path):
-    run(config_path, data_path, output_path)
+def main(species, config_path, data_path, output_path):
+    run(species, config_path, data_path, output_path)
 
 
-def run(config_file, data_dir, output_dir):
+def run(species, config_file, data_dir, output_dir):
     # If using the default output directory, create directory if it doesn't exist
     if output_dir == default_output_path:
         (output_dir).mkdir(exist_ok=True)
@@ -69,7 +75,7 @@ def run(config_file, data_dir, output_dir):
         logger.info("Using config file: " + str(config_file))
         logger.info("Using output directory: " + str(output_dir))
 
-        cfg = setup_config(config_file)
+        cfg = setup_config(config_file, species=species)
 
         # save the calculated params to a file
         save_calculated_params(str(output_dir / "calculated_params.yml"), cfg)

@@ -513,21 +513,28 @@ class ConfigParams:
 # Convert config dict to config dataclass
 
 
-def setup_config(config_file):
+def setup_config(config_file, species):
     logger.info("Reading config file")
 
     with open(config_file, "r") as yml_config:
         loaded_configs = yaml.safe_load(yml_config)
 
+    if species is None:
+        species = list(loaded_configs['species_parameters'].keys())[0]
+        logger.info("No species was specified, so using species: " + species)
     # Check if the config file was the optimization config file format, and convert
     if "optimization_options" in list(loaded_configs):
-        param_dict = {}
-        for param in loaded_configs["parameters"].keys():
-            param_dict[param] = loaded_configs["parameters"][param]["value"]
+        site_param_dict = {}
+        species_param_dict = {}
+        for param in loaded_configs["site_parameters"].keys():
+            site_param_dict[param] = loaded_configs["site_parameters"][param]["value"]
+        for param in loaded_configs["species_parameters"][species].keys():
+            species_param_dict[param] = loaded_configs["species_parameters"][species][param]["value"]
     else:
-        param_dict = loaded_configs["parameters"]
+        site_param_dict = loaded_configs["site_parameters"]
+        species_param_dict = loaded_configs["species_parameters"][species]
 
-    cfg = ConfigParams(**loaded_configs["model_options"], **param_dict)
+    cfg = ConfigParams(**loaded_configs["model_options"], **site_param_dict, **species_param_dict, **{'species': species})
     return cfg
 
 
