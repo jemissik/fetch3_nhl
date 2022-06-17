@@ -253,7 +253,7 @@ parameters:
   scale_nhl:
     type: fixed
     value: 1.0
-    # bounds: [0.1, 2.0]
+    bounds: [0.1, 2.0]
 
   mean_crown_area_sp: #[m2]
   # From 2011 Tree info in FETCH2 Matlab example

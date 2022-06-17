@@ -170,8 +170,8 @@ parameters:
   #XYLEM PARAMETERS
   kmax:
     type: fixed
-    range: [9.0e-7 12.0e-6]  #TODO from table 2 mirfenderesgi (not sure about units)
     value: 1.0e-5   #conductivity of xylem  [ m2/sPa]
+    bounds: [9.0e-7, 12.0e-6]  #TODO from table 2 mirfenderesgi (not sure about units)
   ap:
     type: fixed
     value: 2.0e-6                                  #xylem cavitation parameter [Pa-1]
@@ -215,7 +215,7 @@ parameters:
   scale_nhl:
     type: fixed
     value: 1.0
-    # bounds: [0.1, 2.0]
+    bounds: [0.1, 2.0]
 
   mean_crown_area_sp: #[m2]
     type: fixed
@@ -239,11 +239,11 @@ parameters:
     bounds: [2.0, 6.0]  # Range from Mirfenderesgi et al 2016, Table 2
     value: 1.0  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
   Vcmax25:
-    type: range
+    type: fixed #TODO
     bounds: [20.0, 85.0]  # Range from Mirfenderesgi et al 2016, Table 2
     value: 59.9 #oak 59.9 pine 31.1
   alpha_gs:
-    type: range
+    type: fixed #TODO
     bounds: [4.0, 9.0] # Range from Mirfenderesgi et al 2016, Table 2
     value: 6.7     # value: #6.7 oak, 7.3 pine
 
@@ -252,11 +252,11 @@ parameters:
     value: 1
 
   wp_s50:
-    type: range
+    type: fixed #TODO
     value: -9.1e+5  #-9.1e+5 oak -1.8e+5
     bounds: [-2.0e+6, -1.0e+5]  # Range from Mirfenderesgi et al 2016, Table 2
   c3:
-    type: range
+    type: fixed #TODO
     value: 12.3  # value: #12.3 oak 10.3 pine  from Mirfenderesgi
     bounds: [0.1, 20.0]  # Range from Mirfenderesgi et al 2016, Table 2
 
