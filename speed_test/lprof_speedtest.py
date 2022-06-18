@@ -3,7 +3,7 @@ import pstats
 from pathlib import Path
 
 try:
-    from fetch3.__main__ import (
+    from fetch3.main import (
         Picard,
         initial_conditions,
         prepare_met_data,
@@ -19,7 +19,7 @@ except ImportError:
     import sys
 
     sys.path.insert(0, fetch_dir)
-    from fetch3.__main__ import (
+    from fetch3.main import (
         Picard,
         initial_conditions,
         prepare_met_data,

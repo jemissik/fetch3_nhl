@@ -9,7 +9,7 @@ def test_fetch3_nhl_run():
     )
     data_path = Path(__file__).resolve().parent.parent.parent / "data"
     output_path = Path(__file__).resolve().parent.parent.parent / "output"
-    from fetch3.__main__ import run
+    from fetch3.main import run
 
     run(config_path, data_path, output_path)
 
@@ -21,7 +21,7 @@ def test_fetch3_nhl_run_optconfig():
     data_path = Path(__file__).resolve().parent.parent.parent / "data"
     output_path = Path(__file__).resolve().parent.parent.parent / "output"
     print(output_path)
-    from fetch3.__main__ import run
+    from fetch3.main import run
 
     run(config_path, data_path, output_path)
 
@@ -33,7 +33,7 @@ def test_fetch3_PM_run():
     data_path = Path(__file__).resolve().parent.parent.parent / "data"
     output_path = Path(__file__).resolve().parent.parent.parent / "output"
     print(output_path)
-    from fetch3.__main__ import run
+    from fetch3.main import run
 
     run(config_path, data_path, output_path)
 

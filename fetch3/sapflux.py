@@ -118,11 +118,18 @@ def calc_sapflux(H, trans_2d_tree, cfg):
 
     ds_sapflux = xr.merge([sapflux, storage, delta_S])
 
+    # Add plot-level sapflux for the species
+    ds_sapflux['sapflux_sp_plot'] = (0.0001 * cfg.stand_density_sp) * ds_sapflux.sapflux
+
     # Add metadata to dataset
     ds_sapflux.sapflux.attrs = dict(units="m3 s-1", description="Tree-level sap flux")
     ds_sapflux.storage.attrs = dict(units="m3", description="Total aboveground water storage")
     ds_sapflux.delta_S.attrs = dict(
         units="m3", description="Change in aboveground water storage from the previous timestep"
+    )
+    ds_sapflux.sapflux_sp_plot.attrs = dict(
+        units="m3 H2O m-2ground s-1", description=("Total plot-level sapflux for the species, calculated as tree-level "
+                                                   "sap flux * (# of trees per m2)")
     )
 
     return ds_sapflux
