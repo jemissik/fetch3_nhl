@@ -35,9 +35,6 @@ from boa import (
 
 from fetch3.optimize.fetch_wrapper import Fetch3Wrapper
 
-# from ax.storage.json_store.save import save_experiment
-# from ax.storage.registry_bundle import RegistryBundle
-
 
 @click.command()
 @click.option(
@@ -84,12 +81,6 @@ def run(config_file):
     logger = logging.getLogger(__file__)
 
     logger.info("Start time: %s", dt.datetime.now().strftime("%Y%m%dT%H%M%S"))
-
-    # wrapper = Fetch3Wrapper(
-    #     ex_settings=config["optimization_options"],
-    #     model_settings=config["model_options"],
-    #     experiment_dir=experiment_dir,
-    # )
 
     experiment = get_experiment(config, WrappedJobRunner(wrapper=wrapper), wrapper)
 

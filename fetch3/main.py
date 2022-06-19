@@ -17,8 +17,6 @@ import logging
 import yaml
 from pathlib import Path
 import concurrent.futures
-import traceback
-
 
 import click
 
