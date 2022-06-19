@@ -29,7 +29,7 @@ from fetch3.model_functions import Picard, format_model_output, save_csv, save_n
 from fetch3.model_setup import spatial_discretization, temporal_discretization
 from fetch3.sapflux import calc_sapflux, format_inputs
 
-log_format = "%(levelname)s %(asctime)s - %(message)s"
+log_format = "%(levelname)s %(asctime)s %(processName)s - %(message)s"
 
 logging.basicConfig(
     filemode="w",

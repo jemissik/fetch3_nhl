@@ -104,7 +104,7 @@ def write_configs(trial_dir, parameters, model_options):
         return f.name
 
 
-def get_model_obs(modelfile, obsfile, obs_var):
+def get_model_sapflux(modelfile, obsfile, obs_var, output_var, **kwargs):
     """
     Read in observation data model output for a trial, which will be used for
     calculating the objective function for the trial.
@@ -140,6 +140,7 @@ def get_model_obs(modelfile, obsfile, obs_var):
 
     # Read in model output
     modeldf = xr.load_dataset(modelfile)
+    modeldf = modeldf.sel(species=output_var)
 
     # Slice met data to just the time period that was modeled
     obsdf = obsdf.loc[modeldf.time.data[0] : modeldf.time.data[-1]]
@@ -176,6 +177,7 @@ def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot
 class Fetch3Wrapper(BaseWrapper):
     _processes = []
     config_file_name = "config.yml"
+    fetch_data_funcs = {get_model_sapflux.__name__: get_model_sapflux}
 
     def __init__(self):
         self.ex_settings: dict = None
@@ -304,13 +306,15 @@ class Fetch3Wrapper(BaseWrapper):
         modelfile = (
             get_trial_dir(self.experiment_dir, trial.index) / self.ex_settings["output_fname"]
         )
+
         obs_file = metric_properties["obs_file"]
         obs_var = metric_properties["obs_var"]
+        output_var = metric_properties["output_var"]
+        fetch_data_func = self.fetch_data_funcs[metric_properties["fetch_data_func"]]
 
-        y_pred, y_true = get_model_obs(
+        y_pred, y_true = fetch_data_func(
             modelfile,
-            obs_file,
-            obs_var
+            **metric_properties
         )
         return dict(y_pred=y_pred, y_true=y_true)
 

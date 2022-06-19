@@ -1,36 +1,42 @@
+
+
 optimization_options:
   scalarized_objective_options:
     objectives:
-      - boa_metric: RootMeanSquaredError
-        name: plot_transpiration
-        properties:
-          obs_file: './data/partitioned_umbs_et.csv'
-          obs_var: 'transpiration_mod'
-          output_var: 'plot'
+#      - boa_metric: RootMeanSquaredError
+#        name: plot_transpiration
+#        properties:
+#          obs_file: './data/partitioned_umbs_et.csv'
+#          obs_var: 'transpiration_mod'
+#          output_var: 'plot'
       - boa_metric: RootMeanSquaredError
         name: maple_sapflux
         properties:
           obs_file: './data/umbs_aggregated_sp_sapflow.csv'
           obs_var: 'maple'
           output_var: 'maple'
+          fetch_data_func: get_model_sapflux
       - boa_metric: RootMeanSquaredError
         name: oak_sapflux
         properties:
           obs_file: './data/umbs_aggregated_sp_sapflow.csv'
           obs_var: 'oak'
           output_var: 'oak'
+          fetch_data_func: get_model_sapflux
       - boa_metric: RootMeanSquaredError
         name: aspen_sapflux
         properties:
           obs_file: './data/umbs_aggregated_sp_sapflow.csv'
           obs_var: 'aspen'
           output_var: 'aspen'
+          fetch_data_func: get_model_sapflux
       - boa_metric: RootMeanSquaredError
         name: pine_sapflux
         properties:
           obs_file: './data/USA_UMB_CON_sapf_data.csv'
           obs_var: 'pine'
           output_var: 'pine'
+          fetch_data_func: get_model_sapflux
     minimize: True
 
   experiment: {}
@@ -40,7 +46,7 @@ optimization_options:
   output_dir: "./output"
   model_dir: '.'
   data_path: "./data"
-  output_fname: 'sapflux.nc'
+  output_fname: 'ds_sapflux.nc'
   experiment_name: "multispecies_UMBS"
 
 
