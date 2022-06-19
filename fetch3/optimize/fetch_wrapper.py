@@ -34,7 +34,7 @@ from boa import (
     make_trial_dir
 )
 
-from fetch3.scaling import convert_trans_m3s_to_cm3hr
+from fetch3.scaling import convert_trans_m3s_to_cm3hr, convert_sapflux_m3s_to_mm30min
 
 
 def read_experiment_config(config_file):
@@ -103,8 +103,35 @@ def write_configs(trial_dir, parameters, model_options):
         yaml.dump(config_dict, f)
         return f.name
 
+def get_model_plot_trans(modelfile, obs_file, obs_var, output_var, **kwargs):
+    # Read in observation data - partitioned fluxnet data
+    timestamp_col = 'TIMESTAMP_START'
+    obsdf = pd.read_csv(obs_file, parse_dates=[timestamp_col])
+    obsdf = obsdf.set_index(timestamp_col)
 
-def get_model_sapflux(modelfile, obsfile, obs_var, output_var, **kwargs):
+    # Read in model output
+    modeldf = xr.load_dataset(modelfile)
+    modeldf = modeldf.sel(species=output_var)
+
+    # # Slice met data to just the time period that was modeled
+    obsdf = obsdf.loc[modeldf.time.data[0]: modeldf.time.data[-1]]
+
+    # # Convert model output to the same units as the input data
+    # # tower data is in mm 30min-1
+    modeldf["sapflux_plot_mm30min"] = convert_sapflux_m3s_to_mm30min(modeldf.sapflux_plot)
+
+    # # remove first and last timestamp
+    obsdf = obsdf.iloc[1:-1]
+    modeldf = modeldf.sapflux_plot_mm30min.isel(time=np.arange(1, len(modeldf.time) - 1))
+
+    not_nans = ~obsdf[obs_var].isna()
+    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
+    modeldf_not_nans = modeldf.data[not_nans]
+
+    return modeldf_not_nans, obsdf_not_nans
+
+
+def get_model_sapflux(modelfile, obs_file, obs_var, output_var, **kwargs):
     """
     Read in observation data model output for a trial, which will be used for
     calculating the objective function for the trial.
@@ -113,7 +140,7 @@ def get_model_sapflux(modelfile, obsfile, obs_var, output_var, **kwargs):
     ----------
     modelfile : str
         File path to the model output
-    obsfile : str
+    obs_file : str
         File path to the observation data
     model_settings: dict
         dictionary with model settings read from model config file
@@ -133,10 +160,11 @@ def get_model_sapflux(modelfile, obsfile, obs_var, output_var, **kwargs):
     # Read config file
 
     # Read in observation data
-    obsdf = pd.read_csv(obsfile, parse_dates=[0])
+    obsdf = pd.read_csv(obs_file, parse_dates=[0])
     # Converting time since sapfluxnet data is in GMT
-    obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST")
+    obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST").dt.tz_localize(None)
     obsdf = obsdf.set_index("Timestamp")
+
 
     # Read in model output
     modeldf = xr.load_dataset(modelfile)
@@ -177,7 +205,8 @@ def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot
 class Fetch3Wrapper(BaseWrapper):
     _processes = []
     config_file_name = "config.yml"
-    fetch_data_funcs = {get_model_sapflux.__name__: get_model_sapflux}
+    fetch_data_funcs = {get_model_sapflux.__name__: get_model_sapflux,
+                        get_model_plot_trans.__name__: get_model_plot_trans}
 
     def __init__(self):
         self.ex_settings: dict = None
@@ -307,9 +336,6 @@ class Fetch3Wrapper(BaseWrapper):
             get_trial_dir(self.experiment_dir, trial.index) / self.ex_settings["output_fname"]
         )
 
-        obs_file = metric_properties["obs_file"]
-        obs_var = metric_properties["obs_var"]
-        output_var = metric_properties["output_var"]
         fetch_data_func = self.fetch_data_funcs[metric_properties["fetch_data_func"]]
 
         y_pred, y_true = fetch_data_func(
