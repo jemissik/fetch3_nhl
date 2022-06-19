@@ -829,6 +829,17 @@ def save_nc(dir, xr_datasets):
 
 
 def combine_outputs(results):
+    """
+    Combines the outputs for all species
+
+    Parameters
+    ----------
+    results :
+
+    Returns
+    -------
+
+    """
     soil = [sp['ds_soil'] for sp in results]
     root = [sp['ds_root'] for sp in results]
     canopy = [sp['ds_canopy'] for sp in results]
@@ -840,12 +851,16 @@ def combine_outputs(results):
     ds_canopy = xr.concat(canopy, dim='species')
     ds_sapflux = xr.concat(sapflux, dim='species')
 
-    # ds_all = xr.concat(all_, dim='species')
+    # Calculate plot level sapflux
+    ds_sapflux_tot = ds_sapflux[['sapflux_plot', 'storage_plot', 'delta_S_plot']].sum(dim='species', keep_attrs=True)
+    ds_sapflux_tot = ds_sapflux_tot.assign_coords(species='plot_tot').expand_dims('species')
+
+    # Add plot level sapflux to the dataset
+    ds_sapflux = xr.merge([ds_sapflux, ds_sapflux_tot])
 
     return {
             "ds_soil": ds_soil,
             "ds_root": ds_root,
             "ds_canopy": ds_canopy,
             "ds_sapflux": ds_sapflux,
-            # "ds_all": ds_all,
         }
