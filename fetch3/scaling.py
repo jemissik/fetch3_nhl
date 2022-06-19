@@ -123,6 +123,8 @@ def trans2d_to_tree(trans_2d, crown_area, dz):
     trans = integrate_trans2d(trans_2d, dz) * crown_area
     return trans
 
+def convert_sapflux_cm3hr_to_m3s(sapflux):
+    return sapflux / ((100**3) * 60 * 60)
 
 def convert_sapflux_cm3hr_to_mm30min(sapflux_cm3hr):
     """
