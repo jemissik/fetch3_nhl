@@ -4,28 +4,33 @@ optimization_options:
       - boa_metric: RootMeanSquaredError
         name: plot_transpiration
         properties:
-          obs_file: './data/USA_UMB_CON_sapf_data.csv' #TODO
-          obs_var: 'USA_UMB_CON_Aru_Js_28' #TODO
+          obs_file: './data/partitioned_umbs_et.csv'
+          obs_var: 'transpiration_mod'
+          output_var: 'plot'
       - boa_metric: RootMeanSquaredError
         name: maple_sapflux
         properties:
-          obs_file: './data/USA_UMB_CON_sapf_data.csv'
-          obs_var: 'USA_UMB_CON_Aru_Js_28' #TODO
+          obs_file: './data/umbs_aggregated_sp_sapflow.csv'
+          obs_var: 'maple'
+          output_var: 'maple'
       - boa_metric: RootMeanSquaredError
         name: oak_sapflux
         properties:
-          obs_file: './data/USA_UMB_CON_sapf_data.csv'
-          obs_var: 'USA_UMB_CON_Aru_Js_28' #TODO
+          obs_file: './data/umbs_aggregated_sp_sapflow.csv'
+          obs_var: 'oak'
+          output_var: 'oak'
       - boa_metric: RootMeanSquaredError
         name: aspen_sapflux
         properties:
-          obs_file: './data/USA_UMB_CON_sapf_data.csv'
-          obs_var: 'USA_UMB_CON_Aru_Js_28' #TODO
+          obs_file: './data/umbs_aggregated_sp_sapflow.csv'
+          obs_var: 'aspen'
+          output_var: 'aspen'
       - boa_metric: RootMeanSquaredError
         name: pine_sapflux
         properties:
           obs_file: './data/USA_UMB_CON_sapf_data.csv'
-          obs_var: 'USA_UMB_CON_Aru_Js_28'
+          obs_var: 'pine'
+          output_var: 'pine'
     minimize: True
 
   experiment: {}
@@ -36,7 +41,7 @@ optimization_options:
   model_dir: '.'
   data_path: "./data"
   output_fname: 'sapflux.nc'
-  experiment_name: "UMBS_test_Ameriflux_M8"
+  experiment_name: "multispecies_UMBS"
 
 
 model_options:
