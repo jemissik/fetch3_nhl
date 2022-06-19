@@ -17,6 +17,7 @@ import logging
 import yaml
 from pathlib import Path
 import concurrent.futures
+import traceback
 
 
 import click
@@ -106,6 +107,9 @@ def main(config_path, data_path, output_path, species):
             concurrent.futures.wait(species_runs)
         nc_output = combine_outputs(results)
         save_nc(output_path, nc_output)
+    except Exception as e:
+        logger.exception("Error completing Run! Reason: %r", e)
+        raise
     finally:
         logger.info(f"run time: {time.time() - start} s")  # end run clock
         logger.info("run complete")

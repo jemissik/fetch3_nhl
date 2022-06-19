@@ -19,6 +19,7 @@ import shutil
 import time
 from pathlib import Path
 
+
 import click
 from boa import (
     WrappedJobRunner,
@@ -29,6 +30,7 @@ from boa import (
     make_experiment_dir,
     save_experiment,
     scheduler_to_json_file,
+    normalize_config
 )
 
 from fetch3.optimize.fetch_wrapper import Fetch3Wrapper
@@ -57,11 +59,16 @@ def main(config_file):
 def run(config_file):
     start = time.time()
 
-    config = load_experiment_config(config_file)  # Read experiment config'
+    wrapper = Fetch3Wrapper()
+    config = wrapper.load_config(config_file)
+    config = normalize_config(config)
+
+    # config = load_experiment_config(config_file)  # Read experiment config'
     experiment_dir = make_experiment_dir(
         config["optimization_options"]["output_dir"],
         config["optimization_options"]["experiment_name"],
     )
+    wrapper.experiment_dir = experiment_dir
 
     # Copy the experiment config to the experiment directory
     shutil.copyfile(config_file, experiment_dir / Path(config_file).name)
@@ -78,11 +85,11 @@ def run(config_file):
 
     logger.info("Start time: %s", dt.datetime.now().strftime("%Y%m%dT%H%M%S"))
 
-    wrapper = Fetch3Wrapper(
-        ex_settings=config["optimization_options"],
-        model_settings=config["model_options"],
-        experiment_dir=experiment_dir,
-    )
+    # wrapper = Fetch3Wrapper(
+    #     ex_settings=config["optimization_options"],
+    #     model_settings=config["model_options"],
+    #     experiment_dir=experiment_dir,
+    # )
 
     experiment = get_experiment(config, WrappedJobRunner(wrapper=wrapper), wrapper)
 

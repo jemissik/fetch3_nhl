@@ -35,7 +35,7 @@ optimization_options:
   output_dir: "./output"
   model_dir: '.'
   data_path: "./data"
-  output_fname: 'sapflux.nc'
+  output_fname: 'ds_sapflux.nc'
   experiment_name: "UMBS_test_Ameriflux_M8"
 
 
@@ -48,7 +48,7 @@ model_options:
 
   # Start and end for the model
   start_time: "2011-06-09 00:00:00" #begining of simulation #6/9 is DOY 160
-  end_time: "2011-07-10 00:00:00" #end #DOY190 - 7/10 is doy 191
+  end_time: "2011-06-09 00:30:00" #end #DOY190 - 7/10 is doy 191
 
   dt:  1800  #seconds - input data resolution
   tmin:  0  #tmin [s]
