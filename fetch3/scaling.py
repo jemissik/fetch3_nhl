@@ -122,3 +122,19 @@ def trans2d_to_tree(trans_2d, crown_area, dz):
     # [m3h20 s-1]
     trans = integrate_trans2d(trans_2d, dz) * crown_area
     return trans
+
+
+def convert_sapflux_cm3hr_to_mm30min(sapflux_cm3hr):
+    """
+    Converts aggregated plot-scale sapfluxnet data (in units of m3h20 m-2ground hr-1 to mm 30min-1
+
+    Parameters
+    ----------
+    sapflux_cm3hr : [cm3h2o hr-1 m-2 plot]
+
+    Returns
+    -------
+    scaled sapflux in mm 30min-1
+    """
+    sapflux_mm30min = (sapflux_cm3hr / ((100**3) * 60 * 60)) * 1800 * 1000
+    return sapflux_mm30min
