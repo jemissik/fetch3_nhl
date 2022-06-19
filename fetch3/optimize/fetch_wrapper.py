@@ -16,6 +16,11 @@ import datetime as dt
 import os
 import subprocess
 from pathlib import Path
+import logging
+
+from pprint import pformat
+
+logger = logging.getLogger(__name__)
 
 import numpy as np
 import pandas as pd
@@ -26,8 +31,7 @@ from boa import (
     BaseWrapper,
     cd_and_cd_back,
     get_trial_dir,
-    make_trial_dir,
-    write_configs,
+    make_trial_dir
 )
 
 from fetch3.scaling import convert_trans_m3s_to_cm3hr
@@ -68,52 +72,7 @@ def read_experiment_config(config_file):
     return params, experiment_settings, model_settings
 
 
-def create_experiment_dir(working_dir, ax_client):
-    """
-    Creates directory for the experiment and returns the path.
-    The directory is named with the experiment name and the current datetime.
 
-    Parameters
-    ----------
-    working_dir : str
-        Working directory, the parent directory where the experiment directory will be written
-    ax_client : Ax client
-        Initialized Ax client for the experiment
-
-    Returns
-    -------
-    Path
-        Path to the directory for the experiment
-    """
-    # Directory named with experiment name and datetime
-    ex_dir = Path(working_dir) / (
-        ax_client.experiment.name + "_" + dt.datetime.now().strftime("%Y%m%dT%H%M%S")
-    )
-    ex_dir.mkdir()
-    return ex_dir
-
-
-def create_trial_dir(experiment_dir, trial_index):
-    """
-    Create a directory for a trial, and return the path to the directory.
-    Trial directory is created inside the experiment directory, and named with the trial index.
-    Model configs and outputs for each trial will be written here.
-
-    Parameters
-    ----------
-    experiment_dir : Path
-        Directory for the experiment
-    trial_index : int
-        Trial index from the Ax client
-
-    Returns
-    -------
-    Path
-        Directory for the trial
-    """
-    trial_dir = experiment_dir / str(trial_index).zfill(6)  # zero-padded trial index
-    trial_dir.mkdir()
-    return trial_dir
 
 
 def write_configs(trial_dir, parameters, model_options):
@@ -145,7 +104,7 @@ def write_configs(trial_dir, parameters, model_options):
         return f.name
 
 
-def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
+def get_model_sapflux(modelfile, obsfile, obs_var, output_var, **kwargs):
     """
     Read in observation data model output for a trial, which will be used for
     calculating the objective function for the trial.
@@ -181,6 +140,7 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
 
     # Read in model output
     modeldf = xr.load_dataset(modelfile)
+    modeldf = modeldf.sel(species=output_var)
 
     # Slice met data to just the time period that was modeled
     obsdf = obsdf.loc[modeldf.time.data[0] : modeldf.time.data[-1]]
@@ -193,8 +153,8 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
     obsdf = obsdf.iloc[1:-1]
     modeldf = modeldf.sapflux_scaled.isel(time=np.arange(1, len(modeldf.time) - 1))
 
-    not_nans = ~obsdf[ex_settings["obsvar"]].isna()
-    obsdf_not_nans = obsdf[ex_settings["obsvar"]].loc[not_nans]
+    not_nans = ~obsdf[obs_var].isna()
+    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
     modeldf_not_nans = modeldf.data[not_nans]
 
     return modeldf_not_nans, obsdf_not_nans
@@ -216,17 +176,102 @@ def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot
 
 class Fetch3Wrapper(BaseWrapper):
     _processes = []
+    config_file_name = "config.yml"
+    fetch_data_funcs = {get_model_sapflux.__name__: get_model_sapflux}
 
-    def __init__(self, ex_settings, model_settings, experiment_dir):
-        self.ex_settings = ex_settings
-        self.model_settings = model_settings
-        self.experiment_dir = experiment_dir
+    def __init__(self):
+        self.ex_settings: dict = None
+        self.model_settings: dict = None
+        self.experiment_dir: os.PathLike = None
+        self.mapping: dict = None
+
+    def load_config(self, config_file: os.PathLike):
+        """
+        Load config file and return a dictionary # TODO finish this
+
+        Parameters
+        ----------
+        config_file : os.PathLike
+            File path for the experiment configuration file
+
+        Returns
+        -------
+        loaded_config: dict
+        """
+        # Load the experiment config yml file
+        with open(config_file, "r") as yml_config:
+            config = yaml.safe_load(yml_config)
+
+        self.ex_settings = config["optimization_options"]
+        self.model_settings = config["model_options"]
+
+        site_parameters = config["site_parameters"]
+        species_parameters = config["species_parameters"]
+
+        parameters = {}
+        mapping = {}
+        for species, params in species_parameters.items():
+            for parameter, dct in params.items():
+                new_key = f"{species}_{parameter}"
+                parameters[new_key] = dct
+                mapping[new_key] = species
+        self.mapping = mapping
+
+        parameters.update(site_parameters)
+        config["parameters"] = parameters
+        logging.info(pformat(config))
+        return config
+
+    def write_configs(self, trial: Trial) -> None:
+        """
+        Write model configuration file for a trial (model run). This is the config file used by FETCH3
+        for the model run.
+
+        The config file is written as ```config.yml``` inside the trial directory.
+
+        Parameters
+        ----------
+        trial: Trial
+            The trial to deploy.
+
+        Returns
+        -------
+        str
+            Path for the config file
+        """
+        trial_dir = make_trial_dir(self.experiment_dir, trial.index)
+        parameters = trial.arm.parameters
+
+        species_parameters = {}
+        site_parameters = {}
+        for parameter, dct in parameters.items():
+            if parameter in self.mapping:
+                species = self.mapping[parameter]
+                if species not in species_parameters:
+                    species_parameters[species] = {}
+
+                new_key = parameter[len(species)+1:] if species in parameter else parameter
+                species_parameters[species][new_key] = dct
+            else:
+                site_parameters[parameter] = dct
+
+        model_options = self.model_settings
+        config_dict = {
+            "model_options": model_options,
+            "site_parameters": site_parameters,
+            "species_parameters": species_parameters
+        }
+        logging.info(pformat(config_dict))
+        with open(trial_dir / self.config_file_name, "w") as f:
+            # Write model options from loaded config
+            # Parameters for the trial from Ax
+            yaml.dump(config_dict, f)
+            return f.name
 
     def run_model(self, trial: Trial):
 
-        trial_dir = make_trial_dir(self.experiment_dir, trial.index)
-
-        config_dir = write_configs(trial_dir, trial.arm.parameters, self.model_settings)
+        trial_dir = get_trial_dir(self.experiment_dir, trial.index)
+        config_path = trial_dir / self.config_file_name
 
         model_dir = self.ex_settings["model_dir"]
 
@@ -234,7 +279,7 @@ class Fetch3Wrapper(BaseWrapper):
         os.chdir(model_dir)
 
         cmd = (
-            f"python main.py --config_path {config_dir} --data_path"
+            f"python main.py --config_path {config_path} --data_path"
             f" {self.ex_settings['data_path']} --output_path {trial_dir}"
         )
 
@@ -256,18 +301,20 @@ class Fetch3Wrapper(BaseWrapper):
             elif "run complete" in contents:
                 trial.mark_completed()
 
-    def fetch_trial_data(self, trial: Trial, *args, **kwargs):
+    def fetch_trial_data(self, trial: Trial, metric_properties: dict, metric_name: str, *args, **kwargs):
 
         modelfile = (
             get_trial_dir(self.experiment_dir, trial.index) / self.ex_settings["output_fname"]
         )
 
-        y_pred, y_true = get_model_obs(
+        obs_file = metric_properties["obs_file"]
+        obs_var = metric_properties["obs_var"]
+        output_var = metric_properties["output_var"]
+        fetch_data_func = self.fetch_data_funcs[metric_properties["fetch_data_func"]]
+
+        y_pred, y_true = fetch_data_func(
             modelfile,
-            self.ex_settings["obsfile"],
-            self.ex_settings,
-            self.model_settings,
-            trial.arm.parameters,
+            **metric_properties
         )
         return dict(y_pred=y_pred, y_true=y_true)
 

@@ -18,7 +18,6 @@ import yaml
 from pathlib import Path
 import concurrent.futures
 
-
 import click
 
 from fetch3.initial_conditions import initial_conditions
@@ -28,7 +27,7 @@ from fetch3.model_functions import Picard, format_model_output, save_csv, save_n
 from fetch3.model_setup import spatial_discretization, temporal_discretization
 from fetch3.sapflux import calc_sapflux, format_inputs
 
-log_format = "%(levelname)s %(asctime)s - %(message)s"
+log_format = "%(levelname)s %(asctime)s %(processName)s - %(message)s"
 
 logging.basicConfig(
     filemode="w",
@@ -106,6 +105,9 @@ def main(config_path, data_path, output_path, species):
             concurrent.futures.wait(species_runs)
         nc_output = combine_outputs(results)
         save_nc(output_path, nc_output)
+    except Exception as e:
+        logger.exception("Error completing Run! Reason: %r", e)
+        raise
     finally:
         logger.info(f"run time: {time.time() - start} s")  # end run clock
         logger.info("run complete")
