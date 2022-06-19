@@ -140,3 +140,11 @@ def convert_sapflux_cm3hr_to_mm30min(sapflux_cm3hr):
     """
     sapflux_mm30min = (sapflux_cm3hr / ((100**3) * 60 * 60)) * 1800 * 1000
     return sapflux_mm30min
+
+
+def convert_sapflux_m3s_to_mm30min(sapflux_m3s):
+
+    sapflux_cm3hr = sapflux_m3s * (100**3) * 60 * 60
+    sapflux_mm30min = convert_sapflux_cm3hr_to_mm30min(sapflux_cm3hr)
+
+    return sapflux_mm30min
