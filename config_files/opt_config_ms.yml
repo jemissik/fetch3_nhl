@@ -3,35 +3,35 @@
 optimization_options:
   scalarized_objective_options:
     objectives:
-      - boa_metric: RootMeanSquaredError
+      - sklearn_metric: mean_absolute_percentage_error
         name: plot_transpiration
         properties:
           obs_file: './data/partitioned_umbs_et.csv'
           obs_var: 'transpiration_mod'
           output_var: 'plot_tot'
           fetch_data_func: get_model_plot_trans
-      - boa_metric: RootMeanSquaredError
+      - sklearn_metric: mean_absolute_percentage_error
         name: maple_sapflux
         properties:
           obs_file: './data/umbs_aggregated_sp_sapflow.csv'
           obs_var: 'maple'
           output_var: 'maple'
           fetch_data_func: get_model_sapflux
-      - boa_metric: RootMeanSquaredError
+      - sklearn_metric: mean_absolute_percentage_error
         name: oak_sapflux
         properties:
           obs_file: './data/umbs_aggregated_sp_sapflow.csv'
           obs_var: 'oak'
           output_var: 'oak'
           fetch_data_func: get_model_sapflux
-      - boa_metric: RootMeanSquaredError
+      - sklearn_metric: mean_absolute_percentage_error
         name: aspen_sapflux
         properties:
           obs_file: './data/umbs_aggregated_sp_sapflow.csv'
           obs_var: 'aspen'
           output_var: 'aspen'
           fetch_data_func: get_model_sapflux
-      - boa_metric: RootMeanSquaredError
+      - sklearn_metric: mean_absolute_percentage_error
         name: pine_sapflux
         properties:
           obs_file: './data/umbs_aggregated_sp_sapflow.csv'
