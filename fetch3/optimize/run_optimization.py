@@ -25,10 +25,7 @@ from boa import (
     WrappedJobRunner,
     get_experiment,
     get_scheduler,
-    load_experiment,
-    load_experiment_config,
     make_experiment_dir,
-    save_experiment,
     scheduler_to_json_file,
     normalize_config
 )
