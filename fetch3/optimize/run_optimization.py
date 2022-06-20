@@ -53,6 +53,7 @@ def main(config_file):
 def run(config_file):
     start = time.time()
 
+
     wrapper = Fetch3Wrapper()
     config = wrapper.load_config(config_file)
     config = normalize_config(config)
@@ -83,20 +84,11 @@ def run(config_file):
 
     scheduler = get_scheduler(experiment, config=config)
 
-    scheduler.run_all_trials()
-
-    # save_experiment(experiment, "experiment.json")
-    # print(load_experiment("experiment.json.pickle"))
-
-    # metric = get_metric_from_config(config["optimization_options"]["metric"])
-    # bundle = RegistryBundle(
-    #     metric_clss={metric: None},
-    #     runner_clss={WrappedJobRunner: None}
-    # )
-    # save_experiment(experiment, "experiment.json")
-    # from ax.storage.json_store.load import load_experiment
-    logging.info("\nTrials completed! Total run time: %d", time.time() - start)
-    scheduler_to_json_file(scheduler, experiment_dir / "scheduler.json")
+    try:
+        scheduler.run_all_trials()
+    finally:
+        logging.info("\nTrials completed! Total run time: %d", time.time() - start)
+        scheduler_to_json_file(scheduler, experiment_dir / "scheduler.json")
     return scheduler
 
 
