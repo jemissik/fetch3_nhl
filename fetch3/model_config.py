@@ -534,7 +534,7 @@ def setup_config(config_file, species):
         site_param_dict = loaded_configs["site_parameters"]
         species_param_dict = loaded_configs["species_parameters"][species]
 
-    cfg = ConfigParams(**loaded_configs["model_options"], **site_param_dict, **species_param_dict, **{'species': species})
+    cfg = ConfigParams(**{**loaded_configs["model_options"], **site_param_dict, **species_param_dict, **{'species': species}})
     return cfg
 
 

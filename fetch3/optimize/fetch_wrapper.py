@@ -234,8 +234,8 @@ class Fetch3Wrapper(BaseWrapper):
         self.ex_settings = config["optimization_options"]
         self.model_settings = config["model_options"]
 
-        site_parameters = config["site_parameters"]
-        species_parameters = config["species_parameters"]
+        site_parameters = config.get("site_parameters", {})
+        species_parameters = config.get("species_parameters", {})
 
         parameters = {}
         mapping = {}
@@ -247,7 +247,8 @@ class Fetch3Wrapper(BaseWrapper):
         self.mapping = mapping
 
         parameters.update(site_parameters)
-        config["parameters"] = parameters
+        p = config.get("parameters", {})
+        config["parameters"] = {**p, **parameters}
         logging.info(pformat(config))
         return config
 
