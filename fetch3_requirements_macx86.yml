@@ -6,6 +6,7 @@ channels:
 dependencies:
   - python=3.9
   - mkl < 2022
+  - pytorch<1.12.0
   - torchvision
   - pytorch
   - matplotlib
