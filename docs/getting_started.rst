@@ -55,13 +55,19 @@ It is recommended to create a new conda environment for FETCH3, using the provid
 1. Use ``cd`` to navigate into the FETCH3 directory that you cloned from GitHub.
 2. Create FETCH3's conda environment.
 
-   For Linux, Windows, and Intel Macs::
+   For Linux, Windows, and ARM Macs::
 
      conda env create --file fetch3_requirements.yml
 
-   For M1 Macs::
+   For x86 Macs::
 
-     conda env create --file fetch3_requirements_m1.yml
+     conda env create --file fetch3_requirements_macx86.yml
+
+   .. note::
+      For Mac users:
+
+      - Use ``fetch3_requirements.yml`` for M-series macs running a native version of conda
+      - Use ``fetch3_requirements_macx86.yml`` for Intel Macs or M-series Macs running conda through Rosetta
 
 3. To activate the conda environment, run::
 
