@@ -94,7 +94,7 @@ def main(config_path, data_path, output_path, species):
     try:
         results = []
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            species_runs = {executor.submit(run, species, config_path, data_path, output_path): species for species in species_list}
+            species_runs = {executor.submit(run_single, species, config_path, data_path, output_path): species for species in species_list}
             logger.info("submitted jobs!")
             for future in concurrent.futures.as_completed(species_runs):
                 original_task = species_runs[future]
@@ -113,7 +113,7 @@ def main(config_path, data_path, output_path, species):
         logger.info("run complete")
 
 
-def run(species, config_file, data_dir, output_dir):
+def run_single(species, config_file, data_dir, output_dir):
     log_path = output_dir / f"fetch3_{species}.log"
     if log_path.exists():
         os.remove(log_path)

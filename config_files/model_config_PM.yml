@@ -65,9 +65,6 @@ model_options:
   UpperBC: 0
   BottomBC: 0
 
-  # TREE INFO
-  species:  "Oak"
-
   LAD_norm:  'LAD_data.csv' #LAD data
 
 
@@ -75,30 +72,23 @@ model_options:
   ##########################################
   lad_scheme :  0  #0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
 
-parameters:
-
-  #SOIL SPATIAL DISCRETIZATION
-
-  Root_depth: 3.2 #[m] depth of root column
-  Soil_depth: 5   #[m]depth of soil column
-
-  sand_d: 5.0 #4.2----top soil #m
-  clay_d: 4.2 #0------4.2 #m
-
-  #SOIL INITIAL CONDITIONS
+site_parameters:
+  Soil_depth: 6.0   #[m]depth of soil column
+  sand_d: 6.0 #4.2----top soil #m
+  clay_d: 1.0 #0------4.2 #m
 
   initial_swc_clay: 0.28 # initial swc for clay from Verma et al
   initial_swc_sand: 0.08  # initial swc for sand [m3 m-3] from Verma et al
   soil_moisture_bottom_boundary: 0.28  # [m3 m-3] soil moisture for bottom boundary condition
 
-
   #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
+  # Van Genuchten parameters for UMBS from fetch2_example_amf.m
 
   #CLAY
-  alpha_1: 0.8                        #soil hydraulic parameter [1/m]
-  theta_S1: 0.55                      #saturated volumetric soil moisture content [-]
-  theta_R1: 0.068                     #residual volumetric soil moisture content [-]
-  n_1: 1.5                            #soil hydraulic parameter  [-]
+  alpha_1: 0.8                       #soil hydraulic parameter [1/m]
+  theta_S1: 0.55                     #saturated volumetric soil moisture content [-]
+  theta_R1: 0.068                    #residual volumetric soil moisture content [-]
+  n_1: 1.5                           #soil hydraulic parameter  [-]
   Ksat_1: 1.94e-7               #saturated hydraulic conductivity  [m/s]
 
   #SAND
@@ -108,73 +98,80 @@ parameters:
   n_2: 2.4
   Ksat_2: 3.45e-5
 
-  #Soil stress parameters
-  theta_1_clay: 0.08
-  theta_2_clay: 0.12
+  sum_LAI_plot: 3.45
 
-  theta_1_sand: 0.05
-  theta_2_sand: 0.09
+species_parameters:
+  oak:
+    #SOIL SPATIAL DISCRETIZATION
 
+    Root_depth: 3.2 #[m] depth of root column
 
+    #Soil stress parameters
+    theta_1_clay: 0.08
+    theta_2_clay: 0.12
 
-  #ROOT PARAMETERS
-  #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
-  #Kr divided by rho*g
-  Kr: 7.2e-10 #soil-to-root radial conductance [m/sPa]
-  qz: 9
-  #Ksax divided by rho*g                                       #unitless - parameter for the root mass distribution - Verma et al., 2014
-  Ksax: 1.0e-05   #specific axial conductivity of roots  [ m/s]
-  Aind_r: 1.0                                       #m2 root xylem/m2 ground]
-
-  #XYLEM PARAMETERS
-  kmax: 1.0e-5   #conductivity of xylem  [ m2/sPa]
-  ap: 2.0e-6                                  #xylem cavitation parameter [Pa-1]
-  bp: -1.5e+6                                #xylem cavitation parameter [Pa]
-  Phi_0: 5.74e+8                               #From bohrer et al 2005
-  p: 20                                           #From bohrer et al 2005
-  sat_xylem: 0.573                                #From bohrer et al 2005
-
-  taper_top: 1.0
-  sapwood_depth: 2.494584059
-  dbh: 9.90
-  stand_density_sp: 161.8037135
-
-  #TREE PARAMETERS
-  Hspec: 17.48                      #Height average of trees [m]
-  #From NHL code
-  LAI: 0.898266707                      #[-] Leaf area index
-  mean_crown_area_sp:  34.16 #from NHL
-  sum_LAI_plot:  3.7850736000000005
+    theta_1_sand: 0.05
+    theta_2_sand: 0.09
 
 
-  ###########################################################################
-  #PENMAN-MONTEITH EQUATION PARAMETERS
-  ###########################################################################
 
-  #parameters if using penman-monteith transpiration scheme, based on Lalic et al 2014
-  #if using NHL transpiration scheme, LAD is calculated in NHL module
-  L_m: 0.4  #maximum value of LAD a canopy layer
-  z_m: 11   #height in which L_m is found [m]
+    #ROOT PARAMETERS
+    #diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
+    #Kr divided by rho*g
+    Kr: 7.2e-10 #soil-to-root radial conductance [m/sPa]
+    qz: 9
+    #Ksax divided by rho*g                                       #unitless - parameter for the root mass distribution - Verma et al., 2014
+    Ksax: 1.0e-05   #specific axial conductivity of roots  [ m/s]
+    Aind_r: 1.0                                       #m2 root xylem/m2 ground]
 
-  #W m^-2 is the same as J s^-1 m^-2
-  #1J= 1 kg m2/s2
-  #therefore 1W/m2 = kg/s3
+    #XYLEM PARAMETERS
+    kmax: 1.0e-5   #conductivity of xylem  [ m2/sPa]
+    ap: 2.0e-6                                  #xylem cavitation parameter [Pa-1]
+    bp: -1.5e+6                                #xylem cavitation parameter [Pa]
+    Phi_0: 5.74e+8                               #From bohrer et al 2005
+    p: 20                                           #From bohrer et al 2005
+    sat_xylem: 0.573                                #From bohrer et al 2005
 
-  gb: 2.0e-2          #m/s Leaf boundary layer conductance
-  Cp: 1200                # J/m3 K Heat capacity of air
-  ga: 2.0e-2          #m/s Aerodynamic conductance
-  lamb: 2.51e+9        #J/m3 latent heat of vaporization
-  gama: 66.7              #Pa/K psychrometric constant
+    taper_top: 1.0
+    sapwood_depth: 2.494584059
+    dbh: 9.90
+    stand_density_sp: 161.8037135
 
-  #########################################################################3
-  #JARVIS PARAMETERS
-  ###########################################################################
+    #TREE PARAMETERS
+    Hspec: 17.48                      #Height average of trees [m]
+    #From NHL code
+    LAI: 0.898266707                      #[-] Leaf area index
+    mean_crown_area_sp:  34.16 #from NHL
 
-  gsmax: 10.0e-3      #m/s Maximum leaf stomatal conductance
-  kr: 5.0e-3         #m2/W Jarvis radiation parameter
-  kt: 1.6e-3       #K-2  Jarvis temperature parameter
-  Topt: 289.15           #K   Jarvis temperature parameter (optimum temperature)
-  kd: 1.1e-3       #Pa-1 Jarvis vapor pressure deficit temperature
-  hx50: -1274000         #Pa  Jarvis leaf water potential parameter
-  nl: 2                   #[-] Jarvis leaf water potential parameter
-  Emax: 1.0e-9        #m/s maximum nightime transpiration
+
+    ###########################################################################
+    #PENMAN-MONTEITH EQUATION PARAMETERS
+    ###########################################################################
+
+    #parameters if using penman-monteith transpiration scheme, based on Lalic et al 2014
+    #if using NHL transpiration scheme, LAD is calculated in NHL module
+    L_m: 0.4  #maximum value of LAD a canopy layer
+    z_m: 11   #height in which L_m is found [m]
+
+    #W m^-2 is the same as J s^-1 m^-2
+    #1J= 1 kg m2/s2
+    #therefore 1W/m2 = kg/s3
+
+    gb: 2.0e-2          #m/s Leaf boundary layer conductance
+    Cp: 1200                # J/m3 K Heat capacity of air
+    ga: 2.0e-2          #m/s Aerodynamic conductance
+    lamb: 2.51e+9        #J/m3 latent heat of vaporization
+    gama: 66.7              #Pa/K psychrometric constant
+
+    #########################################################################3
+    #JARVIS PARAMETERS
+    ###########################################################################
+
+    gsmax: 10.0e-3      #m/s Maximum leaf stomatal conductance
+    kr: 5.0e-3         #m2/W Jarvis radiation parameter
+    kt: 1.6e-3       #K-2  Jarvis temperature parameter
+    Topt: 289.15           #K   Jarvis temperature parameter (optimum temperature)
+    kd: 1.1e-3       #Pa-1 Jarvis vapor pressure deficit temperature
+    hx50: -1274000         #Pa  Jarvis leaf water potential parameter
+    nl: 2                   #[-] Jarvis leaf water potential parameter
+    Emax: 1.0e-9        #m/s maximum nightime transpiration

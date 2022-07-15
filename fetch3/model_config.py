@@ -529,7 +529,12 @@ def setup_config(config_file, species):
         for param in loaded_configs["site_parameters"].keys():
             site_param_dict[param] = loaded_configs["site_parameters"][param]["value"]
         for param in loaded_configs["species_parameters"][species].keys():
-            species_param_dict[param] = loaded_configs["species_parameters"][species][param]["value"]
+            try:
+                species_param_dict[param] = loaded_configs["species_parameters"][species][param]["value"]
+            except KeyError as e:
+                print(species, param)
+                print(repr(e))
+                raise
     else:
         site_param_dict = loaded_configs["site_parameters"]
         species_param_dict = loaded_configs["species_parameters"][species]

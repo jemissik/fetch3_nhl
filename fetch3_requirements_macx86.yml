@@ -8,7 +8,7 @@ dependencies:
   - mkl < 2022
   - pytorch<1.12.0
   - torchvision
-  - pytorch
+  - torchaudio
   - matplotlib
   - numpy
   - pandas
