@@ -1,22 +1,24 @@
 optimization_options:
-  metric:  # todo or []
-    boa_metric: "RootMeanSquaredError"
-    properties:
-      obs_file: './data/USA_UMB_CON_sapf_data.csv'
-      obs_var: 'USA_UMB_CON_Qru_Js_10'
-      output_var: 'oak'
-      fetch_data_func: get_model_sapflux
+  objective_options:
+    objectives:
+      - boa_metric: "RootMeanSquaredError"
+        name: rmse_oak
+        properties:
+          obs_file: './data/USA_UMB_CON_sapf_data.csv'
+          obs_var: 'USA_UMB_CON_Qru_Js_10'
+          output_var: 'oak'
+          fetch_data_func: get_model_sapflux
+    minimize: True
   experiment: {}
   generation_strategy: {}
   scheduler:
-    total_trials: 20
+    total_trials: 10
   output_dir: "./output"
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
   data_path: "./data"
-  obsvar: 'USA_UMB_CON_Qru_Js_10'
   output_fname: 'ds_sapflux.nc'
-  experiment_name: "oak_longrun"
+  experiment_name: "oak_deeproot_2015"
 
 
 model_options:
@@ -28,8 +30,8 @@ model_options:
 
   # Start and end for the model
 #  start_time: "2011-07-08 00:00:00" #begining of simulation #6/9 is DOY 160
-  start_time: "2011-06-25 00:00:00" #begining of simulation #6/9 is DOY 160
-  end_time: "2011-07-10 00:00:00" #end #DOY190 - 7/10 is doy 191
+  start_time: "2015-06-01 00:00:00" #begining of simulation #6/9 is DOY 160
+  end_time: "2015-08-01 00:00:00" #end #DOY190 - 7/10 is doy 191
 
 
   dt:  1800  #seconds - input data resolution
@@ -156,7 +158,7 @@ species_parameters:
   # Soil and roots
     Root_depth:
       type: fixed
-      value: 0.6  # [m] depth of root column
+      value: 5.1  # [m] depth of root column
 
     #Soil stress parameters
     theta_1_clay:

@@ -254,16 +254,6 @@ species_parameters:
       type: fixed
       value: 46.94  # Updated with value for O6
 
-    sum_LAI_plot:  # [m2leaf m-2ground]
-      type: fixed
-      value: 3.59  # Value from 2011 optical LAI measurements
-
-    Cd:
-      type: fixed
-      value: 0.1 # Drag coefficient
-    alpha_ml:
-      type: fixed
-      value: 0.1  # Mixing length constant
     Cf:
       type: fixed
       value: 0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
