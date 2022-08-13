@@ -72,7 +72,6 @@ model_options:
   BottomBC: 0
 
   # Tree information
-  species:  "Maple"
   LAD_norm:  'LAD_data.csv' # File with LAD data
 
   # Leaf area density formulation
@@ -156,7 +155,7 @@ species_parameters:
     Root_depth:
     type: fixed
     value: 0.6  # [m] depth of root column
-    
+
     #Soil stress parameters
     theta_1_clay:
       type: fixed
