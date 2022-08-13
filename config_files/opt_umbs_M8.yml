@@ -12,7 +12,7 @@ optimization_options:
   experiment: {}
   generation_strategy: {}
   scheduler:
-    total_trials: 10
+    total_trials: 1
   output_dir: "./output"
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
@@ -153,8 +153,8 @@ site_parameters:
 species_parameters:
   maple:
     Root_depth:
-    type: fixed
-    value: 0.6  # [m] depth of root column
+      type: fixed
+      value: 0.6  # [m] depth of root column
 
     #Soil stress parameters
     theta_1_clay:
