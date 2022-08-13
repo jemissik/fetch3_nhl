@@ -12,7 +12,7 @@ optimization_options:
   experiment: {}
   generation_strategy: {}
   scheduler:
-    total_trials: 1
+    total_trials: 10
   output_dir: "./output"
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
