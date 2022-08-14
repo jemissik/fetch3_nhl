@@ -6,9 +6,22 @@ optimization_options:
         properties:
           obs_file: './data/USA_UMB_CON_sapf_data.csv'
           obs_var: 'USA_UMB_CON_Aru_Js_28'
+          output_fname: 'ds_sapflux.nc'
           output_var: 'maple'
           fetch_data_func: get_model_sapflux
+      - boa_metric: "RootMeanSquaredError"
+        name: rmse_swc
+        properties:
+          obs_file: './data/FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv'
+          obs_var: 'SWC_F_MDS_1'
+          output_fname: 'ds_soil.nc'
+          output_var: 'THETA'
+          species: 'maple'
+          fetch_data_func: get_model_swc
     minimize: True
+    weights:
+      - 1
+      - 1
   experiment: {}
   generation_strategy: {}
   scheduler:
@@ -17,8 +30,7 @@ optimization_options:
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
   data_path: "./data"
-  output_fname: 'ds_sapflux.nc'
-  experiment_name: "maple_2015"
+  experiment_name: "maple_2015_swc_short"
 
 
 model_options:
@@ -29,8 +41,8 @@ model_options:
     CO2_F_MDS: CO2_F
 
   # Start and end for the model
-  start_time: "2015-06-01 00:00:00" #begining of simulation #6/9 is DOY 160
-  end_time: "2015-09-15 00:00:00" #end #DOY190 - 7/10 is doy 191
+  start_time: "2015-07-08 00:00:00" #begining of simulation #6/9 is DOY 160
+  end_time: "2015-07-20 00:00:00" #end #DOY190 - 7/10 is doy 191
 
   dt:  1800  #seconds - input data resolution
   tmin:  0  #tmin [s]

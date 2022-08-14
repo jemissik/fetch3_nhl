@@ -187,6 +187,56 @@ def get_model_sapflux(modelfile, obs_file, obs_var, output_var, **kwargs):
 
     return modeldf_not_nans, obsdf_not_nans
 
+def get_model_swc(modelfile, obs_file, obs_var, output_var, species, **kwargs):
+    """
+    Read in observation data model output for a trial, which will be used for
+    calculating the objective function for the trial.
+
+    Parameters
+    ----------
+    modelfile : str
+        File path to the model output
+    obs_file : str
+        File path to the observation data
+    model_settings: dict
+        dictionary with model settings read from model config file
+
+    Returns
+    -------
+    model_output: pandas Series
+        Model output
+    obs: pandas Series
+        Observations
+
+    ..todo::
+        * Add options to specify certain variables from the observation/output files
+        * Add option to read from .nc file
+
+    """
+    # Read config file
+
+    # Read in observation data
+    obsdf = pd.read_csv(obs_file, parse_dates=[0])
+    obsdf["Timestamp"] = obsdf.TIMESTAMP_START
+    obsdf = obsdf.set_index("Timestamp")
+
+    # Read in model output
+    modeldf = xr.load_dataset(modelfile)
+    modeldf = modeldf.sel(z=5.9, species=species) * 100  #TODO
+
+    # Slice met data to just the time period that was modeled
+    obsdf = obsdf.loc[modeldf.time.data[0] : modeldf.time.data[-1]]
+
+    # remove first and last timestamp
+    obsdf = obsdf.iloc[1:-1]
+    modeldf = modeldf[output_var].isel(time=np.arange(1, len(modeldf.time) - 1))
+
+    not_nans = ~obsdf[obs_var].isna()
+    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
+    modeldf_not_nans = modeldf.isel(time=not_nans).data.transpose()
+
+    return modeldf_not_nans, obsdf_not_nans
+
 
 def scale_sapflux(sapflux, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
     """Scales sapflux from FETCH output (in kg s-1) to W m-2"""
@@ -206,7 +256,8 @@ class Fetch3Wrapper(BaseWrapper):
     _processes = []
     config_file_name = "config.yml"
     fetch_data_funcs = {get_model_sapflux.__name__: get_model_sapflux,
-                        get_model_plot_trans.__name__: get_model_plot_trans}
+                        get_model_plot_trans.__name__: get_model_plot_trans,
+                        get_model_swc.__name__: get_model_swc}
 
     def __init__(self):
         self.ex_settings: dict = None
@@ -334,7 +385,7 @@ class Fetch3Wrapper(BaseWrapper):
     def fetch_trial_data(self, trial: Trial, metric_properties: dict, metric_name: str, *args, **kwargs):
 
         modelfile = (
-            get_trial_dir(self.experiment_dir, trial.index) / self.ex_settings["output_fname"]
+            get_trial_dir(self.experiment_dir, trial.index) / metric_properties["output_fname"]
         )
 
         fetch_data_func = self.fetch_data_funcs[metric_properties["fetch_data_func"]]
