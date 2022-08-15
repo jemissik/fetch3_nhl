@@ -359,9 +359,14 @@ class Fetch3Wrapper(BaseWrapper):
         # with cd_and_cd_back(model_dir):
         os.chdir(model_dir)
 
+        # cmd = (
+        #     f"python main.py --config_path {config_path} --data_path"
+        #     f" {self.ex_settings['data_path']} --output_path {trial_dir}"
+        # )
+
         cmd = (
-            f"python main.py --config_path {config_path} --data_path"
-            f" {self.ex_settings['data_path']} --output_path {trial_dir}"
+            f"sbatch fetch3/optimize/slurm_main.sh {config_path}"
+            f" {self.ex_settings['data_path']} {trial_dir}"
         )
 
         args = cmd.split()
