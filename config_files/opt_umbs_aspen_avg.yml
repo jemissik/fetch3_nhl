@@ -19,7 +19,7 @@ optimization_options:
   model_dir: '.'
   data_path: "./data"
   output_fname: 'ds_sapflux.nc'
-  experiment_name: "avg_aspen_2015_july"
+  experiment_name: "avg_aspen_2015_july_long"
 
 
 model_options:
@@ -30,8 +30,8 @@ model_options:
     CO2_F_MDS: CO2_F
 
   # Start and end for the model
-  start_time: "2015-07-06 00:00:00" #begining of simulation #6/9 is DOY 160
-  end_time: "2015-07-13 00:00:00" #end #DOY190 - 7/10 is doy 191
+  start_time: "2015-07-01 00:00:00" #begining of simulation #6/9 is DOY 160
+  end_time: "2015-08-01 00:00:00" #end #DOY190 - 7/10 is doy 191
 
   #  end_time: "2011-07-10 00:00:00" #end #DOY190 - 7/10 is doy 191
 
@@ -238,9 +238,10 @@ species_parameters:
     #NHL PARAMETERS
     ###########################################################################
     scale_nhl:
-      type: fixed
+      # type: fixed
+      type: range
       value: 1.0
-      bounds: [0.1, 2.0]
+      bounds: [0.1, 3.0]
 
     mean_crown_area_sp: #[m2]
       type: fixed
