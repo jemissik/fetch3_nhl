@@ -41,21 +41,22 @@ from fetch3.optimize.fetch_wrapper import Fetch3Wrapper
     default=Path(__file__).resolve().parent.parent.parent / "config_files/opt_model_config.yml",
     help="Path to configuration YAML file.",
 )
-def main(config_file):
+@click.option('-b', '--batch_mode', is_flag=True)
+def main(config_file, batch_mode):
     """This is my docstring
 
     Args:
         config (os.PathLike): Path to configuration YAML file
     """
-    run(config_file)
+    run(config_file, batch_mode)
 
 
-def run(config_file):
+def run(config_file, batch_mode):
     start = time.time()
 
 
     wrapper = Fetch3Wrapper()
-    config = wrapper.load_config(config_file)
+    config = wrapper.load_config(config_file, batch_mode)
     config = normalize_config(config)
 
     # config = load_experiment_config(config_file)  # Read experiment config'

@@ -264,8 +264,9 @@ class Fetch3Wrapper(BaseWrapper):
         self.model_settings: dict = None
         self.experiment_dir: os.PathLike = None
         self.mapping: dict = None
+        self.batch_mode = False
 
-    def load_config(self, config_file: os.PathLike):
+    def load_config(self, config_file: os.PathLike, batch_mode=False):
         """
         Load config file and return a dictionary # TODO finish this
 
@@ -278,6 +279,7 @@ class Fetch3Wrapper(BaseWrapper):
         -------
         loaded_config: dict
         """
+        self.batch_mode = batch_mode
         # Load the experiment config yml file
         with open(config_file, "r") as yml_config:
             config = yaml.safe_load(yml_config)
@@ -356,18 +358,20 @@ class Fetch3Wrapper(BaseWrapper):
 
         model_dir = self.ex_settings["model_dir"]
 
-        # with cd_and_cd_back(model_dir):
         os.chdir(model_dir)
 
-        # cmd = (
-        #     f"python main.py --config_path {config_path} --data_path"
-        #     f" {self.ex_settings['data_path']} --output_path {trial_dir}"
-        # )
-
         cmd = (
-            f"sbatch fetch3/optimize/slurm_main.sh {config_path}"
-            f" {self.ex_settings['data_path']} {trial_dir}"
+            f"python main.py --config_path {config_path} --data_path"
+            f" {self.ex_settings['data_path']} --output_path {trial_dir}"
         )
+
+        if self.batch_mode:
+
+            cmd = (
+                f"sbatch slurm_main.sh {config_path}"
+                f" {self.ex_settings['data_path']} {trial_dir}"
+            )
+            logger.info("running batch command: \n" + cmd)
 
         args = cmd.split()
         popen = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
