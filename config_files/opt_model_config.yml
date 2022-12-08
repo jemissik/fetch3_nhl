@@ -1,17 +1,19 @@
 optimization_options:
   objective_options:
     objectives:
-      - boa_metric: "RootMeanSquaredError"
+      - metric: "RootMeanSquaredError"
         name: rmse_oak
         properties:
           obs_file: './data/USA_UMB_CON_sapf_data.csv'
           obs_var: 'USA_UMB_CON_Qru_Js_10'
+          output_fname: 'ds_sapflux.nc'
           output_var: 'oak'
           fetch_data_func: get_model_sapflux
-      - boa_metric: "RootMeanSquaredError"
+      - metric: "RootMeanSquaredError"
         name: rmse_pine
         properties:
           obs_file: './data/USA_UMB_CON_sapf_data.csv'
+          output_fname: 'ds_sapflux.nc'
           obs_var: 'USA_UMB_CON_Pst_Js_14'
           output_var: 'pine'
           fetch_data_func: get_model_sapflux
@@ -20,9 +22,17 @@ optimization_options:
       - 1
     minimize: True
   experiment: {}
-  generation_strategy: {}
+  generation_strategy:
+      steps:
+          # Other options are possible, see Ax GenerationStrategy
+          # for more information
+          - model: SOBOL
+            num_trials: 2
+          - model: GPEI
+            num_trials: -1
   scheduler:
-    total_trials: 2
+    total_trials: 5
+#  parameter_keys: # defined dynamically in config to remap species_parameters keys to parameters
   output_dir: "./output"
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
@@ -30,6 +40,12 @@ optimization_options:
   output_fname: 'ds_sapflux.nc'
   experiment_name: "multispecies_test"
 
+script_options:
+  run_cmd: python main.py --config_path {config_path} --data_path {data_path} --output_path {trial_dir}
+#  run_cmd: sbatch slurm_main.sh {config_path} {data_path} {trial_dir}
+  wrapper_path: ./fetch3/optimize/fetch_wrapper.py
+  wrapper_name: Fetch3Wrapper
+  rel_to_launch: true
 
 model_options:
 
@@ -40,7 +56,7 @@ model_options:
 
   # Start and end for the model
   start_time: "2011-07-08 05:00:00" #begining of simulation #6/9 is DOY 160
-  end_time: "2011-07-08 07:00:00" #end #DOY190 - 7/10 is doy 191
+  end_time: "2011-07-08 05:30:00" #end #DOY190 - 7/10 is doy 191
 
 
   dt:  1800  #seconds - input data resolution

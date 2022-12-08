@@ -59,15 +59,22 @@ Running an optimization
 
 To run an optimization, ``cd`` into the fetch3_nhl directory, then run::
 
-      python optimization_run.py  --config_file your_config_path
+      python -m boa --config_file /path/to/your/config/file
 
-Outputs will be saved in a folder inside the ``working_dir`` you specified, labeled with the experiment name and timestamp
+
+Outputs will be saved in a folder inside the ``working_dir`` you specified under optimization_options or script_options , labeled with the experiment name and timestamp
 of the optimization run.
 
 .. note::
     Replace the paths and filenames in this example with the actual paths and files you are using.
 
 See ``optimization_results.ipynb`` for an example of how to explore the optimization results.
+
+You can also resume an interrupted optimization run with::
+
+    python -m boa --scheduler-path /path/to/scheduler.json
+
+the scheduler.json is outputted every couple trials during the optimization to ensure the ability to resume an interrupted optimization.
 
 
 Updating boa
