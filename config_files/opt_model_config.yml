@@ -21,17 +21,8 @@ optimization_options:
       - 1
       - 1
     minimize: True
-  experiment: {}
-  generation_strategy:
-      steps:
-          # Other options are possible, see Ax GenerationStrategy
-          # for more information
-          - model: SOBOL
-            num_trials: 2
-          - model: GPEI
-            num_trials: -1
   scheduler:
-    total_trials: 5
+    total_trials: 2
 #  parameter_keys: # defined dynamically in config to remap species_parameters keys to parameters
   output_dir: "./output"
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
@@ -56,7 +47,7 @@ model_options:
 
   # Start and end for the model
   start_time: "2011-07-08 05:00:00" #begining of simulation #6/9 is DOY 160
-  end_time: "2011-07-08 05:30:00" #end #DOY190 - 7/10 is doy 191
+  end_time: "2011-07-08 07:00:00" #end #DOY190 - 7/10 is doy 191
 
 
   dt:  1800  #seconds - input data resolution
