@@ -1,17 +1,19 @@
 optimization_options:
   objective_options:
     objectives:
-      - boa_metric: "RootMeanSquaredError"
+      - metric: "RootMeanSquaredError"
         name: rmse_oak
         properties:
           obs_file: './data/USA_UMB_CON_sapf_data.csv'
           obs_var: 'USA_UMB_CON_Qru_Js_10'
+          output_fname: 'ds_sapflux.nc'
           output_var: 'oak'
           fetch_data_func: get_model_sapflux
-      - boa_metric: "RootMeanSquaredError"
+      - metric: "RootMeanSquaredError"
         name: rmse_pine
         properties:
           obs_file: './data/USA_UMB_CON_sapf_data.csv'
+          output_fname: 'ds_sapflux.nc'
           obs_var: 'USA_UMB_CON_Pst_Js_14'
           output_var: 'pine'
           fetch_data_func: get_model_sapflux
@@ -19,10 +21,9 @@ optimization_options:
       - 1
       - 1
     minimize: True
-  experiment: {}
-  generation_strategy: {}
   scheduler:
     total_trials: 2
+#  parameter_keys: # defined dynamically in config to remap species_parameters keys to parameters
   output_dir: "./output"
   obsfile: './data/USA_UMB_CON_sapf_data.csv'
   model_dir: '.'
@@ -30,6 +31,12 @@ optimization_options:
   output_fname: 'ds_sapflux.nc'
   experiment_name: "multispecies_test"
 
+script_options:
+  run_cmd: python main.py --config_path {config_path} --data_path {data_path} --output_path {trial_dir}
+#  run_cmd: sbatch slurm_main.sh {config_path} {data_path} {trial_dir}
+  wrapper_path: ./fetch3/optimize/fetch_wrapper.py
+  wrapper_name: Fetch3Wrapper
+  rel_to_launch: true
 
 model_options:
 

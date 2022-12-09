@@ -2,6 +2,8 @@ import yaml
 from pathlib import Path
 
 import pytest
+import boa.__main__ as dunder_main
+from boa import split_shell_command
 
 
 def test_fetch3_nhl_run():
@@ -56,10 +58,4 @@ def test_fetch3_opt_run():
     config_path = (
         Path(__file__).resolve().parent.parent.parent / "config_files" / "opt_model_config.yml"
     )
-    print(config_path)
-    data_path = Path(__file__).resolve().parent.parent.parent / "data"
-    output_path = Path(__file__).resolve().parent.parent.parent / "output"
-
-    from fetch3.optimize.run_optimization import main
-    main(["--config_file", config_path], standalone_mode=False)
-    # main.callback(config_path)
+    dunder_main.main(split_shell_command(f"--config-path {config_path} -td"), standalone_mode=False)
