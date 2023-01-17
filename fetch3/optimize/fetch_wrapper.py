@@ -192,6 +192,10 @@ class Fetch3Wrapper(BaseWrapper):
                         get_model_plot_trans.__name__: get_model_plot_trans,
                         get_model_swc.__name__: get_model_swc}
 
+    def __init__(self, *args, **kwargs):
+        print(args, kwargs)
+        super().__init__(*args, **kwargs)
+
     def load_config(self, config_path, *args, **kwargs) -> dict:
         """
         Load config takes a configuration path of either a JSON file or a YAML file and returns
