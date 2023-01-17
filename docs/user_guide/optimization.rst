@@ -59,7 +59,7 @@ Running an optimization
 
 To run an optimization, ``cd`` into the fetch3_nhl directory, then run::
 
-      python -m boa --config_file /path/to/your/config/file
+      python -m boa --config-path /path/to/your/config/file
 
 
 Outputs will be saved in a folder inside the ``working_dir`` you specified under optimization_options or script_options , labeled with the experiment name and timestamp
