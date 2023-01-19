@@ -25,6 +25,11 @@ See ``model_config.yml`` for an example.
 
 Model options
 -------------
+* **make_experiment_dir** (bool, optional): Whether or not FETCH should create a new experiment inside the specified output directory
+  for the results of the model run. If True, FETCH will write the model outputs to a new directory labeled with the
+  experiment name and the timestamp of the run. If False or not provided, the outputs will be written directly inside the
+  output directory.
+* **experiment_name** (str, optional): Optional label for the run. This is simply used for labeling the output directory. 
 * **input_fname** (str): File for input met data
 * **met_column_labels** (dict): Dictionary specifying the mapping of the column headers in your input file to the
   required input variables. This is needed if your column headers differ from the default variable names. See
