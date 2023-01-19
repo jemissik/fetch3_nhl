@@ -30,7 +30,8 @@ dependencies:
   - git+https://github.com/madeline-scyphers/boa.git
   - isort
   - m2r2
-  - pydata-sphinx-theme
+  - sphinx<6.0
+  - pydata-sphinx-theme<0.12.0
   - pytest
   - snakeviz
 name: fetch3-docs
