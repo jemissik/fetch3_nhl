@@ -20,6 +20,7 @@ import concurrent.futures
 
 import click
 
+from fetch3.utils import make_experiment_directory
 from fetch3.initial_conditions import initial_conditions
 from fetch3.met_data import prepare_met_data
 from fetch3.model_config import save_calculated_params, setup_config
@@ -71,11 +72,25 @@ model_dir = Path(__file__).parent.resolve()  # File path of model source code
     help="species to run the model for"
 )
 def main(config_path, data_path, output_path, species):
+
+    with open(config_path, "r") as yml_config:
+        loaded_configs = yaml.safe_load(yml_config)
+
     # If using the default output directory, create directory if it doesn't exist
     if output_path == default_output_path:
+        logger.info("Using default output path...")
         output_path.mkdir(exist_ok=True)
 
-    log_path = output_path / "fetch3.log"
+    # Make a new experiment directory if make_experiment_dir=True was specified in the config
+    # Otherwise, use the output directory for the experiment directory
+    mk_exp_dir = loaded_configs["model_options"].get("make_experiment_dir", False)
+    exp_name = loaded_configs["model_options"].get("experiment_name", "")
+    if mk_exp_dir:
+        exp_dir = make_experiment_directory(output_path, experiment_name=exp_name)
+    else:
+        exp_dir = output_path
+
+    log_path = exp_dir / "fetch3.log"
     if log_path.exists():
         os.remove(log_path)
     fh = logging.FileHandler(log_path)
@@ -83,18 +98,18 @@ def main(config_path, data_path, output_path, species):
     fh.setFormatter(logging.Formatter(log_format))
     logger.addHandler(fh)
 
+    # Copy the config file to the output directory
+
     # Get species list
     if species is None:
-        with open(config_path, "r") as yml_config:
-            loaded_configs = yaml.safe_load(yml_config)
-            species_list = list(loaded_configs['species_parameters'].keys())
+        species_list = list(loaded_configs['species_parameters'].keys())
     else:
         species_list = list(species)
 
     try:
         results = []
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            species_runs = {executor.submit(run_single, species, config_path, data_path, output_path): species for species in species_list}
+            species_runs = {executor.submit(run_single, species, config_path, data_path, exp_dir): species for species in species_list}
             logger.info("submitted jobs!")
             for future in concurrent.futures.as_completed(species_runs):
                 original_task = species_runs[future]
@@ -104,7 +119,7 @@ def main(config_path, data_path, output_path, species):
                     logger.exception('%r generated an exception: %s' % (original_task, exc))
             concurrent.futures.wait(species_runs)
         nc_output = combine_outputs(results)
-        save_nc(output_path, nc_output)
+        save_nc(exp_dir, nc_output)
     except Exception as e:
         logger.exception("Error completing Run! Reason: %r", e)
         raise

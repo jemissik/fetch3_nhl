@@ -1,4 +1,8 @@
 model_options:
+
+  make_experiment_dir: True
+  experiment_name: test_run
+
   ###############################################################################
   #INPUT DATA FILE PARAMETERS
   ###############################################################################
@@ -162,6 +166,3 @@ species_parameters:
 
     wp_s50: -9.1e+5
     c3: 12.3
-
-
-

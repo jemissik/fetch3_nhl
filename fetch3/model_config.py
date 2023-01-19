@@ -427,6 +427,8 @@ class ConfigParams:
     mean_crown_area_sp: float
     sum_LAI_plot: float
 
+    make_experiment_dir: bool = False
+    experiment_name: str = None
     met_column_labels: dict = None
 
     #########################################################################3
