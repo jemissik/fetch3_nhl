@@ -29,14 +29,14 @@ from fetch3.model_functions import Picard, format_model_output, save_csv, save_n
 from fetch3.model_setup import spatial_discretization, temporal_discretization
 from fetch3.sapflux import calc_sapflux, format_inputs
 
-log_format = "%(levelname)s %(asctime)s %(processName)s - %(message)s"
+log_format = "%(levelname)s %(asctime)s %(processName)s - %(name)s - %(message)s"
 
 logging.basicConfig(
     filemode="w",
     format=log_format,
     level=logging.DEBUG
 )
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("fetch3")
 
 logger.addHandler(logging.StreamHandler())
 
@@ -79,7 +79,6 @@ def main(config_path, data_path, output_path, species):
 
     # If using the default output directory, create directory if it doesn't exist
     if output_path == default_output_path:
-        logger.info("Using default output path...")
         output_path.mkdir(exist_ok=True)
 
     # Make a new experiment directory if make_experiment_dir=True was specified in the config
@@ -221,15 +220,6 @@ def run_single(species, config_file, data_dir, output_dir):
     logger.info("Finished running species: %s", species)
 
     return nc_output
-
-
-def start_logger(output_dir):
-    log_format = "%(levelname)s %(asctime)s - %(message)s"
-
-    logging.basicConfig(
-        filename=output_dir / "fetch3.log", filemode="w", format=log_format, level=logging.DEBUG
-    )
-    logging.getLogger().addHandler(logging.StreamHandler())
 
 
 if __name__ == "__main__":

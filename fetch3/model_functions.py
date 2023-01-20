@@ -17,7 +17,7 @@ from numpy.linalg import multi_dot
 
 from fetch3.roots import calc_root_K, feddes_root_stress, verma_root_mass_dist
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 # function for stem xylem: K and C
 def Porous_media_xylem(arg, ap, bp, kmax, Aind_x, p, sat_xylem, Phi_0, z, nz_r, nz):

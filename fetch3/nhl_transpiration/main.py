@@ -24,7 +24,7 @@ from fetch3.nhl_transpiration.NHL_functions import *
 
 
 def main(cfg, output_dir, data_dir):
-    logger = logging.getLogger(__file__)
+    logger = logging.getLogger(__name__)
 
     start = time.time()
 
