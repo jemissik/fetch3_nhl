@@ -13,6 +13,7 @@ import os
 
 start = time.time()  # start run clock
 
+import shutil
 import logging
 import yaml
 from pathlib import Path
@@ -99,6 +100,10 @@ def main(config_path, data_path, output_path, species):
     logger.addHandler(fh)
 
     # Copy the config file to the output directory
+    copied_config_path = exp_dir / config_path.name
+    if not copied_config_path.exists():
+        shutil.copy(config_path, copied_config_path)
+
 
     # Get species list
     if species is None:
