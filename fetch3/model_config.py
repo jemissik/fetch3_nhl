@@ -29,7 +29,7 @@ Model options
   for the results of the model run. If True, FETCH will write the model outputs to a new directory labeled with the
   experiment name and the timestamp of the run. If False or not provided, the outputs will be written directly inside the
   output directory.
-* **experiment_name** (str, optional): Optional label for the run. This is simply used for labeling the output directory. 
+* **experiment_name** (str, optional): Optional label for the run. This is simply used for labeling the output directory.
 * **input_fname** (str): File for input met data
 * **met_column_labels** (dict): Dictionary specifying the mapping of the column headers in your input file to the
   required input variables. This is needed if your column headers differ from the default variable names. See
@@ -242,6 +242,7 @@ from dataclasses import dataclass
 import yaml
 
 from fetch3.scaling import calc_Aind_x, calc_LAIc_sp, calc_xylem_cross_sectional_area
+from fetch3.utils import load_yaml
 
 # # Default paths for config file, input data, and model output
 # parent_path = Path(__file__).resolve().parent.parent
@@ -523,8 +524,7 @@ class ConfigParams:
 def setup_config(config_file, species):
     logger.info("Reading config file")
 
-    with open(config_file, "r") as yml_config:
-        loaded_configs = yaml.safe_load(yml_config)
+    loaded_configs = load_yaml(config_file)
 
     if species is None:
         species = list(loaded_configs['species_parameters'].keys())[0]

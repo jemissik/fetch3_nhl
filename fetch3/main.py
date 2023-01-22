@@ -21,7 +21,7 @@ import concurrent.futures
 
 import click
 
-from fetch3.utils import make_experiment_directory
+from fetch3.utils import make_experiment_directory, load_yaml
 from fetch3.initial_conditions import initial_conditions
 from fetch3.met_data import prepare_met_data
 from fetch3.model_config import save_calculated_params, setup_config
@@ -74,8 +74,7 @@ model_dir = Path(__file__).parent.resolve()  # File path of model source code
 )
 def main(config_path, data_path, output_path, species):
 
-    with open(config_path, "r") as yml_config:
-        loaded_configs = yaml.safe_load(yml_config)
+    loaded_configs = load_yaml(config_path)
 
     # If using the default output directory, create directory if it doesn't exist
     if output_path == default_output_path:

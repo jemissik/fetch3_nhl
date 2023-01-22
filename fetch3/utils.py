@@ -1,5 +1,6 @@
 import numpy as np
 import datetime as dt
+import yaml
 from pathlib import Path
 
 #############################################
@@ -45,3 +46,22 @@ def make_experiment_directory(
     ex_dir = Path(output_dir).expanduser() / exp_name
     ex_dir.mkdir(exist_ok=exist_ok)
     return ex_dir
+
+
+def load_yaml(file_path):
+    """
+    Load contents of a yaml file to a dictionary
+
+    Parameters
+    ----------
+    file_path : str or Path
+        Path of yaml file
+
+    Returns
+    -------
+    dict
+        Dict with contents of yaml file
+    """
+    with open(file_path, "r") as yml_file:
+        yaml_dict = yaml.safe_load(yml_file)
+    return yaml_dict
