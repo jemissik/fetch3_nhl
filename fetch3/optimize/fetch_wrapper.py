@@ -86,11 +86,9 @@ def get_model_sapflux(modelfile, obs_file, obs_var, output_var, **kwargs):
         Observations
 
     ..todo::
-        * Add options to specify certain variables from the observation/output files
         * Add option to read from .nc file
 
     """
-    # Read config file
 
     # Read in observation data
     obsdf = pd.read_csv(obs_file, parse_dates=[0])
@@ -98,27 +96,26 @@ def get_model_sapflux(modelfile, obs_file, obs_var, output_var, **kwargs):
     obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST").dt.tz_localize(None)
     obsdf = obsdf.set_index("Timestamp")
 
-
     # Read in model output
-    modeldf = xr.load_dataset(modelfile)
-    modeldf = modeldf.sel(species=output_var)
-
-    # Slice met data to just the time period that was modeled
-    obsdf = obsdf.loc[modeldf.time.data[0] : modeldf.time.data[-1]]
+    modelds = xr.load_dataset(modelfile)
+    modelds = modelds.sel(species=output_var)
 
     # Convert model output to the same units as the input data
     # Sapfluxnet data is in cm3 hr-1
-    modeldf["sapflux_scaled"] = convert_trans_m3s_to_cm3hr(modeldf.sapflux)
+    modelds["sapflux_scaled"] = convert_trans_m3s_to_cm3hr(modelds.sapflux)
+
+    modeldf = modelds.squeeze(drop=True).to_dataframe()
+
+    # Merge model and obs dataframes
+    df = pd.merge(modeldf, obsdf[[obs_var]], how='left', right_index=True, left_index=True, suffixes=['model', 'obs'])
 
     # remove first and last timestamp
     obsdf = obsdf.iloc[1:-1]
-    modeldf = modeldf.sapflux_scaled.isel(time=np.arange(1, len(modeldf.time) - 1))
 
-    not_nans = ~obsdf[obs_var].isna()
-    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
-    modeldf_not_nans = modeldf.data[not_nans]
+    # Drop rows with NaN
+    df = df.dropna()
 
-    return modeldf_not_nans, obsdf_not_nans
+    return df['sapflux_scaled'], df[obs_var]
 
 def get_model_swc(modelfile, obs_file, obs_var, output_var, species, **kwargs):
     """
