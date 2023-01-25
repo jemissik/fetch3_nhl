@@ -64,7 +64,7 @@ def get_model_plot_trans(modelfile, obs_file, obs_var, output_var, **kwargs):
     return modeldf_not_nans, obsdf_not_nans
 
 
-def get_model_sapflux(modelfile, obs_file, obs_var, output_var, **kwargs):
+def get_model_sapflux(modelfile, obs_file, obs_var, output_var, hour_range=None, **kwargs):
     """
     Read in observation data model output for a trial, which will be used for
     calculating the objective function for the trial.
@@ -114,6 +114,9 @@ def get_model_sapflux(modelfile, obs_file, obs_var, output_var, **kwargs):
 
     # Drop rows with NaN
     df = df.dropna()
+
+    if hour_range:
+        df = df[(df.index.hour >= hour_range[0]) & (df.index.hour <= hour_range[1])]
 
     return df['sapflux_scaled'], df[obs_var]
 
