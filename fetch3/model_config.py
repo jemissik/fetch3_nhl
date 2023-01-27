@@ -437,6 +437,9 @@ class ConfigParams:
     experiment_name: str = None
     met_column_labels: dict = None
 
+    # Infiltration
+    frac_infiltration: float = 1
+
     #########################################################################3
     # NHL PARAMETERS
     ###########################################################################

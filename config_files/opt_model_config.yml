@@ -89,6 +89,10 @@ model_options:
   UpperBC: 0
   BottomBC: 0
 
+
+  #Infiltration
+  frac_infiltration: 0.5
+
   # Tree information
   # species:  "Oak"
   LAD_norm:  'LAD_data.csv' # File with LAD data
