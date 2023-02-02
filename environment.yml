@@ -1,0 +1,31 @@
+name: fetch3
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - torchvision
+  - pytorch
+  - matplotlib
+  - pyviz::hvplot
+  - pyviz::panel
+  - pyviz::datashader
+  - conda-forge::jupyterlab
+  - numpy
+  - pandas
+  - scipy
+  - xarray
+  - netCDF4
+  - dask
+  - bottleneck
+  - ipympl
+  - invoke
+  - flake8
+  - pip
+  - pip:
+    - ax-platform
+    - click
+    - PyYAML
+    - git+https://github.com/madeline-scyphers/boa.git@0.7.2
+    - -e . --install-option="--no-deps"
