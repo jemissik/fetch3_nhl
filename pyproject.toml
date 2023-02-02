@@ -1,13 +1,54 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fetch3"
+dynamic = ["version"]
+description = ""
+classifiers = [
+    "Programming Language :: Python :: 3"
+]
+dependencies = [
+    "xarray",
+    "dask",
+    "bottleneck",
+    "ipympl",
+    "torch",
+    "torchvision",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scipy",
+    "flake8",
+    "invoke",
+    "click",
+]
+
+[tool.setuptools]
+packages = ["fetch3"]
+
+[tool.setuptools_scm]
+write_to = "fetch3/__version__.py"
+
+[tool.setuptools.package-data]
+"*" = [
+    "*.yml",
+    "*.css",
+    "*.html"
+]
+
+
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-py_version = 39
 skip_glob = ["*env*/*"]
 
+
 [tool.black]
-line-length = 100
-preview=true
-# These are regular expressions (hence the \. is escaping the ., and not a literal \.)
+line-length = 120
+experimental-string-processing = true
+# This is a regular expression (hence the \. is escaping the ., and not a literal \.)
 exclude = '''
 (
     /(\.git
@@ -23,11 +64,3 @@ exclude = '''
     )
 )
 '''
-
-[tool.flakeheaven]
-# make output nice
-format = "grouped"
-# 80 chars aren't enough in 21 century
-max_line_length = 100
-# show line of source code in output
-show_source = true
