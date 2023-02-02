@@ -1,7 +1,7 @@
 """
-This file runs FETCH3. 
+This file runs FETCH3.
 """
-from fetch3.main import main
+from fetch3.__main__ import main
 
 if __name__ == "__main__":
     main()

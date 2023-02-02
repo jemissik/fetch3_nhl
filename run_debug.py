@@ -9,7 +9,7 @@ different files or directories.
 
 from pathlib import Path
 
-from fetch3.main import run
+from fetch3.__main__ import run
 
 # These paths point to the default locations
 parent_path = Path(__file__).resolve().parent

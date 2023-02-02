@@ -17,7 +17,7 @@ def test_fetch3_nhl_run():
         loaded_configs = yaml.safe_load(yml_config)
         species_list = list(loaded_configs['species_parameters'].keys())
 
-    from fetch3.main import main
+    from fetch3.__main__ import main
 
     main(["--config_path", config_path, "--data_path", data_path, "--output_path", output_path], standalone_mode=False)
 
@@ -33,7 +33,7 @@ def test_fetch3_nhl_run_optconfig():
         loaded_configs = yaml.safe_load(yml_config)
         species_list = list(loaded_configs['species_parameters'].keys())
 
-    from fetch3.main import main
+    from fetch3.__main__ import main
 
     main(["--config_path", config_path, "--data_path", data_path, "--output_path", output_path], standalone_mode=False)
 
@@ -49,7 +49,7 @@ def test_fetch3_PM_run():
         loaded_configs = yaml.safe_load(yml_config)
         species_list = list(loaded_configs['species_parameters'].keys())
 
-    from fetch3.main import main
+    from fetch3.__main__ import main
 
     main(["--config_path", config_path, "--data_path", data_path, "--output_path", output_path], standalone_mode=False)
 
