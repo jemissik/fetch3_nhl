@@ -30,4 +30,4 @@ try:
     __version__ = version
 except ImportError:
     # Package not installed
-    ___version__ = "0.0.0"
+    __version__ = "0.0.0"
