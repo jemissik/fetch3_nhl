@@ -20,12 +20,12 @@ If they aren't specified, defaults will be used.
 Running the model from the command line
 ========================================
 
-Run the model by running ``main.py``
+Run the model by running the ``fetch3`` module.
 
 To specify an input config file, data directory, or output directory in a location other than the
 default, different directories can be specified as command line arguments, for example::
-  
-    python main.py --config_path /Users/username/fetch3/user_model_config.yml
+
+    python -m fetch3 --config_path /Users/username/fetch3/user_model_config.yml
     --data_path /Users/username/fetch3/user_data/ --output_path /Users/username/fetch3/output/
 
 .. note::
