@@ -16,6 +16,6 @@ echo $config_file
 
 source activate fetch3-dev
 
-python main.py --config_path $config_path --data_path $data_path --output_path $output_path
+python -m fetch3 --config_path $config_path --data_path $data_path --output_path $output_path
 
 echo "Finished with main.py"
