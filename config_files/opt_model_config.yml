@@ -32,7 +32,7 @@ optimization_options:
     name: multispecies_test
 
 script_options:
-  run_cmd: python main.py --config_path {config_path} --data_path {data_path} --output_path {trial_dir}
+  run_cmd: python -m fetch3 --config_path {config_path} --data_path {data_path} --output_path {trial_dir}
   # run_cmd: sbatch slurm_main.sh {config_path} {data_path} {trial_dir}
   wrapper_path: ./fetch3/optimize/fetch_wrapper.py
   wrapper_name: Fetch3Wrapper
