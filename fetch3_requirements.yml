@@ -29,4 +29,4 @@ dependencies:
     - black
     - isort
     - flakeheaven
-    - git+https://github.com/madeline-scyphers/boa.git==0.7.1
+    - git+https://github.com/madeline-scyphers/boa.git==0.7.3
