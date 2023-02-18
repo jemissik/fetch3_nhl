@@ -21,6 +21,7 @@ import concurrent.futures
 
 import click
 
+from fetch3.__version__ import __version__ as VERSION
 from fetch3.utils import make_experiment_directory, load_yaml
 from fetch3.initial_conditions import initial_conditions
 from fetch3.met_data import prepare_met_data
@@ -97,6 +98,23 @@ def main(config_path, data_path, output_path, species):
     fh.setFormatter(logging.Formatter(log_format))
     logger.addHandler(fh)
 
+    HEADER_BAR = """
+    ##############################################
+    """
+    LOG_INFO = (
+        f"""
+    FETCH Run
+    Output Experiment Dir: {exp_dir}
+    Config file: {config_path}
+    Start Time: {time.ctime(start)}
+    Version: {VERSION}"""
+    )
+
+    logger.info(
+        f"\n{HEADER_BAR}"
+        f"\n{LOG_INFO}"
+        f"\n{HEADER_BAR}"
+    )
     # Copy the config file to the output directory
     copied_config_path = exp_dir / config_path.name
     if not copied_config_path.exists():
