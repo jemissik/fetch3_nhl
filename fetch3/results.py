@@ -99,13 +99,19 @@ class Results:
             # TODO check config for an experiment name first
             self.label = self.output_dir.name
 
-        # Load results
-        self.canopy, self.soil, self.roots, self.sapflux = load_model_outputs(self.output_dir)
+        try:
+            # Load results
+            self.canopy, self.soil, self.roots, self.sapflux = load_model_outputs(self.output_dir)
 
-        # Reassign coordinates
-        self.canopy = self.canopy.assign_coords(z=self.canopy.z - self.params['Soil_depth'])
-        self.soil = self.soil.assign_coords(z=self.soil.z - self.params['Soil_depth'])
-        self.roots = self.roots.assign_coords(z=self.roots.z - self.params['Soil_depth'])
+            # Reassign coordinates
+            self.canopy = self.canopy.assign_coords(z=self.canopy.z - self.params['Soil_depth'])
+            self.soil = self.soil.assign_coords(z=self.soil.z - self.params['Soil_depth'])
+            self.roots = self.roots.assign_coords(z=self.roots.z - self.params['Soil_depth'])
+        except:
+            self.canopy = None
+            self.soil = None
+            self.roots = None
+            self.sapflux = None 
 
         # Load met data
 
