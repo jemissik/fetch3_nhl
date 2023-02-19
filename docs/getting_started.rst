@@ -78,12 +78,12 @@ It is recommended to create a new conda environment for FETCH3, using the provid
     conda env update --name fetch3 --file environment_dev_update.yml
 
 
-  .. note::
+.. important::
     Make sure the fetch environment is activated when you try to run the model!
 
 
-   See this `cheat sheet for working with conda <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_ for
-   a helpful list of conda commands.
+See this `cheat sheet for working with conda <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_ for
+a helpful list of conda commands.
 
 .. note::
     For Windows users, use the **Anaconda Prompt** application that was installed with Anaconda Navigator
@@ -107,9 +107,11 @@ as command line arguments.
 **Default input and output directories:**
 
 From the package's root directory:
+
 * Input meteorological data: ``data/``
 * Input configuration file: ``model_config.yml``
 * Model output and logs: ``output/``
+  
   If using the default output directory, a directory ``output/`` will be created
   if it doesn't already exist.
 
