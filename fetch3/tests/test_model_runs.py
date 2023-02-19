@@ -19,7 +19,7 @@ def test_fetch3_nhl_run():
 
     from fetch3.__main__ import main
 
-    main(["--config_path", config_path, "--data_path", data_path, "--output_path", output_path], standalone_mode=False)
+    main(["--config_path", config_path, "--data_path", data_path], standalone_mode=False)
 
 
 def test_fetch3_nhl_run_optconfig():
@@ -35,7 +35,7 @@ def test_fetch3_nhl_run_optconfig():
 
     from fetch3.__main__ import main
 
-    main(["--config_path", config_path, "--data_path", data_path, "--output_path", output_path], standalone_mode=False)
+    main(["--config_path", config_path, "--data_path", data_path], standalone_mode=False)
 
 
 def test_fetch3_PM_run():
@@ -51,7 +51,7 @@ def test_fetch3_PM_run():
 
     from fetch3.__main__ import main
 
-    main(["--config_path", config_path, "--data_path", data_path, "--output_path", output_path], standalone_mode=False)
+    main(["--config_path", config_path, "--data_path", data_path], standalone_mode=False)
 
 
 def test_fetch3_opt_run():
