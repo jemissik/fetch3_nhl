@@ -43,7 +43,7 @@ Clone the FETCH3 repository from `FETCH3's GitHub page <https://github.com/jemis
   forking the FETCH3 repository and working with git.
 
 .. todo::
-    - Eventually FETCH3 will be released as a package to make installation simpler
+    - Eventually FETCH3 will be released on conda-forge to make installation simpler
 
 Install FETCH3's dependencies
 =============================
@@ -57,7 +57,7 @@ It is recommended to create a new conda environment for FETCH3, using the provid
 
    For Linux, Windows, and ARM Macs::
 
-     conda env create --file fetch3_requirements.yml
+     conda env create --file environment.yml
 
    For x86 Macs::
 
@@ -66,14 +66,21 @@ It is recommended to create a new conda environment for FETCH3, using the provid
    .. note::
       For Mac users:
 
-      - Use ``fetch3_requirements.yml`` for M-series macs running a native version of conda
+      - Use ``environment.yml`` for M-series macs running a native version of conda
       - Use ``fetch3_requirements_macx86.yml`` for Intel Macs or M-series Macs running conda through Rosetta
 
 3. To activate the conda environment, run::
 
-    conda activate fetch3-dev
+    conda activate fetch3
 
-   Make sure you're using the FETCH3 conda environment when you try to run the model.
+4. To install the dev requirements (only needed if you plan to alter the source code)::
+
+    conda env update --name fetch3 --file environment_dev_update.yml
+
+
+  .. note::
+    Make sure the fetch environment is activated when you try to run the model!
+
 
    See this `cheat sheet for working with conda <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_ for
    a helpful list of conda commands.
