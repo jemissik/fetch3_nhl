@@ -1,0 +1,276 @@
+optimization_options:
+  objective_options:
+    objectives:
+      - boa_metric: "RootMeanSquaredError"
+        name: rmse_aspen
+        properties:
+          obs_file: './data/umbs_aggregated_sp_sapflow_withbirch.csv'
+          obs_var: 'aspen'
+          output_fname: 'ds_sapflux.nc'
+          output_var: 'aspen'
+          fetch_data_func: get_model_sapflux
+    minimize: True
+
+  experiment: {}
+  generation_strategy: {}
+  scheduler:
+    total_trials: 20
+  output_dir: "./output"
+  model_dir: '.'
+  data_path: "./data"
+  output_fname: 'ds_sapflux.nc'
+  experiment_name: "avg_aspen_2015_july_long"
+
+
+model_options:
+
+  # File for input met data
+  input_fname: "FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv"
+  met_column_labels:
+    CO2_F_MDS: CO2_F
+
+  # Start and end for the model
+  start_time: "2015-07-01 00:00:00" #begining of simulation #6/9 is DOY 160
+  end_time: "2015-08-01 00:00:00" #end #DOY190 - 7/10 is doy 191
+
+  #  end_time: "2011-07-10 00:00:00" #end #DOY190 - 7/10 is doy 191
+
+  dt:  1800  #seconds - input data resolution
+  tmin:  0  #tmin [s]
+
+  # Site information
+  latitude:  45.5598  # From AmeriFlux UMBS page
+  longitude:  -84.7138
+  time_offset:  -5 #Offset from UTC time, e.g EST = UTC -5 hrs
+
+  # Run options
+
+  # Printing slows down model run
+  # Options to turn printing off or specify print frequency
+  print_run_progress:  True  # Turn on/off printing for progress of time steps calculated
+  print_freq:  2000  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
+
+  # Transpiration options: NHL or PM transpiration scheme
+  transpiration_scheme:  1 # 0: PM transpiration; 1: NHL transpiration
+  zenith_method: "CN"  # Method to use for zenith angle calculation (if using NHL)
+
+  # Numerical solution time and space constants
+  #The finite difference discretization constants
+  dt0:  20  #model temporal resolution [s]
+  dz:  0.1  #model spatial resolution [m]
+  stop_tol:  .0001  #0.0001  #stop tolerance of equation converging
+
+  # Soil boundary conditions
+
+  # Upper Boundary condition
+  # 1 = no flux (Neuman)
+  # 0 = infiltration
+
+  # Bottom Boundary condition
+  # 2 = free drainage
+  # 1 = no flux (Neuman)
+  # 0 = constant potential (Dirichlet)
+
+  UpperBC: 0
+  BottomBC: 0
+
+  # Tree information
+  LAD_norm:  'LAD_data.csv' # File with LAD data
+
+  # Leaf area density formulation
+  lad_scheme :  1  #0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
+
+site_parameters:
+  Soil_depth:
+    type: fixed
+    value: 6.0  # [m] depth of soil column
+  sand_d:
+    type: fixed
+    value: 6.0 #4.2----top soil #m
+  clay_d:
+    type: fixed
+    value: 1.0 #0------4.2 #m
+
+  # Soil initial conditions
+  initial_swc_clay:
+    type: fixed
+    value: 0.28 #from Verma et al
+
+  initial_swc_sand:
+    type: fixed
+    value: 0.08  # [m3 m-3] from Verma et al
+
+  # soil bottom boundary condition
+  soil_moisture_bottom_boundary:
+    type: fixed
+    value: 0.28  # [m3/m3]
+
+  #SOIL PARAMETERS - USING VAN GENUCHTEN RELATIONSHIPS
+
+  #CLAY
+  alpha_1:
+    type: fixed
+    value: 0.8                       #soil hydraulic parameter [1/m]
+  theta_S1:
+    type: fixed
+    value: 0.55                     #saturated volumetric soil moisture content [-]
+  theta_R1:
+    type: fixed
+    value: 0.068                    #residual volumetric soil moisture content [-]
+  n_1:
+    type: fixed
+    value: 1.5                           #soil hydraulic parameter  [-]
+  Ksat_1:
+    type: fixed
+    value: 1.94e-7               #saturated hydraulic conductivity  [m/s]
+
+  #SAND
+  alpha_2:
+    type: fixed
+    value: 14.5
+  theta_S2:
+    type: fixed
+    value: 0.47
+  theta_R2:
+    type: fixed
+    value: 0.045
+  n_2:
+    type: fixed
+    value: 2.4
+  Ksat_2:
+    type: fixed
+    value: 3.45e-5
+
+  #For NHL
+  sum_LAI_plot:  # [m2leaf m-2ground]
+    type: fixed
+    value: 3.59  # Value from 2011 optical LAI measurements
+
+  Cd:
+    type: fixed
+    value: 0.1 # Drag coefficient
+  alpha_ml:
+    type: fixed
+    value: 0.1  # Mixing length constant
+
+species_parameters:
+  aspen:
+  # Soil and roots
+    Root_depth:
+      type: fixed
+      value: 0.6  # [m] depth of root column
+    #Soil stress parameters
+    theta_1_clay:
+      type: fixed
+      value: 0.08
+    theta_2_clay:
+      type: fixed
+      value: 0.12
+    theta_1_sand:
+      type: fixed
+      value: 0.05
+    theta_2_sand:
+      type: fixed
+      value: 0.09
+
+    #ROOT PARAMETERS
+    Kr:
+      type: fixed
+      value: 7.2e-10 #soil-to-root radial conductance [m/sPa]
+    qz:
+      type: fixed
+      value: 9  #unitless - parameter for the root mass distribution - Verma et al., 2014
+    Ksax:
+      type: fixed
+      value: 1.0e-05   #specific axial conductivity of roots  [ m/s]
+    Aind_r:
+      type: fixed
+      value: 1          #m2 root xylem/m2 ground]
+
+    #XYLEM PARAMETERS
+    kmax:  # Max conductivity of saturated stem xylem  [m s-1]
+      type: range
+      value: 1.0e-5
+      # bounds: [9.0e-7, 12.0e-6]  #TODO from table 2 mirfenderesgi (not sure about units)
+      bounds: [1.0e-6, 01.0e-4]  #arbitrary range
+
+    ap:
+      type: range
+      value: 2.0e-6                                  #xylem cavitation parameter [Pa-1]
+      bounds: [1.0e-7, 1.0e-5]  #arbitrary range
+    bp:
+      type: range
+      value: -1.5e+6                                #xylem cavitation parameter [Pa]                         #m2 xylem/m2 ground]
+      bounds: [-1.5e+7, -1.5e+5]  #arbitrary range
+    Phi_0:
+      type: fixed
+      value: 5.74e+8                               #From bohrer et al 2005
+    p:
+      type: range
+      value: 20                                          #From bohrer et al 2005
+      bounds: [10, 30]
+    sat_xylem:
+      type: range
+      value: 0.573  # From bohrer et al 2005
+      bounds: [0.4, 0.7]
+
+    #TREE PARAMETERS
+    taper_top:
+      type: fixed
+      value: 1.0  # Taper of xylem from base to crown
+    sapwood_depth:  # Sapwood depth, measured at breast height [cm]
+      type: fixed
+      value: 4.802839584   # Updated with value for avg aspen
+    dbh:  # Diameter of plant at breast height [cm]
+      type: fixed
+      value: 23.84  #Updated with value for avg aspen
+    stand_density_sp: # Species-specific stand density [trees ha-1]
+      type: fixed
+      value: 213.0857648  # Updated for 2010 aspen
+    Hspec:  #Tree height [m]
+      type: fixed
+      value: 30.25666667   # Updated with value for avg aspen
+    LAI:  # Species-specific leaf area index [m2leaf m-2 ground]
+      type: fixed
+      value: 0.679731565  # Updated for aspen from 2011 litter trap measurements (adjusted by optical measurements)
+
+    #########################################################################3
+    #NHL PARAMETERS
+    ###########################################################################
+    scale_nhl:
+      # type: fixed
+      type: range
+      value: 1.0
+      bounds: [0.1, 3.0]
+
+    mean_crown_area_sp: #[m2]
+      type: fixed
+      value: 41.86333333  # Updated with value for avg aspen
+    Cf:
+      type: fixed
+      value: 0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
+    x:
+      type: fixed
+      bounds: [2.0, 6.0]  # Range from Mirfenderesgi et al 2016, Table 2
+      value: 1.0  #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+    Vcmax25:
+      type: range
+      bounds: [20.0, 85.0]  # Range from Mirfenderesgi et al 2016, Table 2
+      value: 59.9 #oak 59.9 pine 31.1
+    alpha_gs:
+      type: range
+      bounds: [4.0, 9.0] # Range from Mirfenderesgi et al 2016, Table 2
+      value: 6.7     # value: #6.7 oak, 7.3 pine
+
+    alpha_p:  # Not used
+      type: fixed
+      value: 1
+
+    wp_s50:
+      type: range
+      value: -9.1e+5  #-9.1e+5 oak -1.8e+5
+      bounds: [-2.0e+6, -1.0e+5]  # Range from Mirfenderesgi et al 2016, Table 2
+    c3:
+      type: range
+      value: 12.3  # value: #12.3 oak 10.3 pine  from Mirfenderesgi
+      bounds: [0.1, 20.0]  # Range from Mirfenderesgi et al 2016, Table 2

@@ -11,21 +11,26 @@ If they aren't specified, defaults will be used.
 
 **Default input and output directories:**
 
-* Input meteorological data: ``./data/``
-* Input configuration file: ``./model_config.yml``
-* Model output and logs: ``./output/``
-  If using the default output directory, a directory ``./output/`` will be created
+From the package's root directory:
+* Input meteorological data: ``data/``
+* Input configuration file: ``model_config.yml``
+* Model output and logs: ``output/``
+  If using the default output directory, a directory ``output/`` will be created
   if it doesn't already exist.
 
 Running the model from the command line
 ========================================
 
-Run the model by running ``main.py``
+Run the model by running the ``fetch3`` module.
+
+.. important::
+  fetch3's conda environment must be activated to run the model!
 
 To specify an input config file, data directory, or output directory in a location other than the
 default, different directories can be specified as command line arguments, for example::
-      python main.py --config_path /Users/username/fetch3/user_model_config.yml
-      --data_path /Users/username/fetch3/user_data/ --output_path /Users/username/fetch3/output/
+
+    python -m fetch3 --config_path /Users/username/fetch3/user_model_config.yml
+    --data_path /Users/username/fetch3/user_data/ --output_path /Users/username/fetch3/output/
 
 .. note::
     Replace the paths and filenames in this example with the actual paths and files you are using.

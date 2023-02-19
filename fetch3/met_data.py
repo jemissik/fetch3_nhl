@@ -12,9 +12,6 @@ import pandas as pd
 
 from fetch3.utils import interpolate_2d
 
-filepath = "/Users/jmissik/Desktop/repos/fetch3_nhl/data/FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv"
-
-
 def import_ameriflux_data(filein):
     """
     Imports AmeriFlux data (in ONEFLUX format) to a DataFrame.
@@ -94,6 +91,9 @@ def calc_infiltration_rate(cfg, precipitation, tmax, t_data):
     rain = precipitation / cfg.Rho  # [converting to m/s]
     q_rain = np.interp(np.arange(0, tmax + cfg.dt0, cfg.dt0), t_data, rain)  # interpolating
     q_rain = np.nan_to_num(q_rain)  # m/s precipitation rate= infiltration rate
+
+    # Reduce by frac_infiltration
+    q_rain = cfg.frac_infiltration * q_rain
     return q_rain
 
 

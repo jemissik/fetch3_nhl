@@ -1,6 +1,9 @@
+import yaml
 from pathlib import Path
 
 import pytest
+import boa.__main__ as dunder_main
+from boa import split_shell_command
 
 
 def test_fetch3_nhl_run():
@@ -9,9 +12,14 @@ def test_fetch3_nhl_run():
     )
     data_path = Path(__file__).resolve().parent.parent.parent / "data"
     output_path = Path(__file__).resolve().parent.parent.parent / "output"
-    from fetch3.__main__ import run
 
-    run(config_path, data_path, output_path)
+    with open(config_path, "r") as yml_config:
+        loaded_configs = yaml.safe_load(yml_config)
+        species_list = list(loaded_configs['species_parameters'].keys())
+
+    from fetch3.__main__ import main
+
+    main(["--config_path", config_path, "--data_path", data_path], standalone_mode=False)
 
 
 def test_fetch3_nhl_run_optconfig():
@@ -20,10 +28,14 @@ def test_fetch3_nhl_run_optconfig():
     )
     data_path = Path(__file__).resolve().parent.parent.parent / "data"
     output_path = Path(__file__).resolve().parent.parent.parent / "output"
-    print(output_path)
-    from fetch3.__main__ import run
 
-    run(config_path, data_path, output_path)
+    with open(config_path, "r") as yml_config:
+        loaded_configs = yaml.safe_load(yml_config)
+        species_list = list(loaded_configs['species_parameters'].keys())
+
+    from fetch3.__main__ import main
+
+    main(["--config_path", config_path, "--data_path", data_path], standalone_mode=False)
 
 
 def test_fetch3_PM_run():
@@ -32,18 +44,18 @@ def test_fetch3_PM_run():
     )
     data_path = Path(__file__).resolve().parent.parent.parent / "data"
     output_path = Path(__file__).resolve().parent.parent.parent / "output"
-    print(output_path)
-    from fetch3.__main__ import run
 
-    run(config_path, data_path, output_path)
+    with open(config_path, "r") as yml_config:
+        loaded_configs = yaml.safe_load(yml_config)
+        species_list = list(loaded_configs['species_parameters'].keys())
+
+    from fetch3.__main__ import main
+
+    main(["--config_path", config_path, "--data_path", data_path], standalone_mode=False)
 
 
 def test_fetch3_opt_run():
     config_path = (
         Path(__file__).resolve().parent.parent.parent / "config_files" / "opt_model_config.yml"
     )
-    output_path = Path(__file__).resolve().parent.parent.parent / "output"
-    print(output_path)
-    from fetch3.optimize.run_optimization import run
-
-    run(config_path)
+    dunder_main.main(split_shell_command(f"--config-path {config_path} -td"), standalone_mode=False)

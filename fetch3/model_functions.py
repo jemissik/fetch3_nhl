@@ -17,7 +17,7 @@ from numpy.linalg import multi_dot
 
 from fetch3.roots import calc_root_K, feddes_root_stress, verma_root_mass_dist
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 # function for stem xylem: K and C
 def Porous_media_xylem(arg, ap, bp, kmax, Aind_x, p, sat_xylem, Phi_0, z, nz_r, nz):
@@ -583,6 +583,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
 # Calculating water balance from model outputs
 def format_model_output(
+    species,
     H,
     K,
     S_stomata,
@@ -686,6 +687,7 @@ def format_model_output(
         coords={
             "time": df_EP.index,
             "z": zind.z,
+            "species": species
         },
     )
 
@@ -704,6 +706,7 @@ def format_model_output(
         coords={
             "time": df_EP.index,
             "z": zind.z_soil,
+            "species": species
         },
     )
     # root TODO
@@ -742,6 +745,7 @@ def format_model_output(
         coords={
             "time": df_EP.index,
             "z": zind.z_root,
+            "species": species
         },
     )
     # canopy
@@ -764,6 +768,7 @@ def format_model_output(
         coords={
             "time": df_EP.index,
             "z": zind.z_upper,
+            "species": species
         },
     )
 
@@ -821,3 +826,41 @@ def save_nc(dir, xr_datasets):
     # save dataset
     for ds in xr_datasets:
         xr_datasets[ds].to_netcdf(dir / (ds + ".nc"))
+
+
+def combine_outputs(results):
+    """
+    Combines the outputs for all species
+
+    Parameters
+    ----------
+    results :
+
+    Returns
+    -------
+
+    """
+    soil = [sp['ds_soil'] for sp in results]
+    root = [sp['ds_root'] for sp in results]
+    canopy = [sp['ds_canopy'] for sp in results]
+    sapflux = [sp['sapflux'] for sp in results]
+    # all_ = [sp['ds_all'] for sp in results]
+
+    ds_soil = xr.concat(soil, dim='species')
+    ds_root = xr.concat(root, dim='species')
+    ds_canopy = xr.concat(canopy, dim='species')
+    ds_sapflux = xr.concat(sapflux, dim='species')
+
+    # Calculate plot level sapflux
+    ds_sapflux_tot = ds_sapflux[['sapflux_plot', 'storage_plot', 'delta_S_plot']].sum(dim='species', keep_attrs=True)
+    ds_sapflux_tot = ds_sapflux_tot.assign_coords(species='plot_tot').expand_dims('species')
+
+    # Add plot level sapflux to the dataset
+    ds_sapflux = xr.merge([ds_sapflux, ds_sapflux_tot])
+
+    return {
+            "ds_soil": ds_soil,
+            "ds_root": ds_root,
+            "ds_canopy": ds_canopy,
+            "ds_sapflux": ds_sapflux,
+        }

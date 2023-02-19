@@ -24,7 +24,7 @@ from fetch3.nhl_transpiration.NHL_functions import *
 
 
 def main(cfg, output_dir, data_dir):
-    logger = logging.getLogger(__file__)
+    logger = logging.getLogger(__name__)
 
     start = time.time()
 
@@ -50,9 +50,9 @@ def main(cfg, output_dir, data_dir):
 
     logger.info(f"NHL calculations finished in {time.time() - start} s")
 
-    logger.info("Saving NHL output...")
-    write_outputs_netcdf(output_dir, ds)
-    write_outputs({"zenith": zen, "LAD": LAD}, output_dir)
+    # logger.info("Saving NHL output...")
+    # write_outputs_netcdf(output_dir, ds)
+    # write_outputs({"zenith": zen, "LAD": LAD}, output_dir)
 
     logger.info(f"Interpolating NHL to the time resolution for FETCH3...")
     # Interpolate to model time resolution
@@ -76,9 +76,9 @@ def main(cfg, output_dir, data_dir):
 
     NHL_modelres = da.interp(z=model_z, time=model_ts, assume_sorted=True, kwargs={"fill_value": 0})
 
-    logger.info("Saving NHL_modelres output...")
-    # write NHL output to netcdf
-    NHL_modelres.to_netcdf(output_dir / "nhl_modelres_trans_out.nc")
+    # logger.info("Saving NHL_modelres output...")
+    # # write NHL output to netcdf
+    # NHL_modelres.to_netcdf(output_dir / "nhl_modelres_trans_out.nc")
     NHL_modelres = NHL_modelres.data.transpose()
 
     logger.info(f"NHL module finished in {time.time() - start} s")

@@ -12,10 +12,13 @@ These functions provide the interface between the optimization tool and FETCH3
 """
 
 import atexit
-import datetime as dt
 import os
 import subprocess
-from pathlib import Path
+import logging
+
+from pprint import pformat
+
+logger = logging.getLogger(__name__)
 
 import numpy as np
 import pandas as pd
@@ -24,128 +27,44 @@ import yaml
 from ax import Trial
 from boa import (
     BaseWrapper,
-    cd_and_cd_back,
     get_trial_dir,
     make_trial_dir,
-    write_configs,
+    normalize_config,
+    boa_params_to_wpr, load_jsonlike
 )
 
-from fetch3.scaling import convert_trans_m3s_to_cm3hr
+from fetch3.scaling import convert_trans_m3s_to_cm3hr, convert_sapflux_m3s_to_mm30min
 
 
-def read_experiment_config(config_file):
-    """
-    Read experiment configuration yml file for setting up the optimization.
-    yml file contains the list of parameters, and whether each parameter is a fixed
-    parameter or a range parameter. Fixed parameters have a value specified, and range
-    parameters have a range specified.
+def get_model_plot_trans(modelfile, obs_file, obs_var, output_var, **kwargs):
+    # Read in observation data - partitioned fluxnet data
+    timestamp_col = 'TIMESTAMP_START'
+    obsdf = pd.read_csv(obs_file, parse_dates=[timestamp_col])
+    obsdf = obsdf.set_index(timestamp_col)
 
-    Parameters
-    ----------
-    config_file : str
-        File path for the experiment configuration file
+    # Read in model output
+    modeldf = xr.load_dataset(modelfile)
+    modeldf = modeldf.sel(species=output_var)
 
-    Returns
-    -------
-    params: list
-        Parameters formatted for the Ax experiment
-    experiment_settings: dict
-        Optimization options for the experiment
-    """
+    # # Slice met data to just the time period that was modeled
+    obsdf = obsdf.loc[modeldf.time.data[0]: modeldf.time.data[-1]]
 
-    # Load the experiment config yml file
-    with open(config_file, "r") as yml_config:
-        loaded_configs = yaml.safe_load(yml_config)
+    # # Convert model output to the same units as the input data
+    # # tower data is in mm 30min-1
+    modeldf["sapflux_plot_mm30min"] = convert_sapflux_m3s_to_mm30min(modeldf.sapflux_plot)
 
-    # Format parameters for Ax experiment
-    for param in loaded_configs["parameters"].keys():
-        # Add "name" attribute for each parameter
-        loaded_configs["parameters"][param]["name"] = param
-    # Parameters from dictionary to list
-    params = [loaded_configs["parameters"][param] for param in list(loaded_configs["parameters"])]
-    experiment_settings = loaded_configs["optimization_options"]
-    model_settings = loaded_configs["model_options"]
-    return params, experiment_settings, model_settings
+    # # remove first and last timestamp
+    obsdf = obsdf.iloc[1:-1]
+    modeldf = modeldf.sapflux_plot_mm30min.isel(time=np.arange(1, len(modeldf.time) - 1))
+
+    not_nans = ~obsdf[obs_var].isna()
+    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
+    modeldf_not_nans = modeldf.data[not_nans]
+
+    return modeldf_not_nans, obsdf_not_nans
 
 
-def create_experiment_dir(working_dir, ax_client):
-    """
-    Creates directory for the experiment and returns the path.
-    The directory is named with the experiment name and the current datetime.
-
-    Parameters
-    ----------
-    working_dir : str
-        Working directory, the parent directory where the experiment directory will be written
-    ax_client : Ax client
-        Initialized Ax client for the experiment
-
-    Returns
-    -------
-    Path
-        Path to the directory for the experiment
-    """
-    # Directory named with experiment name and datetime
-    ex_dir = Path(working_dir) / (
-        ax_client.experiment.name + "_" + dt.datetime.now().strftime("%Y%m%dT%H%M%S")
-    )
-    ex_dir.mkdir()
-    return ex_dir
-
-
-def create_trial_dir(experiment_dir, trial_index):
-    """
-    Create a directory for a trial, and return the path to the directory.
-    Trial directory is created inside the experiment directory, and named with the trial index.
-    Model configs and outputs for each trial will be written here.
-
-    Parameters
-    ----------
-    experiment_dir : Path
-        Directory for the experiment
-    trial_index : int
-        Trial index from the Ax client
-
-    Returns
-    -------
-    Path
-        Directory for the trial
-    """
-    trial_dir = experiment_dir / str(trial_index).zfill(6)  # zero-padded trial index
-    trial_dir.mkdir()
-    return trial_dir
-
-
-def write_configs(trial_dir, parameters, model_options):
-    """
-    Write model configuration file for each trial (model run). This is the config file used by FETCH3
-    for the model run.
-
-    The config file is written as ```config.yml``` inside the trial directory.
-
-    Parameters
-    ----------
-    trial_dir : Path
-        Trial directory where the config file will be written
-    parameters : list
-        Model parameters for the trial, generated by the ax client
-    model_options : dict
-        Model options loaded from the experiment config yml file.
-
-    Returns
-    -------
-    str
-        Path for the config file
-    """
-    with open(trial_dir / "config.yml", "w") as f:
-        # Write model options from loaded config
-        # Parameters for the trial from Ax
-        config_dict = {"model_options": model_options, "parameters": parameters}
-        yaml.dump(config_dict, f)
-        return f.name
-
-
-def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
+def get_model_sapflux(modelfile, obs_file, obs_var, output_var, hour_range=None, normalize=True, **kwargs):
     """
     Read in observation data model output for a trial, which will be used for
     calculating the objective function for the trial.
@@ -154,7 +73,67 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
     ----------
     modelfile : str
         File path to the model output
-    obsfile : str
+    obs_file : str
+        File path to the observation data
+    model_settings: dict
+        dictionary with model settings read from model config file
+
+    Returns
+    -------
+    model_output: pandas Series
+        Model output
+    obs: pandas Series
+        Observations
+
+    ..todo::
+        * Add option to read from .nc file
+
+    """
+
+    # Read in observation data
+    obsdf = pd.read_csv(obs_file, parse_dates=[0])
+    # Converting time since sapfluxnet data is in GMT
+    obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST").dt.tz_localize(None)
+    obsdf = obsdf.set_index("Timestamp")
+
+    # Read in model output
+    modelds = xr.load_dataset(modelfile)
+    modelds = modelds.sel(species=output_var)
+
+    # Convert model output to the same units as the input data
+    # Sapfluxnet data is in cm3 hr-1
+    modelds["sapflux_scaled"] = convert_trans_m3s_to_cm3hr(modelds.sapflux)
+
+    modeldf = modelds.squeeze(drop=True).to_dataframe()
+
+    # Merge model and obs dataframes
+    df = pd.merge(modeldf, obsdf[[obs_var]], how='left', right_index=True, left_index=True, suffixes=['model', 'obs'])
+
+    # remove first and last timestamp
+    obsdf = obsdf.iloc[1:-1]
+
+    # Drop rows with NaN
+    df = df.dropna()
+
+    if normalize:
+        df['sapflux_scaled'] = (df['sapflux_scaled'] - df['sapflux_scaled'].mean()) / df['sapflux_scaled'].std()
+        df[obs_var] = (df[obs_var] - df[obs_var].mean()) / df[obs_var].std()
+
+    if hour_range:
+        df = df[(df.index.hour >= hour_range[0]) & (df.index.hour <= hour_range[1])]
+
+    return df['sapflux_scaled'], df[obs_var]
+
+def get_model_swc(modelfile, obs_file, obs_var, output_var, species, **kwargs):
+    """
+    Read in observation data model output for a trial, which will be used for
+    calculating the objective function for the trial.
+
+    Parameters
+    ----------
+    modelfile : str
+        File path to the model output
+    obs_file : str
         File path to the observation data
     model_settings: dict
         dictionary with model settings read from model config file
@@ -174,28 +153,24 @@ def get_model_obs(modelfile, obsfile, ex_settings, model_settings, parameters):
     # Read config file
 
     # Read in observation data
-    obsdf = pd.read_csv(obsfile, parse_dates=[0])
-    # Converting time since sapfluxnet data is in GMT
-    obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST")
+    obsdf = pd.read_csv(obs_file, parse_dates=[0])
+    obsdf["Timestamp"] = obsdf.TIMESTAMP_START
     obsdf = obsdf.set_index("Timestamp")
 
     # Read in model output
     modeldf = xr.load_dataset(modelfile)
+    modeldf = modeldf.sel(z=5.9, species=species) * 100  #TODO
 
     # Slice met data to just the time period that was modeled
     obsdf = obsdf.loc[modeldf.time.data[0] : modeldf.time.data[-1]]
 
-    # Convert model output to the same units as the input data
-    # Sapfluxnet data is in cm3 hr-1
-    modeldf["sapflux_scaled"] = convert_trans_m3s_to_cm3hr(modeldf.sapflux)
-
     # remove first and last timestamp
     obsdf = obsdf.iloc[1:-1]
-    modeldf = modeldf.sapflux_scaled.isel(time=np.arange(1, len(modeldf.time) - 1))
+    modeldf = modeldf[output_var].isel(time=np.arange(1, len(modeldf.time) - 1))
 
-    not_nans = ~obsdf[ex_settings["obsvar"]].isna()
-    obsdf_not_nans = obsdf[ex_settings["obsvar"]].loc[not_nans]
-    modeldf_not_nans = modeldf.data[not_nans]
+    not_nans = ~obsdf[obs_var].isna()
+    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
+    modeldf_not_nans = modeldf.isel(time=not_nans).data.transpose()
 
     return modeldf_not_nans, obsdf_not_nans
 
@@ -216,27 +191,85 @@ def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot
 
 class Fetch3Wrapper(BaseWrapper):
     _processes = []
+    config_file_name = "config.yml"
+    fetch_data_funcs = {get_model_sapflux.__name__: get_model_sapflux,
+                        get_model_plot_trans.__name__: get_model_plot_trans,
+                        get_model_swc.__name__: get_model_swc}
 
-    def __init__(self, ex_settings, model_settings, experiment_dir):
-        self.ex_settings = ex_settings
-        self.model_settings = model_settings
-        self.experiment_dir = experiment_dir
+    def __init__(self, *args, **kwargs):
+        print(args, kwargs)
+        super().__init__(*args, **kwargs)
+
+    def load_config(self, config_path, *args, **kwargs) -> dict:
+        """
+        Load config takes a configuration path of either a JSON file or a YAML file and returns
+        your configuration dictionary.
+
+        Load_config will (unless overwritten in a subclass), do some basic "normalizations"
+        to your configuration for convenience. See :func:`.normalize_config`
+        for more information about how the normalization works and what config options you
+        can control.
+
+        This implementation offers a default implementation that should work for most JSON or YAML
+        files, but can be overwritten in subclasses if need be.
+
+        Parameters
+        ----------
+        config_path
+            File path for the experiment configuration file
+
+        Returns
+        -------
+        dict
+            loaded_config
+        """
+        config = load_jsonlike(config_path, normalize=False)
+        parameter_keys = [["species_parameters", key] for key in config.get("species_parameters", {}).keys()]
+        parameter_keys.append(["site_parameters"])
+        self.config = normalize_config(config=config, parameter_keys=parameter_keys)
+        return self.config
+
+    def write_configs(self, trial: Trial) -> None:
+        """
+        Write model configuration file for a trial (model run). This is the config file used by FETCH3
+        for the model run.
+
+        The config file is written as ```config.yml``` inside the trial directory.
+
+        Parameters
+        ----------
+        trial: Trial
+            The trial to deploy.
+
+        Returns
+        -------
+        str
+            Path for the config file
+        """
+        trial_dir = make_trial_dir(self.experiment_dir, trial.index)
+        config_dict = boa_params_to_wpr(trial.arm.parameters, self.config["optimization_options"]["mapping"])
+        config_dict["model_options"] = self.model_settings
+
+        logging.info(pformat(config_dict))
+
+        with open(trial_dir / self.config_file_name, "w") as f:
+            # Write model options from loaded config
+            # Parameters for the trial from Ax
+            yaml.dump(config_dict, f)
+            return f.name
 
     def run_model(self, trial: Trial):
 
-        trial_dir = make_trial_dir(self.experiment_dir, trial.index)
-
-        config_dir = write_configs(trial_dir, trial.arm.parameters, self.model_settings)
+        trial_dir = get_trial_dir(self.experiment_dir, trial.index)
+        config_path = trial_dir / self.config_file_name
 
         model_dir = self.ex_settings["model_dir"]
 
-        # with cd_and_cd_back(model_dir):
         os.chdir(model_dir)
 
-        cmd = (
-            f"python main.py --config_path {config_dir} --data_path"
-            f" {self.ex_settings['data_path']} --output_path {trial_dir}"
-        )
+        cmd = self.script_options["run_cmd"].format(config_path=config_path,
+                                                    data_path=self.ex_settings['data_path'],
+                                                    trial_dir=trial_dir)
 
         args = cmd.split()
         popen = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
@@ -256,18 +289,17 @@ class Fetch3Wrapper(BaseWrapper):
             elif "run complete" in contents:
                 trial.mark_completed()
 
-    def fetch_trial_data(self, trial: Trial, *args, **kwargs):
+    def fetch_trial_data(self, trial: Trial, metric_properties: dict, metric_name: str, *args, **kwargs):
 
         modelfile = (
-            get_trial_dir(self.experiment_dir, trial.index) / self.ex_settings["output_fname"]
+            get_trial_dir(self.experiment_dir, trial.index) / metric_properties[metric_name]["output_fname"]
         )
 
-        y_pred, y_true = get_model_obs(
+        fetch_data_func = self.fetch_data_funcs[metric_properties[metric_name]["fetch_data_func"]]
+
+        y_pred, y_true = fetch_data_func(
             modelfile,
-            self.ex_settings["obsfile"],
-            self.ex_settings,
-            self.model_settings,
-            trial.arm.parameters,
+            **metric_properties[metric_name]
         )
         return dict(y_pred=y_pred, y_true=y_true)
 

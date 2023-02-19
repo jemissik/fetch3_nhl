@@ -43,7 +43,7 @@ Clone the FETCH3 repository from `FETCH3's GitHub page <https://github.com/jemis
   forking the FETCH3 repository and working with git.
 
 .. todo::
-    - Eventually FETCH3 will be released as a package to make installation simpler
+    - Eventually FETCH3 will be released on conda-forge to make installation simpler
 
 Install FETCH3's dependencies
 =============================
@@ -55,22 +55,35 @@ It is recommended to create a new conda environment for FETCH3, using the provid
 1. Use ``cd`` to navigate into the FETCH3 directory that you cloned from GitHub.
 2. Create FETCH3's conda environment.
 
-   For Linux, Windows, and Intel Macs::
+   For Linux, Windows, and ARM Macs::
 
-     conda env create --file fetch3_requirements.yml
+     conda env create --file environment.yml
 
-   For M1 Macs::
+   For x86 Macs::
 
-     conda env create --file fetch3_requirements_m1.yml
+     conda env create --file fetch3_requirements_macx86.yml
+
+   .. note::
+      For Mac users:
+
+      - Use ``environment.yml`` for M-series macs running a native version of conda
+      - Use ``fetch3_requirements_macx86.yml`` for Intel Macs or M-series Macs running conda through Rosetta
 
 3. To activate the conda environment, run::
 
-    conda activate fetch3-dev
+    conda activate fetch3
 
-   Make sure you're using the FETCH3 conda environment when you try to run the model.
+4. To install the dev requirements (only needed if you plan to alter the source code)::
 
-   See this `cheat sheet for working with conda <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_ for
-   a helpful list of conda commands.
+    conda env update --name fetch3 --file environment_dev_update.yml
+
+
+.. important::
+    Make sure the fetch environment is activated when you try to run the model!
+
+
+See this `cheat sheet for working with conda <https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf>`_ for
+a helpful list of conda commands.
 
 .. note::
     For Windows users, use the **Anaconda Prompt** application that was installed with Anaconda Navigator
@@ -84,36 +97,22 @@ Test run of the model
 Once everything is installed, try to run FETCH3 using the default test files that are installed with the model. This way,
 you can make sure everything is working correctly before you move on to using your own data and configuration files.
 
-To run the test case, use ``cd`` to navigate inside the directory with the FETCH3 code. To check that you're in the right place,
-run ``ls`` and check that there is a file called ``main.py`` in the current directory, for example::
+To do a short test run (using a default configuration file and data)::
 
-
-  >>> ls
-  README.md                          optimization.ipynb
-  __pycache__                        optimization_results.ipynb
-  config_files                       optimization_run.py
-  data                               output
-  docs                               read_sapfluxnet_data.ipynb
-  example_model_output.ipynb         run_debug.py
-  explore_optimization_results.ipynb sapflux_test.ipynb
-  fetch3                             scratch
-  fetch3_requirements.yml            speed_test
-  fetch3_requirements_m1.yml         test_output_slice.ipynb
-  main.py                            umbs_census.ipynb
-
-Once you're in the correct directory, you can run the model using the provided test files by running ``main.py``::
-
-  python main.py
+  python -m fetch3
 
 For runs using your own data and configuration file, you will specify the configuration file, data directory, and output directory
-as command line arguments. Since we are ommitting these arguments, the default files will be used instead.
+as command line arguments.
 
 **Default input and output directories:**
 
-* Input meteorological data: ``./data/``
-* Input configuration file: ``./model_config.yml``
-* Model output and logs: ``./output/``
-  If using the default output directory, a directory ``./output/`` will be created
+From the package's root directory:
+
+* Input meteorological data: ``data/``
+* Input configuration file: ``model_config.yml``
+* Model output and logs: ``output/``
+  
+  If using the default output directory, a directory ``output/`` will be created
   if it doesn't already exist.
 
 If this test case runs successfully, you can move on to preparing your own data and configuration files.

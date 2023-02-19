@@ -20,5 +20,14 @@ met_data
 - imports and prepares met data for model
 
 initial_conditions
-- calculates initial water potential conditions 
+- calculates initial water potential conditions
 """
+
+
+try:
+    from fetch3.__version__ import version
+
+    __version__ = version
+except ImportError:
+    # Package not installed
+    __version__ = "0.0.0"

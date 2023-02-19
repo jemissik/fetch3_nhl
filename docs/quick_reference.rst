@@ -12,16 +12,15 @@ Running FETCH3
 
 Running FETCH3 (without optimization)::
 
-    python main.py --config_path <path to your config file>
+    python -m fetch3 --config_path <path to your config file>
     --data_path <path to your data folder> --output_path <path to your output directory>
 
 Running an optimization::
 
-    python optimization_run.py  --config_file <your_config_path>
+    python -m boa --config-path <your_config_path>
 
 .. note::
-    Make sure that you have the fetch3-dev environment activated and you are inside the fetch3_nhl
-    directory when you run the model.
+    Make sure that you have the fetch3-dev environment activated when you run the model.
 
 
 ****************
