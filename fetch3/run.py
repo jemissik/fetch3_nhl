@@ -64,7 +64,7 @@ model_dir = Path(__file__).parent.resolve()  # File path of model source code
 @click.option(
     "--output_path",
     type=click.Path(exists=True, path_type=Path),
-    default=str(default_output_path),
+    default=str(parent_path),
     help="Path to output directory",
 )
 @click.option(
@@ -78,7 +78,8 @@ def main(config_path, data_path, output_path, species):
     loaded_configs = load_yaml(config_path)
 
     # If using the default output directory, create directory if it doesn't exist
-    if output_path == default_output_path:
+    if output_path == parent_path:
+        output_path = default_output_path
         output_path.mkdir(exist_ok=True)
 
     # Make a new experiment directory if make_experiment_dir=True was specified in the config
