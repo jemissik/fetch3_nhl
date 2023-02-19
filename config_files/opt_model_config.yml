@@ -67,7 +67,6 @@ model_options:
 
   # Transpiration options: NHL or PM transpiration scheme
   transpiration_scheme:  1 # 0: PM transpiration; 1: NHL transpiration
-  zenith_method: "CN"  # Method to use for zenith angle calculation (if using NHL)
 
   # Numerical solution time and space constants
   #The finite difference discretization constants
