@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath("../optimize/"))
 
 # -- Project information -----------------------------------------------------
 
-project = 'FETCH3'
+project = 'FETCH3.14'
 copyright = '2022, Justine Missik'
 author = 'Justine Missik'
 

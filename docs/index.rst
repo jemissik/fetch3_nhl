@@ -3,14 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to FETCH3's documentation!
+Welcome to FETCH3.14's documentation!
 ==================================
 
 ********
 Overview
 ********
 
-FETCH3 is a tree hydrodynamic model for water fluxes across the soil-plant-atmosphere continuum. FETCH3 simulates water
+FETCH3.14 is a tree hydrodynamic model for water fluxes across the soil-plant-atmosphere continuum. FETCH3.14 simulates water
 transport through the soil, roots, and xylem as flow through porous media. The model resolves water potentials along the
 vertical dimension, and stomatal response is linked to xylem water potential.
 
@@ -72,7 +72,7 @@ Contents
   quick_reference
   troubleshooting
   changelog
-  FETCH3 code reference <ftch/fetch3>
+  Code reference <ftch/fetch3>
 
 
 
