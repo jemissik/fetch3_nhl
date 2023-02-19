@@ -3,8 +3,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - pip
   - pip:
-    - conda-merge
     - pytest
     - snakeviz
     - black

@@ -22,10 +22,10 @@ dependencies:
   - ipympl
   - invoke
   - flake8
+  - ax-platform==0.2.9
+  - PyYAML
+  - click
   - pip
   - pip:
-    - ax-platform
-    - click
-    - PyYAML
-    - git+https://github.com/madeline-scyphers/boa.git==0.7.3
+    - git+https://github.com/madeline-scyphers/boa.git@0.7.3
     - -e . --install-option="--no-deps"

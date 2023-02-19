@@ -31,4 +31,5 @@ dependencies:
     - black
     - isort
     - flakeheaven
-    - git+https://github.com/madeline-scyphers/boa.git==0.7.3
+    - git+https://github.com/madeline-scyphers/boa.git@0.7.3
+    - -e . --install-option="--no-deps"
