@@ -97,36 +97,20 @@ Test run of the model
 Once everything is installed, try to run FETCH3 using the default test files that are installed with the model. This way,
 you can make sure everything is working correctly before you move on to using your own data and configuration files.
 
-To run the test case, use ``cd`` to navigate inside the directory with the FETCH3 code. To check that you're in the right place,
-run ``ls`` and check that there is a file called ``main.py`` in the current directory, for example::
+To do a short test run (using a default configuration file and data)::
 
-
-  >>> ls
-  README.md                          optimization.ipynb
-  __pycache__                        optimization_results.ipynb
-  config_files                       optimization_run.py
-  data                               output
-  docs                               read_sapfluxnet_data.ipynb
-  example_model_output.ipynb         run_debug.py
-  explore_optimization_results.ipynb sapflux_test.ipynb
-  fetch3                             scratch
-  fetch3_requirements.yml            speed_test
-  fetch3_requirements_m1.yml         test_output_slice.ipynb
-  main.py                            umbs_census.ipynb
-
-Once you're in the correct directory, you can run the model using the provided test files by running ``main.py``::
-
-  python main.py
+  python -m fetch3
 
 For runs using your own data and configuration file, you will specify the configuration file, data directory, and output directory
-as command line arguments. Since we are ommitting these arguments, the default files will be used instead.
+as command line arguments.
 
 **Default input and output directories:**
 
-* Input meteorological data: ``./data/``
-* Input configuration file: ``./model_config.yml``
-* Model output and logs: ``./output/``
-  If using the default output directory, a directory ``./output/`` will be created
+From the package's root directory:
+* Input meteorological data: ``data/``
+* Input configuration file: ``model_config.yml``
+* Model output and logs: ``output/``
+  If using the default output directory, a directory ``output/`` will be created
   if it doesn't already exist.
 
 If this test case runs successfully, you can move on to preparing your own data and configuration files.
