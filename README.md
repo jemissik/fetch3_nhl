@@ -1,10 +1,7 @@
-# FETCH3
+# FETCH3.14 Hydrodynamic canopy model
 
-Links:
-- [FETCH3 docs](https://fetch3-nhl.readthedocs.io/)
+[![DOI](https://zenodo.org/badge/429869390.svg)](https://zenodo.org/badge/latestdoi/429869390)
 
-Create conda environment for FETCH3:
 
-```
-conda env create --file fetch3_requirements.yml
-```
+For more information, please see the documentation:
+- [FETCH3.14 docs](https://fetch3-nhl.readthedocs.io/)
