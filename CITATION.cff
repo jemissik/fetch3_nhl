@@ -4,8 +4,7 @@
 cff-version: 1.2.0
 title: FETCH3.14 Hydrodynamic Canopy Transpiration Model
 message: >-
-  If you use this software, please cite it using the
-  metadata from this file.
+  If you use this software, please cite it as below.
 type: software
 authors:
   - given-names: Justine
@@ -23,6 +22,7 @@ authors:
     orcid: 'https://orcid.org/0000-0003-3733-4330'
 repository-code: 'https://github.com/jemissik/fetch3_nhl'
 url: 'https://fetch3-nhl.readthedocs.io/en/latest/'
+doi: 'https://doi.org/10.5281/zenodo.7655405'
 license: MIT
 references:
   - authors:
