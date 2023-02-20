@@ -1,0 +1,1 @@
+python main_standalone.py --config_path /Users/jmissik/Desktop/repos/fetch3_nhl/nhl_transpiration/nhl_config.yml --output_path /Users/jmissik/Desktop/fetch_test/NHL_4_10 --data_path /Users/jmissik/Desktop/repos/fetch3_nhl/nhl_transpiration/data
