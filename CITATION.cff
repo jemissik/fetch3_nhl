@@ -1,0 +1,77 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: FETCH3.14 Hydrodynamic Canopy Transpiration Model
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Justine
+    family-names: Missik
+    email: missik.2@osu.edu
+    orcid: 'https://orcid.org/0000-0002-6448-0694'
+  - given-names: Gil
+    family-names: Bohrer
+    orcid: 'https://orcid.org/0000-0002-9209-9540'
+  - given-names: Marcela
+    family-names: Silva
+    orcid: 'https://orcid.org/0000-0001-5889-5298'
+  - given-names: Madeline
+    family-names: Scyphers
+    orcid: 'https://orcid.org/0000-0003-3733-4330'
+repository-code: 'https://github.com/jemissik/fetch3_nhl'
+url: 'https://fetch3-nhl.readthedocs.io/en/latest/'
+license: MIT
+references:
+  - authors:
+    - family-names: Silva
+      given-names: Marcela
+    - family-names: Matheny
+      given-names: Ashley
+    - family-names: Pauwels
+      given-names: Valentijn
+    - family-names: Triadis
+      given-names: Dimetre
+    - family-names: Missik
+      given-names: Justine
+    - family-names: Bohrer
+      given-names: Gil
+    - family-names: Daly
+      given-names: Edoardo
+    type: article
+    title: 'Tree hydrodynamic modelling of the soil–plant–atmosphere continuum using FETCH3'
+    journal: 'Geosci. Model Dev'
+    year: 2022
+    url: 'https://doi.org/10.5194/gmd-15-2619-2022'
+  - authors:
+    - family-names: Mirfenderesgi
+      given-names: Golnazalsadat
+    - family-names: Matheny
+      given-names: Ashley
+    - family-names: Bohrer
+      given-names: Gil
+    type: article
+    title: 'Hydrodynamic Trait Coordination and Cost-Benefit Trade-offs in Trees'
+    journal: 'Ecohydrology'
+    year: 2022
+    url: 'https://doi.org/10.1002/eco.2041'
+  - authors:
+    - given-names: Madeline
+      family-names: Scyphers
+      email: scyphers.3@osu.edu
+      orcid: 'https://orcid.org/0000-0003-3733-4330'
+    - given-names: Justine
+      family-names: Missik
+      email: missik.2@osu.edu
+      orcid: 'https://orcid.org/0000-0002-6448-0694'
+    - given-names: Joel
+      family-names: Paulson
+      orcid: 'https://orcid.org/0000-0002-1518-7985'
+    - given-names: Gil
+      family-names: Bohrer
+      orcid: 'https://orcid.org/0000-0002-9209-9540'
+    title: Bayesian Optimization for Anything (BOA)
+    type: software
+    doi: 'https://doi.org/10.5281/zenodo.7655354'
