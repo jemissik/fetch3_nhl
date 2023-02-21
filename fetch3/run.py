@@ -21,7 +21,7 @@ import concurrent.futures
 
 import click
 
-from fetch3.__version__ import __version__ as VERSION
+from fetch3 import __version__ as VERSION
 from fetch3.utils import make_experiment_directory, load_yaml
 from fetch3.initial_conditions import initial_conditions
 from fetch3.met_data import prepare_met_data
