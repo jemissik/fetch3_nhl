@@ -25,7 +25,7 @@ dependencies:
   - ax-platform==0.2.9
   - PyYAML
   - click
+  - boa==0.8.4
   - pip
   - pip:
-    - git+https://github.com/madeline-scyphers/boa.git@0.8.4
     - -e .
