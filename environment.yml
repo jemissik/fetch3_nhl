@@ -28,4 +28,4 @@ dependencies:
   - pip
   - pip:
     - git+https://github.com/madeline-scyphers/boa.git@0.7.3
-    - -e . --install-option="--no-deps"
+    - -e .
