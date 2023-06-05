@@ -22,10 +22,9 @@ dependencies:
   - ipympl
   - invoke
   - flake8
-  - ax-platform==0.2.9
   - PyYAML
   - click
-  - boa==0.8.4
+  - conda-forge::boa-framework==0.8.4
   - pip
   - pip:
     - -e .
