@@ -27,5 +27,5 @@ dependencies:
   - click
   - pip
   - pip:
-    - git+https://github.com/madeline-scyphers/boa.git@0.7.3
+    - git+https://github.com/madeline-scyphers/boa.git@0.8.4
     - -e .
