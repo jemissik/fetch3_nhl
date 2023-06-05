@@ -11,7 +11,7 @@ DEV_ENV = Path(__file__).resolve().parent / "environment_dev_update.yml"
 # also if you are installing a pkg from a git rep, you should remap it
 # to "git+https/etc": "pkg_name @ git+https/etc"
 pkg_renames = {"pytorch": "torch",
-               "git+https://github.com/madeline-scyphers/boa.git@0.7.3": "boa @ git+https://github.com/madeline-scyphers/boa.git@0.7.3"}
+               "git+https://github.com/madeline-scyphers/boa.git@0.8.4": "boa @ git+https://github.com/madeline-scyphers/boa.git@0.8.4"}
 
 
 # list of any packages in your environment files you don't want to include

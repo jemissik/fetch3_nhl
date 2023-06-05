@@ -6,7 +6,7 @@ channels:
 dependencies:
   - python=3.9
   - torchvision
-  - pytorch
+  - pytorch > 2
   - matplotlib
   - pyviz::hvplot
   - pyviz::panel
@@ -27,5 +27,5 @@ dependencies:
   - click
   - pip
   - pip:
-    - git+https://github.com/madeline-scyphers/boa.git@0.7.3
-    - -e . --install-option="--no-deps"
+    - git+https://github.com/madeline-scyphers/boa.git@0.8.4
+    - -e .
