@@ -6,7 +6,7 @@ channels:
 dependencies:
   - python=3.9
   - torchvision
-  - pytorch
+  - pytorch > 2
   - matplotlib
   - pyviz::hvplot
   - pyviz::panel

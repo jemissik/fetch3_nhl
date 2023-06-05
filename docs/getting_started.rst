@@ -53,21 +53,10 @@ It is recommended to create a new conda environment for FETCH3, using the provid
 **To install using the command line**:
 
 1. Use ``cd`` to navigate into the FETCH3 directory that you cloned from GitHub.
-2. Create FETCH3's conda environment.
+2. Create FETCH3's conda environment::
 
-   For Linux, Windows, and ARM Macs::
+    conda env create --file environment.yml
 
-     conda env create --file environment.yml
-
-   For x86 Macs::
-
-     conda env create --file fetch3_requirements_macx86.yml
-
-   .. note::
-      For Mac users:
-
-      - Use ``environment.yml`` for M-series macs running a native version of conda
-      - Use ``fetch3_requirements_macx86.yml`` for Intel Macs or M-series Macs running conda through Rosetta
 
 3. To activate the conda environment, run::
 
@@ -111,7 +100,7 @@ From the package's root directory:
 * Input meteorological data: ``data/``
 * Input configuration file: ``model_config.yml``
 * Model output and logs: ``output/``
-  
+
   If using the default output directory, a directory ``output/`` will be created
   if it doesn't already exist.
 
