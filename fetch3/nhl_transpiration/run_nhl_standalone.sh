@@ -1,1 +1,1 @@
-python main_standalone.py --config_path /Users/jmissik/Desktop/repos/fetch3_nhl/nhl_transpiration/nhl_config.yml --output_path /Users/jmissik/Desktop/fetch_test/NHL_4_10 --data_path /Users/jmissik/Desktop/repos/fetch3_nhl/nhl_transpiration/data
+python main_standalone.py --config_path /Users/jmissik/Desktop/repos.nosync/fetch3_nhl/config_files/opt_model_config.yml --output_path /Users/jmissik/Desktop/repos.nosync/fetch3_nhl/output/nhl_test --species oak
