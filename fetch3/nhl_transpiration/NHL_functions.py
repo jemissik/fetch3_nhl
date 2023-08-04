@@ -783,7 +783,7 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
 
     # Calculate the transpiration per m-1 [ kg H2O s-1 m-1_stem]
     NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)  # [kg H2O m-2leaf s-1]
-    NHL_trans_sp_stem = NHL_trans_leaf * LAD  # [kg H2O s-1 m-1stem m-2crown]
+    NHL_trans_sp_stem = NHL_trans_leaf * LAD
 
     # Add data to dataset
     ds = xr.Dataset(
@@ -803,6 +803,14 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
         ),
         coords=dict(z=(["z"], z)),
         attrs=dict(description="Model output"),
+    )
+
+    # Add metadata to dataset
+    ds.NHL_trans_leaf.attrs = dict(
+        units="kg H2O m-2leaf s-1", description="NHL transpiration per unit leaf area"
+    )
+    ds.NHL_trans_sp_stem.attrs = dict(
+        units="kg H2O s-1 m-1_stem", description="NHL transpiration per unit height of stem"
     )
 
     return ds, LAD, zenith_angle
@@ -937,7 +945,7 @@ def write_outputs(output_vars, dir):
         )
 
 
-def write_outputs_netcdf(dir, ds):
+def write_outputs_netcdf(dir, ds, filename="nhl_2d_out.nc"):
     """
     Writes model output to netcdf file
 
@@ -947,4 +955,4 @@ def write_outputs_netcdf(dir, ds):
     """
 
     # save dataset
-    ds.to_netcdf(dir / "nhl_out.nc")
+    ds.to_netcdf(dir / filename)

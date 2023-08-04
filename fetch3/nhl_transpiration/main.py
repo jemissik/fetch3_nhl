@@ -1,7 +1,4 @@
 """
-########
-Runs NHL
-########
 This file runs the NHL module.
 This version is intended to be called by FETCH3, and reads configs from the FETCH3
 model config.
@@ -22,8 +19,33 @@ import pandas as pd
 from fetch3.met_data import prepare_ameriflux_data
 from fetch3.nhl_transpiration.NHL_functions import *
 
+from fetch3.scaling import trans2d_to_tree
 
-def main(cfg, output_dir, data_dir, to_model_res=True):
+
+def main(cfg, output_dir, data_dir, to_model_res=True, write_output=True):
+    """
+    Calculate NHL transpiration.
+
+    Parameters
+    ----------
+    cfg : FETCH3 config object
+        Model configuration
+    output_dir : pathlib.Path
+        Directory to write output files to. If output_dir is None, NHL output is not written.
+    data_dir : pathlib.Path
+        Directory containing input data
+    to_model_res : bool, optional
+        Whether or not to calculate and return NHL in the resolution needed to run in FETCH, by default True.
+
+    Returns
+    -------
+    LAD : array
+        LAD profile
+    NHL transpiration : xarray.DataArray
+        NHL transpiration. If to_model_res is True, NHL is returned in the resolution
+        needed to run in FETCH, with units of [m3 H2O m-2crown m-1stem s-1]. If to_model_res is False,
+        NHL is returned as tree-level transpiration, with units of [kg H2O s-1].
+    """
     logger = logging.getLogger(__name__)
 
     start = time.time()
@@ -36,9 +58,10 @@ def main(cfg, output_dir, data_dir, to_model_res=True):
 
     ds, LAD, zen = calc_NHL_timesteps(cfg, met_data, LADnorm_df)
 
-    # NHL scaling
-    ds["NHL_trans_sp_stem"] = ds.NHL_trans_sp_stem * cfg.scale_nhl
-    ds["NHL_trans_leaf"] = ds.NHL_trans_leaf * cfg.scale_nhl
+    # Apply NHl scaling factor
+    ds["NHL_trans_sp_stem"] = ds.NHL_trans_sp_stem * cfg.scale_nhl  # [kg H2O s-1 m-1stem m-2crown]
+    ds["NHL_trans_leaf"] = ds.NHL_trans_leaf * cfg.scale_nhl  # [kg H2O m-2leaf s-1]
+    ds = ds.assign_coords(species=cfg.species)
 
     # Nighttime transpiration
     ds["NHL_trans_sp_stem"] = calc_nighttime_trans(ds.NHL_trans_sp_stem, met_data.PPFD_IN, cfg.mean_crown_area_sp)
@@ -46,11 +69,19 @@ def main(cfg, output_dir, data_dir, to_model_res=True):
 
     logger.info(f"NHL calculations finished in {time.time() - start} s")
 
-    if not to_model_res:
-    # logger.info("Saving NHL output...")
+    if write_output:
+        # logger.info("Saving NHL output...")
+        nhl_trans_tot = trans2d_to_tree(ds.NHL_trans_sp_stem, cfg.mean_crown_area_sp, cfg.dz) # kg h20 s-1
+        nhl_trans_tot.attrs = dict(
+            units="kg h20 s-1", description="NHL transpiration per tree"
+        )
+        nhl_trans_tot = nhl_trans_tot.assign_coords(species=cfg.species)
         write_outputs_netcdf(output_dir, ds)
-        write_outputs({"zenith": zen, "LAD": LAD}, output_dir)
-        return ds, LAD
+        write_outputs_netcdf(output_dir, nhl_trans_tot)
+        # write_outputs({"zenith": zen, "LAD": LAD}, output_dir)
+
+    if not to_model_res:
+        return nhl_trans_tot, LAD
 
     if to_model_res:
         logger.info(f"Interpolating NHL to the time resolution for FETCH3...")
