@@ -124,6 +124,40 @@ def get_model_sapflux(modelfile, obs_file, obs_var, output_var, hour_range=None,
 
     return df['sapflux_scaled'], df[obs_var]
 
+def get_model_nhl_trans(modelfile, obs_file, obs_var, output_var, hour_range=None, scaling_factor=None, **kwargs):
+    # Read in observation data
+    obsdf = pd.read_csv(obs_file, parse_dates=[0])
+    # Converting time since sapfluxnet data is in GMT
+    obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST").dt.tz_localize(None)
+    obsdf = obsdf.set_index("Timestamp")
+
+    # Read in model output
+    modelds = xr.load_dataset(modelfile)
+
+    # Convert model output to the same units as the input data
+    # Sapfluxnet data is in cm3 hr-1
+    # 1d NHL output is in kg h20 s-1
+    modelds["nhl_scaled"] = convert_trans_m3s_to_cm3hr(modelds[output_var] * 10**-3) #* 10**-3 to convert kg to m3
+
+    modeldf = modelds.squeeze(drop=True).to_dataframe()
+
+    # Merge model and obs dataframes
+    df = pd.merge(modeldf, obsdf[[obs_var]], how='left', right_index=True, left_index=True, suffixes=['model', 'obs'])
+
+    # remove first and last timestamp
+    obsdf = obsdf.iloc[1:-1]
+
+    # Drop rows with NaN
+    df = df.dropna()
+
+    if scaling_factor:
+        df[obs_var] = df[obs_var] * scaling_factor
+
+    if hour_range:
+        df = df[(df.index.hour >= hour_range[0]) & (df.index.hour <= hour_range[1])]
+
+    return df['nhl_scaled'], df[obs_var]
+
 def get_model_swc(modelfile, obs_file, obs_var, output_var, species, **kwargs):
     """
     Read in observation data model output for a trial, which will be used for
@@ -194,7 +228,9 @@ class Fetch3Wrapper(BaseWrapper):
     config_file_name = "config.yml"
     fetch_data_funcs = {get_model_sapflux.__name__: get_model_sapflux,
                         get_model_plot_trans.__name__: get_model_plot_trans,
-                        get_model_swc.__name__: get_model_swc}
+                        get_model_swc.__name__: get_model_swc,
+                        get_model_nhl_trans.__name__: get_model_nhl_trans,
+                        }
 
     def __init__(self, *args, **kwargs):
         print(args, kwargs)
@@ -275,11 +311,11 @@ class Fetch3Wrapper(BaseWrapper):
         popen = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
         self._processes.append(popen)
 
-    def set_trial_status(self, trial: Trial) -> None:
+    def set_trial_status(self, trial: Trial, log_file='fetch3.log') -> None:
         """ "Get status of the job by a given ID. For simplicity of the example,
         return an Ax `TrialStatus`.
         """
-        log_file = get_trial_dir(self.experiment_dir, trial.index) / "fetch3.log"
+        log_file = get_trial_dir(self.experiment_dir, trial.index) / log_file
 
         if log_file.exists():
             with open(log_file, "r") as f:
@@ -302,6 +338,35 @@ class Fetch3Wrapper(BaseWrapper):
             **metric_properties[metric_name]
         )
         return dict(y_pred=y_pred, y_true=y_true)
+
+
+class NHLWrapper(Fetch3Wrapper):
+    fetch_data_funcs = {get_model_nhl_trans.__name__: get_model_nhl_trans,
+                       }
+    def __init__(self, *args, **kwargs):
+        print(args, kwargs)
+        super().__init__(*args, **kwargs)
+
+    def run_model(self, trial: Trial):
+
+        trial_dir = get_trial_dir(self.experiment_dir, trial.index)
+        config_path = trial_dir / self.config_file_name
+
+        model_dir = self.ex_settings["model_dir"]
+
+        os.chdir(model_dir)
+
+        cmd = self.script_options["run_cmd"].format(config_path=config_path,
+                                                    data_path=self.ex_settings['data_path'],
+                                                    trial_dir=trial_dir,
+                                                    species=self.ex_settings['species'])
+
+        args = cmd.split()
+        popen = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
+        self._processes.append(popen)
+
+    def set_trial_status(self, trial: Trial, log_file='nhl.log') -> None:
+        return super().set_trial_status(trial, log_file)
 
 
 def exit_handler():
