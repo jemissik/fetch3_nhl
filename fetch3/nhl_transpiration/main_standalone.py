@@ -50,7 +50,7 @@ def run(config_path, data_path, output_path, species):
     cfg = setup_config(config_path, species=species)
 
     # NHL in units of [kg H2O m-2crown_projection s-1 m-1stem]
-    nhl_trans_tot, LAD = nhl.main(cfg, output_path, data_path, to_model_res=False)
+    nhl_trans_tot, LAD = nhl.main(cfg, output_path, data_path, to_model_res=False, write_output=True)
 
 
 if __name__ == "__main__":

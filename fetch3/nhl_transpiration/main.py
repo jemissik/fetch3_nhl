@@ -22,7 +22,7 @@ from fetch3.nhl_transpiration.NHL_functions import *
 from fetch3.scaling import trans2d_to_tree
 
 
-def main(cfg, output_dir, data_dir, to_model_res=True, write_output=True):
+def main(cfg, output_dir, data_dir, to_model_res=True, write_output=False):
     """
     Calculate NHL transpiration.
 
