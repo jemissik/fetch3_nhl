@@ -217,6 +217,7 @@ def run_single(species, config_file, data_dir, output_dir):
         THETA,
         infiltration,
         trans_2d,
+        nhl_trans_2d,
         cfg.dt,
         start_time,
         end_time,
