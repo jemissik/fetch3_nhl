@@ -197,6 +197,7 @@ def run_single(species, config_file, data_dir, output_dir):
         THETA,
         infiltration,
         trans_2d,
+        nhl_trans_2d,
     ) = Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data_dir)
 
     ############## Calculate water balance and format model outputs #######################
@@ -230,10 +231,6 @@ def run_single(species, config_file, data_dir, output_dir):
     ds_sapflux = calc_sapflux(H_above, trans_2d_tree, cfg)
 
     nc_output["sapflux"] = ds_sapflux
-
-    ####################### Save model outputs ###################################
-    logger.info("Saving outputs")
-    # save_csv(output_dir, df_waterbal, df_EP)
 
     logger.info("Finished running species: %s", species)
 

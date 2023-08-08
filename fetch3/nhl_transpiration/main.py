@@ -76,8 +76,8 @@ def main(cfg, output_dir, data_dir, to_model_res=True, write_output=True):
             units="kg h20 s-1", description="NHL transpiration per tree"
         )
         nhl_trans_tot = nhl_trans_tot.assign_coords(species=cfg.species)
-        write_outputs_netcdf(output_dir, ds)
-        write_outputs_netcdf(output_dir, nhl_trans_tot)
+        write_outputs_netcdf(output_dir, ds, filename=f'nhl_2d_{cfg.species}.nc')
+        write_outputs_netcdf(output_dir, nhl_trans_tot, filename=f'nhl_tree_{cfg.species}.nc')
         # write_outputs({"zenith": zen, "LAD": LAD}, output_dir)
 
     if not to_model_res:

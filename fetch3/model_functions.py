@@ -239,6 +239,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
     H = np.zeros(shape=(nz, dim))  # Water potential [Pa]
     trans_2d = np.zeros(shape=(len(z_upper), dim))
+    nhl_trans_2d = np.zeros(shape=(len(z_upper), dim))
     K = np.zeros(shape=(nz, dim))
     Capac = np.zeros(shape=(nz, dim))
     S_kx = np.zeros(shape=(nz - nz_r, dim))
@@ -538,6 +539,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
 
                     H[:, sav] = hnp1mp1  # saving potential
                     trans_2d[:, sav] = Pt_2d[:, i]  # 1/s
+                    nhl_trans_2d[:, sav] = NHL_modelres[:, i]
                     hsoil = hnp1mp1[nz_s - (nz_r - nz_s) : nz_s]
                     hroot = hnp1mp1[(nz_s):(nz_r)]
                     EVsink_ts[:, sav] = -Kr[:] * (hsoil - hroot)  # sink term soil #saving
@@ -578,6 +580,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
         THETA,
         infiltration,
         trans_2d,
+        nhl_trans_2d,
     )
 
 
@@ -764,6 +767,7 @@ def format_model_output(
                 trans_2d.transpose(),
                 dict(description="transpiration", units="m3H2O m-2crown_projection m-1stem s-1"),
             ),
+            #TODO add nhl_trans_2d
         },
         coords={
             "time": df_EP.index,
