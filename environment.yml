@@ -24,7 +24,7 @@ dependencies:
   - flake8
   - PyYAML
   - click
-  - conda-forge::boa-framework==0.8.4
+  - conda-forge::boa-framework==0.8.7
   - pip
   - pip:
     - -e .
