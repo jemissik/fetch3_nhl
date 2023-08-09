@@ -15,7 +15,7 @@ import logging
 import fetch3.nhl_transpiration.main as nhl
 import click
 from pathlib import Path
-from fetch3.model_config import setup_config
+from fetch3.model_config import setup_config, save_calculated_params
 from fetch3.utils import make_experiment_directory
 from fetch3 import __version__ as VERSION
 
@@ -113,6 +113,9 @@ def run(config_path, data_path, output_path, species):
     copied_config_path = exp_dir / config_path.name
     if not copied_config_path.exists():
         shutil.copy(config_path, copied_config_path)
+
+    # save the calculated params to a file
+    save_calculated_params(str(exp_dir / "calculated_params.yml"), cfg)
 
 
     try:
