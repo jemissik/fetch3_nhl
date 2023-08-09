@@ -449,8 +449,13 @@ class ConfigParams:
     x: float = None  # Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
 
     Vcmax25: float = None
-    alpha_gs: float = None
     alpha_p: float = None
+
+    # alpha_gs and m are the same parameter
+    # old version of model used alpha_gs, so rename this parameter to m if it's in the config file
+    alpha_gs: float = None
+    m: float = None
+
 
     wp_s50: float = None  # value for oak from Mirfenderesgi
     c3: float = None  # value for oak from Mirfenderesgi
@@ -513,6 +518,11 @@ class ConfigParams:
         self.Aind_x = calc_Aind_x(self.sapwood_area, self.mean_crown_area_sp)
         # Calculate LAIc_sp
         self.LAIc_sp = calc_LAIc_sp(self.LAI, self.mean_crown_area_sp, self.stand_density_sp)
+
+        # Rename alpha_gs to m if it's in the config file
+        if self.alpha_gs is not None:
+            self.m = self.alpha_gs
+            self.alpha_gs = None
 
 
 # Read configs from yaml file

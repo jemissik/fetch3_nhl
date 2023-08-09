@@ -210,7 +210,7 @@ species_parameters:
 
     #XYLEM PARAMETERS
     kmax:
-      type: range
+      type: fixed
       value: 1.0e-5   #conductivity of xylem  [ m2/sPa]
       bounds: [0.5e-5, 1.5e-5]  #arbitrary range
 
@@ -329,13 +329,13 @@ species_parameters:
 
     #XYLEM PARAMETERS
     kmax:  # Max conductivity of saturated stem xylem  [m s-1]
-      type: range
+      type: fixed
       value: 1.0e-5
       # bounds: [9.0e-7, 12.0e-6]  #TODO from table 2 mirfenderesgi (not sure about units)
       bounds: [1.0e-6, 01.0e-4]  #arbitrary range
 
     ap:
-      type: range
+      type: fixed
       value: 2.0e-6                                  #xylem cavitation parameter [Pa-1]
       bounds: [1.0e-7, 1.0e-5]  #arbitrary range
     bp:

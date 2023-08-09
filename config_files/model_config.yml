@@ -160,7 +160,7 @@ species_parameters:
     Cf: 0.85  #Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
     x: 1.0  # FETCH2: 2-6 #Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
     Vcmax25: 59.9 #oak 59.9 pine 31.1
-    alpha_gs: 6.7
+    m: 6.7
     alpha_p: 1.0
 
     wp_s50: -9.1e+5

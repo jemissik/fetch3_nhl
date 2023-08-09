@@ -465,7 +465,7 @@ def calc_gs_Leuning(g0, m, A, c_s, gamma_star, VPD, D0=3):
     return gs
 
 
-def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
+def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, m, **kwargs):
     """
     Calculates photosynthesis and stomatal conductance
     Uses Leuning model for stomatal conductance
@@ -510,7 +510,6 @@ def solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs):
     o = 210  # [mmol mol-1]
     # Leuning model
     g0 = 0.01  # [mol m-2 s-1]
-    m = 4.0  # unitless
 
     # Adjust the Farquhar model parameters for temperature
     Vcmax = Vcmax25 * np.exp(0.088 * (Tair - 25)) / (1 + np.exp(0.29 * (Tair - 41)))
@@ -614,7 +613,7 @@ def calc_respiration(Tair):
     return Re
 
 
-def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, VPD, **kwargs):
+def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, VPD, m, **kwargs):
 
     CF = 1.15 * 1000 / 29
     Re = Re / CF
@@ -658,7 +657,7 @@ def solve_C_closure(z, Kc, Ca, S_initial, Re, a_s, Tair, Qp, Vcmax25, alpha_p, V
         C = eps1 * Cn + (1 - eps1) * C
         Ca = C
         A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(
-            Tair, Qp, Ca, Vcmax25, alpha_p, VPD, **kwargs
+            Tair, Qp, Ca, Vcmax25, alpha_p, VPD, m, **kwargs
         )
         S = -A * a_s / CF
 
@@ -721,7 +720,7 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     h = cfg.Hspec
     Cd = cfg.Cd
     Vcmax25 = cfg.Vcmax25
-    alpha_gs = cfg.alpha_gs
+    m = cfg.m
     alpha_p = cfg.alpha_p
     LAIp_sp = cfg.LAI
     LAIc_sp = cfg.LAIc_sp
@@ -779,11 +778,11 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     )
 
     # Solve conductances
-    A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD=VPD, uz=U)
+    A, gs, Ci, Cs, gb, geff = solve_leaf_physiology(Tair, Qp, Ca, Vcmax25, alpha_p, VPD=VPD, m=m, uz=U)
 
     # Calculate the transpiration per m-1 [ kg H2O s-1 m-1_stem]
     NHL_trans_leaf = calc_transpiration_leaf(VPD, Tair, geff, Press)  # [kg H2O m-2leaf s-1]
-    NHL_trans_sp_stem = NHL_trans_leaf * LAD  # [kg H2O s-1 m-1stem m-2crown]
+    NHL_trans_sp_stem = NHL_trans_leaf * LAD
 
     # Add data to dataset
     ds = xr.Dataset(
@@ -805,6 +804,14 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
         attrs=dict(description="Model output"),
     )
 
+    # Add metadata to dataset
+    ds.NHL_trans_leaf.attrs = dict(
+        units="kg H2O m-2leaf s-1", description="NHL transpiration per unit leaf area"
+    )
+    ds.NHL_trans_sp_stem.attrs = dict(
+        units="kg H2O s-1 m-1_stem", description="NHL transpiration per unit height of stem"
+    )
+
     return ds, LAD, zenith_angle
 
 
@@ -824,8 +831,6 @@ def calc_NHL_timesteps(cfg, met_data, LADnorm_df, **kwargs):
     met_data : _type_
         _description_
     Vcmax25 : _type_
-        _description_
-    alpha_gs : _type_
         _description_
     alpha_p : _type_
         _description_
@@ -937,7 +942,7 @@ def write_outputs(output_vars, dir):
         )
 
 
-def write_outputs_netcdf(dir, ds):
+def write_outputs_netcdf(dir, ds, filename="nhl_2d_out.nc"):
     """
     Writes model output to netcdf file
 
@@ -947,4 +952,4 @@ def write_outputs_netcdf(dir, ds):
     """
 
     # save dataset
-    ds.to_netcdf(dir / "nhl_out.nc")
+    ds.to_netcdf(dir / filename)
