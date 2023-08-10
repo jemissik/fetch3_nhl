@@ -15,7 +15,7 @@ import logging
 import fetch3.nhl_transpiration.main as nhl
 import click
 from pathlib import Path
-from fetch3.model_config import setup_config, save_calculated_params
+from fetch3.model_config import save_calculated_params, get_single_config
 from fetch3.utils import make_experiment_directory
 from fetch3 import __version__ as VERSION
 
@@ -68,7 +68,7 @@ model_dir = Path(__file__).parent.resolve()  # File path of model source code
     help="species to run the model for"
 )
 def run(config_path, data_path, output_path, species):
-    cfg = setup_config(config_path, species=species)
+    cfg = get_single_config(config_path=config_path, species=species)
 
     # If using the default output directory, create directory if it doesn't exist
     if output_path == parent_path:
@@ -77,8 +77,8 @@ def run(config_path, data_path, output_path, species):
 
     # Make a new experiment directory if make_experiment_dir=True was specified in the config
     # Otherwise, use the output directory for the experiment directory
-    mk_exp_dir = cfg.make_experiment_dir
-    exp_name = cfg.experiment_name
+    mk_exp_dir = cfg.model_options.make_experiment_dir
+    exp_name = cfg.model_options.experiment_name
     if mk_exp_dir:
         exp_dir = make_experiment_directory(output_path, experiment_name=exp_name)
     else:

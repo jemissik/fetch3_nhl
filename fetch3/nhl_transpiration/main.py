@@ -18,11 +18,12 @@ import pandas as pd
 
 from fetch3.met_data import prepare_ameriflux_data
 from fetch3.nhl_transpiration.NHL_functions import *
+from fetch3.model_config import ConfigParams
 
 from fetch3.scaling import trans2d_to_tree
 
 
-def main(cfg, output_dir, data_dir, to_model_res=True, write_output=False):
+def main(cfg: ConfigParams, output_dir, data_dir, to_model_res=True, write_output=False):
     """
     Calculate NHL transpiration.
 
@@ -51,27 +52,27 @@ def main(cfg, output_dir, data_dir, to_model_res=True, write_output=False):
     start = time.time()
 
     # Read in LAD and met data
-    met_data = prepare_ameriflux_data(data_dir / cfg.input_fname, cfg)
-    LADnorm_df = pd.read_csv(data_dir / cfg.LAD_norm)
+    met_data = prepare_ameriflux_data(data_dir / cfg.model_options.input_fname, cfg)
+    LADnorm_df = pd.read_csv(data_dir / cfg.model_options.LAD_norm)
 
     logger.info("Calculating NHL...")
 
     ds, LAD, zen = calc_NHL_timesteps(cfg, met_data, LADnorm_df)
 
     # Apply NHl scaling factor
-    ds["NHL_trans_sp_stem"] = ds.NHL_trans_sp_stem * cfg.scale_nhl  # [kg H2O s-1 m-1stem m-2crown]
-    ds["NHL_trans_leaf"] = ds.NHL_trans_leaf * cfg.scale_nhl  # [kg H2O m-2leaf s-1]
+    ds["NHL_trans_sp_stem"] = ds.NHL_trans_sp_stem * cfg.parameters.scale_nhl  # [kg H2O s-1 m-1stem m-2crown]
+    ds["NHL_trans_leaf"] = ds.NHL_trans_leaf * cfg.parameters.scale_nhl  # [kg H2O m-2leaf s-1]
     ds = ds.assign_coords(species=cfg.species)
 
     # Nighttime transpiration
-    ds["NHL_trans_sp_stem"] = calc_nighttime_trans(ds.NHL_trans_sp_stem, met_data.PPFD_IN, cfg.mean_crown_area_sp)
-    ds["NHL_trans_leaf"] = calc_nighttime_trans(ds.NHL_trans_leaf, met_data.PPFD_IN, cfg.mean_crown_area_sp)
+    ds["NHL_trans_sp_stem"] = calc_nighttime_trans(ds.NHL_trans_sp_stem, met_data.PPFD_IN, cfg.parameters.mean_crown_area_sp)
+    ds["NHL_trans_leaf"] = calc_nighttime_trans(ds.NHL_trans_leaf, met_data.PPFD_IN, cfg.parameters.mean_crown_area_sp)
 
     logger.info(f"NHL calculations finished in {time.time() - start} s")
 
     if write_output:
         # logger.info("Saving NHL output...")
-        nhl_trans_tot = trans2d_to_tree(ds.NHL_trans_sp_stem, cfg.mean_crown_area_sp, cfg.dz) # kg h20 s-1
+        nhl_trans_tot = trans2d_to_tree(ds.NHL_trans_sp_stem, cfg.parameters.mean_crown_area_sp, cfg.model_options.dz) # kg h20 s-1
         nhl_trans_tot.attrs = dict(
             units="kg h20 s-1", description="NHL transpiration per tree"
         )
@@ -97,8 +98,8 @@ def main(cfg, output_dir, data_dir, to_model_res=True, write_output=False):
         )
 
         # New time and space coordinates matching model resolution
-        model_ts = np.arange(0, len(ds.time) * cfg.dt + cfg.dt0, cfg.dt0)
-        model_z = np.arange(0, cfg.Hspec, cfg.dz)
+        model_ts = np.arange(0, len(ds.time) * cfg.model_options.dt + cfg.model_options.dt0, cfg.model_options.dt0)
+        model_z = np.arange(0, cfg.parameters.Hspec, cfg.model_options.dz)
 
         da = (
             ds2.NHL_trans_sp_stem * 10**-3

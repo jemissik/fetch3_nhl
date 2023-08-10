@@ -9,18 +9,21 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from fetch3.model_config import ConfigParams
+
+
 ###########################################################
 # Discretization
 ###########################################################
 
 
-def spatial_discretization(cfg):
-    dz = cfg.dz
-    Soil_depth = cfg.Soil_depth
-    Root_depth = cfg.Root_depth
-    Hspec = cfg.Hspec
-    sand_d = cfg.sand_d
-    clay_d = cfg.clay_d
+def spatial_discretization(cfg: ConfigParams):
+    dz = cfg.model_options.dz
+    Soil_depth = cfg.parameters.Soil_depth
+    Root_depth = cfg.parameters.Root_depth
+    Hspec = cfg.parameters.Hspec
+    sand_d = cfg.parameters.sand_d
+    clay_d = cfg.parameters.clay_d
 
     ##########################################
     # below-ground spatial discretization
@@ -56,10 +59,10 @@ def spatial_discretization(cfg):
 
     # Create arrays for theta_1 and theta_2
     theta_1 = np.piecewise(
-        z_soil, [z_soil <= clay_d, z_soil > clay_d], [cfg.theta_1_clay, cfg.theta_1_sand]
+        z_soil, [z_soil <= clay_d, z_soil > clay_d], [cfg.parameters.theta_1_clay, cfg.parameters.theta_1_sand]
     )
     theta_2 = np.piecewise(
-        z_soil, [z_soil <= clay_d, z_soil > clay_d], [cfg.theta_2_clay, cfg.theta_2_sand]
+        z_soil, [z_soil <= clay_d, z_soil > clay_d], [cfg.parameters.theta_2_clay, cfg.parameters.theta_2_sand]
     )
 
     zind = Zind(
@@ -81,9 +84,9 @@ def spatial_discretization(cfg):
     return zind
 
 
-def temporal_discretization(cfg, tmax):
+def temporal_discretization(cfg: ConfigParams, tmax):
     ##############Temporal discritization according to MODEL resolution
-    t_num = np.arange(0, tmax + cfg.dt0, cfg.dt0)  # [s]
+    t_num = np.arange(0, tmax + cfg.model_options.dt0, cfg.model_options.dt0)  # [s]
     nt = len(t_num)  # number of time steps
     return t_num, nt
 

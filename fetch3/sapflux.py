@@ -5,6 +5,7 @@ Functions for calculating sap storage and sap flux from the model outputs
 import numpy as np
 import xarray as xr
 
+from fetch3.model_config import ConfigParams
 from fetch3.scaling import integrate_trans2d
 
 
@@ -38,7 +39,7 @@ def format_inputs(canopy_ds, crown_area):
     return H_above, trans_2d_tree
 
 
-def calc_sap_storage(H_MPa, cfg):
+def calc_sap_storage(H_MPa, cfg: ConfigParams):
     """
     Calculates sap storage based on water potential
 
@@ -54,17 +55,17 @@ def calc_sap_storage(H_MPa, cfg):
     storage: xarray.DataArray
         Sap storage [m3]
     """
-    sapwood_area = cfg.sapwood_area  # m2
-    dz = cfg.dz
-    Phi0x = cfg.Phi_0
-    p = cfg.p
+    sapwood_area = cfg.parameters.sapwood_area  # m2
+    dz = cfg.model_options.dz
+    Phi0x = cfg.parameters.Phi_0
+    p = cfg.parameters.p
 
     # Convert H to Pa
     H = H_MPa * 10**6
 
     # cfg.sat_xylem is in [m3 h2o/m3xylem]
-    thetasat = cfg.sat_xylem
-    taper_top = cfg.taper_top
+    thetasat = cfg.parameters.sat_xylem
+    taper_top = cfg.parameters.taper_top
 
     nz = len(H.z)
 
@@ -79,7 +80,7 @@ def calc_sap_storage(H_MPa, cfg):
     return storage
 
 
-def calc_sapflux(H, trans_2d_tree, cfg):
+def calc_sapflux(H, trans_2d_tree, cfg: ConfigParams):
     """
     Calculates sapflux and total aboveground water storage of the tree.
 
@@ -101,8 +102,8 @@ def calc_sapflux(H, trans_2d_tree, cfg):
             - delta_s: Change in aboveground water storage from the previous timestep [m3]
 
     """
-    dt = cfg.dt
-    dz = cfg.dz
+    dt = cfg.model_options.dt
+    dz = cfg.model_options.dz
 
     storage = calc_sap_storage(H, cfg)
     storage.name = "storage"
@@ -119,9 +120,9 @@ def calc_sapflux(H, trans_2d_tree, cfg):
     ds_sapflux = xr.merge([sapflux, storage, delta_S])
 
     # Add plot-level sapflux for the species
-    ds_sapflux['sapflux_plot'] = (0.0001 * cfg.stand_density_sp) * ds_sapflux.sapflux
-    ds_sapflux['storage_plot'] = (0.0001 * cfg.stand_density_sp) * ds_sapflux.storage
-    ds_sapflux['delta_S_plot'] = (0.0001 * cfg.stand_density_sp) * ds_sapflux.delta_S
+    ds_sapflux['sapflux_plot'] = (0.0001 * cfg.parameters.stand_density_sp) * ds_sapflux.sapflux
+    ds_sapflux['storage_plot'] = (0.0001 * cfg.parameters.stand_density_sp) * ds_sapflux.storage
+    ds_sapflux['delta_S_plot'] = (0.0001 * cfg.parameters.stand_density_sp) * ds_sapflux.delta_S
 
 
 

@@ -22,11 +22,11 @@ import concurrent.futures
 import click
 
 from fetch3 import __version__ as VERSION
-from fetch3.utils import make_experiment_directory, load_yaml
+from fetch3.utils import make_experiment_directory
 from fetch3.initial_conditions import initial_conditions
 from fetch3.met_data import prepare_met_data
-from fetch3.model_config import save_calculated_params, setup_config
-from fetch3.model_functions import Picard, format_model_output, save_csv, save_nc, combine_outputs
+from fetch3.model_config import save_calculated_params, get_multi_config, ConfigParams
+from fetch3.model_functions import Picard, format_model_output, save_nc, combine_outputs
 from fetch3.model_setup import spatial_discretization, temporal_discretization
 from fetch3.sapflux import calc_sapflux, format_inputs
 
@@ -74,8 +74,9 @@ model_dir = Path(__file__).parent.resolve()  # File path of model source code
     help="species to run the model for"
 )
 def main(config_path, data_path, output_path, species):
+    cfgs = get_multi_config(config_path=config_path, species=species)
 
-    loaded_configs = load_yaml(config_path)
+    model_options = cfgs[0].model_options
 
     # If using the default output directory, create directory if it doesn't exist
     if output_path == parent_path:
@@ -84,8 +85,8 @@ def main(config_path, data_path, output_path, species):
 
     # Make a new experiment directory if make_experiment_dir=True was specified in the config
     # Otherwise, use the output directory for the experiment directory
-    mk_exp_dir = loaded_configs["model_options"].get("make_experiment_dir", False)
-    exp_name = loaded_configs["model_options"].get("experiment_name", "")
+    mk_exp_dir = model_options.make_experiment_dir
+    exp_name = model_options.experiment_name
     if mk_exp_dir:
         exp_dir = make_experiment_directory(output_path, experiment_name=exp_name)
     else:
@@ -108,6 +109,7 @@ def main(config_path, data_path, output_path, species):
     Output Experiment Dir: {exp_dir}
     Config file: {config_path}
     Start Time: {time.ctime(start)}
+    Using config file: {config_path}
     Version: {VERSION}"""
     )
 
@@ -122,16 +124,10 @@ def main(config_path, data_path, output_path, species):
         shutil.copy(config_path, copied_config_path)
 
 
-    # Get species list
-    if species is None:
-        species_list = list(loaded_configs['species_parameters'].keys())
-    else:
-        species_list = list(species)
-
     try:
         results = []
         with concurrent.futures.ProcessPoolExecutor() as executor:
-            species_runs = {executor.submit(run_single, species, config_path, data_path, exp_dir): species for species in species_list}
+            species_runs = {executor.submit(run_single, cfg, data_path, exp_dir): cfg for cfg in cfgs}
             logger.info("submitted jobs!")
             for future in concurrent.futures.as_completed(species_runs):
                 original_task = species_runs[future]
@@ -150,8 +146,8 @@ def main(config_path, data_path, output_path, species):
         logger.info("run complete")
 
 
-def run_single(species, config_file, data_dir, output_dir):
-    log_path = output_dir / f"fetch3_{species}.log"
+def run_single(cfg: ConfigParams, data_dir, output_dir):
+    log_path = output_dir / f"fetch3_{cfg.species}.log"
     if log_path.exists():
         os.remove(log_path)
     fh = logging.FileHandler(log_path)
@@ -160,10 +156,7 @@ def run_single(species, config_file, data_dir, output_dir):
     logger.addHandler(fh)
 
     # Log the directories being used
-    logger.info("Using config file: " + str(config_file))
     logger.info("Using output directory: " + str(output_dir))
-
-    cfg = setup_config(config_file, species=species)
 
     # save the calculated params to a file
     save_calculated_params(str(output_dir / "calculated_params.yml"), cfg)
@@ -202,7 +195,7 @@ def run_single(species, config_file, data_dir, output_dir):
 
     ############## Calculate water balance and format model outputs #######################
     df_waterbal, df_EP, nc_output = format_model_output(
-        species,
+        cfg.species,
         H,
         K,
         S_stomata,
@@ -218,22 +211,22 @@ def run_single(species, config_file, data_dir, output_dir):
         infiltration,
         trans_2d,
         nhl_trans_2d,
-        cfg.dt,
+        cfg.model_options.dt,
         start_time,
         end_time,
-        cfg.dz,
+        cfg.model_options.dz,
         cfg,
         zind,
     )
 
     # Calculate sapflux and aboveground storage
-    H_above, trans_2d_tree = format_inputs(nc_output["ds_canopy"], cfg.mean_crown_area_sp)
+    H_above, trans_2d_tree = format_inputs(nc_output["ds_canopy"], cfg.parameters.mean_crown_area_sp)
 
     ds_sapflux = calc_sapflux(H_above, trans_2d_tree, cfg)
 
     nc_output["sapflux"] = ds_sapflux
 
-    logger.info("Finished running species: %s", species)
+    logger.info("Finished running species: %s", cfg.species)
 
     return nc_output
 

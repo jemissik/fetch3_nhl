@@ -3,6 +3,8 @@ Root functions
 """
 import numpy as np
 
+from fetch3.model_config import ConfigParams
+
 
 def feddes_root_stress(theta, theta1, theta2):
     """
@@ -30,7 +32,7 @@ def feddes_root_stress(theta, theta1, theta2):
     return stress_roots
 
 
-def verma_root_mass_dist(cfg):
+def verma_root_mass_dist(cfg: ConfigParams):
     """
     Root mass distribution following Verma et al. 2014
 
@@ -46,18 +48,18 @@ def verma_root_mass_dist(cfg):
 
     """
 
-    z_dist = np.arange(0, cfg.Root_depth + cfg.dz, cfg.dz)
+    z_dist = np.arange(0, cfg.parameters.Root_depth + cfg.model_options.dz, cfg.model_options.dz)
     z_dist = np.flipud(z_dist)
 
     r_dist = (
-        np.exp(cfg.qz - ((cfg.qz * z_dist) / cfg.Root_depth))
-        * cfg.qz**2
-        * (cfg.Root_depth - z_dist)
-    ) / (cfg.Root_depth**2 * (1 + np.exp(cfg.qz) * (-1 + cfg.qz)))
+        np.exp(cfg.parameters.qz - ((cfg.parameters.qz * z_dist) / cfg.parameters.Root_depth))
+        * cfg.parameters.qz**2
+        * (cfg.parameters.Root_depth - z_dist)
+    ) / (cfg.parameters.Root_depth**2 * (1 + np.exp(cfg.parameters.qz) * (-1 + cfg.parameters.qz)))
     return r_dist
 
 
-def calc_root_K(r_dist, stress_roots, cfg):
+def calc_root_K(r_dist, stress_roots, cfg: ConfigParams):
     """
 
     Parameters
@@ -72,7 +74,7 @@ def calc_root_K(r_dist, stress_roots, cfg):
     """
 
     # specific radial conductivity under saturated soil conditions
-    Ksrad = stress_roots * cfg.Kr  # stress function is unitless
+    Ksrad = stress_roots * cfg.parameters.Kr  # stress function is unitless
 
     # effective root radial conductivity
     Kerad = Ksrad * r_dist  # [1/sPa] #Kr is already divided by Rho*g

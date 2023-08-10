@@ -255,7 +255,7 @@ from os import PathLike
 
 from attrs import define, field, fields
 from typing import ClassVar, Optional
-from enum import Enum
+from enum import IntEnum
 import yaml
 
 from fetch3.scaling import calc_Aind_x, calc_LAIc_sp, calc_xylem_cross_sectional_area
@@ -263,7 +263,8 @@ from fetch3.utils import load_yaml, deprecation
 
 logger = logging.getLogger(__file__)
 
-class TranspirationScheme(Enum):
+
+class TranspirationScheme(IntEnum):
     PM = 0
     pm = 0
     Penman_Monteith = 0
@@ -538,8 +539,8 @@ SCHEMES = {
 class ConfigParams:
     transpiration_scheme: int | str | TranspirationScheme  # 0: PM transpiration; 1: NHL transpiration
 
-    model_options: dict | ModelOptions
-    parameters: dict | BaseParameters
+    model_options: dict | ModelOptions | NHLModelOptions
+    parameters: dict | BaseParameters | NHLParameters | PMParameters
 
     def __init__(self, model_options, parameters, transpiration_scheme=None):
         if transpiration_scheme is None:
@@ -589,8 +590,16 @@ class ConfigParams:
     def species(self):
         return self.model_options.species
 
+    @property
+    def Rho(self):
+        return self.parameters.Rho
 
-def get_multi_config(config_path: Optional[str | PathLike] = None, config: Optional[dict] = None) -> list[ConfigParams]:
+    @property
+    def g(self):
+        return self.parameters.g
+
+
+def get_multi_config(config_path: Optional[str | PathLike] = None, config: Optional[dict] = None, species: Optional[str | list[str]] = None) -> list[ConfigParams]:
     """Get a list of ConfigParams objects from a config file or dict"""
     if config and config_path:
         raise ValueError("Only one of config and config_path can be specified")
@@ -598,19 +607,40 @@ def get_multi_config(config_path: Optional[str | PathLike] = None, config: Optio
         config = load_yaml(config_path)
 
     if "model_trees" in config:
-        return config_from_groupers(config)
+        return config_from_groupers(config=config, species=species)
     elif "species_parameters" in config:
-        return [ConfigParams.from_deprecated_config(config=config, species=species) for species in config["species_parameters"]]
+        species_list = species or list(config["species_parameters"].keys())
+        return [ConfigParams.from_deprecated_config(config=config, species=species) for species in species_list]
     else:
         raise ValueError("Invalid config file format. Config file must contain either 'model_trees' key (current valid format)"
                          " or 'species_parameters' and 'site_parameters' keys (deprecated format)")
 
 
-def config_from_groupers(config):
+def get_single_config(config_path: Optional[str | PathLike] = None, config: Optional[dict] = None, species: Optional[str] = None) -> ConfigParams:
+    """Get a list of ConfigParams objects from a config file or dict"""
+    if config and config_path:
+        raise ValueError("Only one of config and config_path can be specified")
+    if config_path is not None:
+        config = load_yaml(config_path)
+
+    if "model_trees" in config:
+        return config_from_groupers(config=config, species=species)[0]
+    elif "species_parameters" in config:
+        return ConfigParams.from_deprecated_config(config=config, species=species)
+    else:
+        raise ValueError("Invalid config file format. Config file must contain either 'model_trees' key (current valid format)"
+                         " or 'species_parameters' and 'site_parameters' keys (deprecated format)")
+
+
+def config_from_groupers(config, species: Optional[str | list[str]]  = None):
+    if isinstance(species, str):
+        species = [species]
     groups = config.get("groups")  # we do a .get b/c we don't want to raise an error if groups is not in config
     model_trees = config["model_trees"]  # this should always be in config, so we use a regular dict access
     configs = []
     for tree, parameters in model_trees.items():
+        if species and tree not in species:
+            continue
         model_options = deepcopy(config["model_options"])  # deepcopy b/c Config init modifies the dict
         parents = parameters.pop("parents", [])  # default empty list so we can iterate over it later
 
@@ -679,4 +709,13 @@ def save_calculated_params(fileout, cfg):
 if __name__ == "__main__":
     import pathlib
     _cp = pathlib.Path(__file__).parent.parent / "config_files/test_param_groups.yml"
-    print(config_from_groupers(load_yaml(_cp)))
+    c = config_from_groupers(load_yaml(_cp))[0]
+
+
+
+    import timeit
+
+    print(timeit.repeat("for x in range(100): c.wp_s50", "from __main__ import c",
+                  number=100000))
+    print(timeit.repeat("for x in range(100): c.parameters.wp_s50", "from __main__ import c",
+                  number=100000))
