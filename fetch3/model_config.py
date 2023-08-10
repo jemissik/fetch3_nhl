@@ -590,6 +590,22 @@ class ConfigParams:
         return self.model_options.species
 
 
+def get_multi_config(config_path: Optional[str | PathLike] = None, config: Optional[dict] = None) -> list[ConfigParams]:
+    """Get a list of ConfigParams objects from a config file or dict"""
+    if config and config_path:
+        raise ValueError("Only one of config and config_path can be specified")
+    if config_path is not None:
+        config = load_yaml(config_path)
+
+    if "model_trees" in config:
+        return config_from_groupers(config)
+    elif "species_parameters" in config:
+        return [ConfigParams.from_deprecated_config(config=config, species=species) for species in config["species_parameters"]]
+    else:
+        raise ValueError("Invalid config file format. Config file must contain either 'model_trees' key (current valid format)"
+                         " or 'species_parameters' and 'site_parameters' keys (deprecated format)")
+
+
 def config_from_groupers(config):
     groups = config.get("groups")  # we do a .get b/c we don't want to raise an error if groups is not in config
     model_trees = config["model_trees"]  # this should always be in config, so we use a regular dict access
@@ -662,5 +678,5 @@ def save_calculated_params(fileout, cfg):
 
 if __name__ == "__main__":
     import pathlib
-    config_path = pathlib.Path(__file__).parent.parent / "config_files/model_config.yml"
-    c = ConfigParams.from_deprecated_config(config_path)
+    _cp = pathlib.Path(__file__).parent.parent / "config_files/test_param_groups.yml"
+    print(config_from_groupers(load_yaml(_cp)))
