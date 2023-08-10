@@ -120,7 +120,6 @@ groups:
     #NHL PARAMETERS
     ###########################################################################
     scale_nhl: 1
-
     mean_crown_area_sp: 26.8600000000000 #from NHL
 #    total_crown_area_sp: 2171.75744784689 #from NHL code  # TODO MADDIE what to do with these parameters
 #    plot_area: 75649.5511

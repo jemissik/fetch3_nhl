@@ -565,14 +565,22 @@ def config_from_groupers(config):
     for tree, parameters in model_trees.items():
         model_options = deepcopy(config["model_options"])  # deepcopy b/c Config init modifies the dict
         parents = parameters.pop("parents", [])  # default empty list so we can iterate over it later
+
+        parameter_check_dict = collections.defaultdict(list)
+        for label, param_dict in zip(
+                [tree, *parents],
+                [parameters] + [groups[parent] for parent in parents]
+        ):
+            for param, value in param_dict.items():
+                parameter_check_dict[param].append(label)
+        for key, labels in parameter_check_dict.items():
+            if len(labels) > 1:
+                raise ValueError(f"Parameter {key} is defined more than once. It is defined in {labels} locations."
+                                 "Overriding parameters from a parent in a child is not allowed.")
+
         for parent in parents:
-            params = groups[parent]
-            for key in params:
-                if key in parameters:
-                    raise ValueError(f"Parameter {key} is defined in both {parent} and {tree}. "
-                                     "Overriding parameters from a parent in a child is not allowed.")
-            parameters.update(params)  # update the parameters dict with the parent parameters
-            model_options["species"] = tree
+            parameters.update(groups[parent])  # update the parameters dict with the parent parameters
+        model_options["species"] = tree
         configs.append(ConfigParams(model_options=model_options, parameters=parameters))
     return configs
 
