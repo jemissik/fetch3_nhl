@@ -246,10 +246,15 @@ Jarvis parameters
 * ``Emax`` (float): *[m/s]* maximum nightime transpiration
 
 """
+from __future__ import annotations
 
+import collections
 import logging
-from attrs import define, field
+from copy import deepcopy
 
+from attrs import define, field, fields
+from typing import ClassVar
+from enum import Enum
 import yaml
 
 from fetch3.scaling import calc_Aind_x, calc_LAIc_sp, calc_xylem_cross_sectional_area
@@ -257,12 +262,26 @@ from fetch3.utils import load_yaml
 
 logger = logging.getLogger(__file__)
 
+class TranspirationScheme(Enum):
+    PM = 0
+    pm = 0
+    Penman_Monteith = 0
+    penman_monteith = 0
+    NHL = 1
+    nhl = 1
 
-# Dataclass to hold the config parameters
+
+def get_enum(val, enum):
+    """Get enum from string or int, normalize string, returning enum value"""
+    if isinstance(val, str):
+        val = val.lower().replace("-", "_")
+        return getattr(enum, val)
+    elif isinstance(val, int):
+        return enum(val)
+
+
 @define
-class ConfigParams:
-
-
+class ModelOptions:
     # File for input met data
     input_fname: str
 
@@ -282,7 +301,6 @@ class ConfigParams:
     print_freq: int  # Interval of timesteps to print if print_run_progress = True (e.g. 1 will print every time step)
 
 
-    transpiration_scheme: int  # 0: PM transpiration; 1: NHL transpiration
     lad_scheme: int  # 0: default scheme, based on Lalic et al 2014; 1: scheme from NHL module
 
     ###############################################################################
@@ -294,10 +312,8 @@ class ConfigParams:
 
     stop_tol: float  # stop tolerance of equation converging
 
-    #############################################################################
-    # MODEL PARAMETERS
-    # Values according to Verma et al., 2014
-    ############################################################################
+    # TREE SPECIES PARAMETERS
+    species: str
 
     # CONFIGURING SOIL BOUNDARY CONDITIONS
     # Here the user can choose the desired contition by setting the numbers as
@@ -320,6 +336,26 @@ class ConfigParams:
 
     UpperBC: int
     BottomBC: int
+    LAD_norm: str = None  # LAD data
+
+    make_experiment_dir: bool = False
+    experiment_name: str = None
+    met_column_labels: dict = None
+
+
+@define
+class NHLModelOptions(ModelOptions):
+    """NHL Model Options"""
+    zenith_method: str = "CN"  # "CN" or "fetch2" zenith angle calculation method
+
+
+@define
+class BaseParameters:
+    #############################################################################
+    # MODEL PARAMETERS
+    # Values according to Verma et al., 2014
+    ############################################################################
+
 
     # SOIL SPATIAL DISCRETIZATION
 
@@ -362,9 +398,6 @@ class ConfigParams:
     theta_1_sand: float
     theta_2_sand: float
 
-    # TREE PARAMETERS
-    species: str
-
     # ROOT PARAMETERS
     Kr: float  # soil-to-root radial conductance [m/sPa]
     qz: float
@@ -391,40 +424,41 @@ class ConfigParams:
     mean_crown_area_sp: float
     sum_LAI_plot: float
 
-    make_experiment_dir: bool = False
-    experiment_name: str = None
-    met_column_labels: dict = None
 
     # Infiltration
     frac_infiltration: float = 1
 
-    #########################################################################
-    # NHL PARAMETERS
-    #########################################################################
-    zenith_method: str = "CN"
+    m_1: float = field(init=False)
+    m_2: float = field(init=False)
+    sapwood_area: float = field(init=False)
+    Aind_x: float = field(init=False)
+    LAIc_sp: float = field(init=False)
+
+    def __attrs_post_init__(self):
+
+        # Calculate m_1 and m_2
+        self.m_1 = 1 - (1 / self.n_1)
+        self.m_2 = 1 - (1 / self.n_2)
+
+        # divide Kr, Ksax, and kmax by rho*g
+        # diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
+        self.Kr = self.Kr / (self.Rho * self.g)
+        self.Ksax = self.Ksax / (self.Rho * self.g)
+        self.kmax = self.kmax / (self.Rho * self.g)
+
+        # Calculate sapwood area
+        self.sapwood_area = calc_xylem_cross_sectional_area(self.dbh, self.sapwood_depth)
+
+        # Calculate Aind_x
+        self.Aind_x = calc_Aind_x(self.sapwood_area, self.mean_crown_area_sp)
+        # Calculate LAIc_sp
+        self.LAIc_sp = calc_LAIc_sp(self.LAI, self.mean_crown_area_sp, self.stand_density_sp)
 
 
-    scale_nhl: float = None
-
-    Cd: float = None  # Drag coefficient
-    alpha_ml: float = None  # Mixing length constant
-    Cf: float = None  # Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
-    x: float = None  # Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
-
-    Vcmax25: float = None
-    alpha_p: float = None
-
-    # alpha_gs and m are the same parameter
-    # old version of model used alpha_gs, so rename this parameter to m if it's in the config file
-    alpha_gs: float = None
-    m: float = None
 
 
-    wp_s50: float = None  # value for oak from Mirfenderesgi
-    c3: float = None  # value for oak from Mirfenderesgi
-
-    LAD_norm: str = None  # LAD data
-
+@define
+class PMParameters(BaseParameters):
     ###########################################################################
     # PENMAN-MONTEITH EQUATION PARAMETERS
     ###########################################################################
@@ -456,42 +490,85 @@ class ConfigParams:
     nl: float = None  # [-] Jarvis leaf water potential parameter
     Emax: float = None  # m/s maximum nightime transpiration
 
-    ###############################################################################
-    # PHYSICAL CONSTANTS
-    ###############################################################################
-    Rho: float = 998  # [kg m-3] water density
-    g: float = 9.81  # [m s-2]
 
-    m_1: float = field(init=False)
-    m_2: float = field(init=False)
-    sapwood_area: float = field(init=False)
-    Aind_x: float = field(init=False)
-    LAIc_sp: float = field(init=False)
+@define
+class NHLParameters(BaseParameters):
+    #########################################################################
+    # NHL PARAMETERS
+    #########################################################################
+
+    scale_nhl: float = None
+
+    Cd: float = None  # Drag coefficient
+    alpha_ml: float = None  # Mixing length constant
+    Cf: float = None  # Clumping fraction [unitless], assumed to be 0.85 (Forseth & Norman 1993) unless otherwise specified
+    x: float = None  # Ratio of horizontal to vertical projections of leaves (leaf angle distribution), assumed spherical (x=1)
+
+    Vcmax25: float = None
+    alpha_p: float = None
+
+    # alpha_gs and m are the same parameter
+    # old version of model used alpha_gs, so rename this parameter to m if it's in the config file
+    alpha_gs: float = None
+    m: float = None
+
+    wp_s50: float = None  # value for oak from Mirfenderesgi
+    c3: float = None  # value for oak from Mirfenderesgi
 
     def __attrs_post_init__(self):
-
-        # Calculate m_1 and m_2
-        self.m_1 = 1 - (1 / self.n_1)
-        self.m_2 = 1 - (1 / self.n_2)
-
-        # divide Kr, Ksax, and kmax by rho*g
-        # diving by Rho*g since Richards equation is being solved in terms of \Phi (Pa)
-        self.Kr = self.Kr / (self.Rho * self.g)
-        self.Ksax = self.Ksax / (self.Rho * self.g)
-        self.kmax = self.kmax / (self.Rho * self.g)
-
-        # Calculate sapwood area
-        self.sapwood_area = calc_xylem_cross_sectional_area(self.dbh, self.sapwood_depth)
-
-        # Calculate Aind_x
-        self.Aind_x = calc_Aind_x(self.sapwood_area, self.mean_crown_area_sp)
-        # Calculate LAIc_sp
-        self.LAIc_sp = calc_LAIc_sp(self.LAI, self.mean_crown_area_sp, self.stand_density_sp)
-
         # Rename alpha_gs to m if it's in the config file
         if self.alpha_gs is not None:
             self.m = self.alpha_gs
             self.alpha_gs = None
+
+SCHEMES = {
+    TranspirationScheme.PM: {"parameters": PMParameters, "model_options": ModelOptions},
+    TranspirationScheme.NHL: {"parameters": NHLParameters, "model_options": NHLModelOptions},
+}
+
+
+# Dataclass to hold the config parameters
+@define
+class ConfigParams:
+    g: ClassVar = 9.81  # Gravitational acceleration [m/s2]
+    Rho: ClassVar = 998  # Density of water [kg/m3]
+    transpiration_scheme: int | str | TranspirationScheme  # 0: PM transpiration; 1: NHL transpiration
+
+    model_options: ModelOptions
+    parameters: BaseParameters
+
+    def __init__(self, model_options, parameters, transpiration_scheme=None):
+        if transpiration_scheme is None:
+            if "transpiration_scheme" not in model_options:
+                raise ValueError("transpiration_scheme must be specified in model_options")
+            transpiration_scheme = model_options.pop("transpiration_scheme")
+        transpiration_scheme = get_enum(val=transpiration_scheme, enum=TranspirationScheme)
+
+        parameters = SCHEMES[transpiration_scheme]["parameters"](**parameters)
+        model_options = SCHEMES[transpiration_scheme]["model_options"](**model_options)
+        self.__attrs_init__(transpiration_scheme=transpiration_scheme, model_options=model_options, parameters=parameters)
+
+    @property
+    def species(self):
+        return self.model_options.species
+
+def config_from_groupers(config):
+    groups = config.get("groups")  # we do a .get b/c we don't want to raise an error if groups is not in config
+    model_trees = config["model_trees"]  # this should always be in config, so we use a regular dict access
+    configs = []
+    for tree, parameters in model_trees.items():
+        model_options = deepcopy(config["model_options"])
+        parents = parameters.pop("parents", [])  # default empty list so we can iterate over it later
+        for parent in parents:
+            params = groups[parent]
+            for key in params:
+                if key in parameters:
+                    raise ValueError(f"Parameter {key} is defined in both {parent} and {tree}. "
+                                     "Overriding parameters from a parent in a child is not allowed.")
+            parameters.update(params)  # update the parameters dict with the parent parameters
+            model_options["species"] = tree
+        configs.append(ConfigParams(model_options=model_options, parameters=parameters))
+    return configs
 
 
 # Read configs from yaml file
@@ -500,7 +577,7 @@ class ConfigParams:
 # Convert config dict to config dataclass
 
 
-def setup_config(config_file, species):
+def setup_config(config_file, species=None):
     logger.info("Reading config file")
 
     loaded_configs = load_yaml(config_file)
@@ -525,7 +602,8 @@ def setup_config(config_file, species):
         site_param_dict = loaded_configs["site_parameters"]
         species_param_dict = loaded_configs["species_parameters"][species]
 
-    cfg = ConfigParams(**{**loaded_configs["model_options"], **site_param_dict, **species_param_dict, **{'species': species}})
+    cfg = ConfigParams(**{"model_options": {**loaded_configs["model_options"], 'species': species},
+                          "parameters": {**site_param_dict, **species_param_dict}})
     return cfg
 
 
@@ -534,3 +612,9 @@ def save_calculated_params(fileout, cfg):
         # Write model options from loaded config
         # Parameters for the trial from Ax
         yaml.dump(cfg, f)
+
+
+if __name__ == "__main__":
+    import pathlib
+    config_path = pathlib.Path(__file__).parent.parent / "config_files/model_config.yml"
+    c = setup_config(config_path)
