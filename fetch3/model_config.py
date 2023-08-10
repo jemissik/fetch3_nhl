@@ -351,6 +351,9 @@ class NHLModelOptions(ModelOptions):
 
 @define
 class BaseParameters:
+    g: ClassVar = 9.81  # Gravitational acceleration [m/s2]
+    Rho: ClassVar = 998  # Density of water [kg/m3]
+
     #############################################################################
     # MODEL PARAMETERS
     # Values according to Verma et al., 2014
@@ -516,10 +519,12 @@ class NHLParameters(BaseParameters):
     c3: float = None  # value for oak from Mirfenderesgi
 
     def __attrs_post_init__(self):
+        super().__attrs_post_init__()
         # Rename alpha_gs to m if it's in the config file
         if self.alpha_gs is not None:
             self.m = self.alpha_gs
             self.alpha_gs = None
+
 
 SCHEMES = {
     TranspirationScheme.PM: {"parameters": PMParameters, "model_options": ModelOptions},
@@ -530,12 +535,10 @@ SCHEMES = {
 # Dataclass to hold the config parameters
 @define
 class ConfigParams:
-    g: ClassVar = 9.81  # Gravitational acceleration [m/s2]
-    Rho: ClassVar = 998  # Density of water [kg/m3]
     transpiration_scheme: int | str | TranspirationScheme  # 0: PM transpiration; 1: NHL transpiration
 
-    model_options: ModelOptions
-    parameters: BaseParameters
+    model_options: dict | ModelOptions
+    parameters: dict | BaseParameters
 
     def __init__(self, model_options, parameters, transpiration_scheme=None):
         if transpiration_scheme is None:
@@ -544,20 +547,23 @@ class ConfigParams:
             transpiration_scheme = model_options.pop("transpiration_scheme")
         transpiration_scheme = get_enum(val=transpiration_scheme, enum=TranspirationScheme)
 
-        parameters = SCHEMES[transpiration_scheme]["parameters"](**parameters)
-        model_options = SCHEMES[transpiration_scheme]["model_options"](**model_options)
+        if isinstance(model_options, dict):
+            model_options = SCHEMES[transpiration_scheme]["model_options"](**model_options)
+        if isinstance(parameters, dict):
+            parameters = SCHEMES[transpiration_scheme]["parameters"](**parameters)
         self.__attrs_init__(transpiration_scheme=transpiration_scheme, model_options=model_options, parameters=parameters)
 
     @property
     def species(self):
         return self.model_options.species
 
+
 def config_from_groupers(config):
     groups = config.get("groups")  # we do a .get b/c we don't want to raise an error if groups is not in config
     model_trees = config["model_trees"]  # this should always be in config, so we use a regular dict access
     configs = []
     for tree, parameters in model_trees.items():
-        model_options = deepcopy(config["model_options"])
+        model_options = deepcopy(config["model_options"])  # deepcopy b/c Config init modifies the dict
         parents = parameters.pop("parents", [])  # default empty list so we can iterate over it later
         for parent in parents:
             params = groups[parent]

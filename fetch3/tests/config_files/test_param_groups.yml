@@ -105,8 +105,6 @@ groups:
     Ksat_2: 3.45e-5
 
     sum_LAI_plot: 3.45
-#    Cd: 0.1 # Drag coefficient  # TODO MADDIE what to do with these parameters
-#    alpha_ml: 0.1  # Mixing length constant
 
   maple_species:
     #SOIL SPATIAL DISCRETIZATION
