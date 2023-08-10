@@ -251,14 +251,15 @@ from __future__ import annotations
 import collections
 import logging
 from copy import deepcopy
+from os import PathLike
 
 from attrs import define, field, fields
-from typing import ClassVar
+from typing import ClassVar, Optional
 from enum import Enum
 import yaml
 
 from fetch3.scaling import calc_Aind_x, calc_LAIc_sp, calc_xylem_cross_sectional_area
-from fetch3.utils import load_yaml
+from fetch3.utils import load_yaml, deprecation
 
 logger = logging.getLogger(__file__)
 
@@ -553,6 +554,37 @@ class ConfigParams:
             parameters = SCHEMES[transpiration_scheme]["parameters"](**parameters)
         self.__attrs_init__(transpiration_scheme=transpiration_scheme, model_options=model_options, parameters=parameters)
 
+    @classmethod
+    def from_deprecated_config(cls, config_path: Optional[str | PathLike] = None, config: Optional[dict] = None, species: Optional[str] = None):
+        deprecation("Config format is deprecated in will be removed in a future version."
+                    "Consult documentation for new format.")
+        if config and config_path:
+            raise ValueError("Only one of config and config_path can be specified")
+        if config_path is not None:
+            config = load_yaml(config_path)
+        if species is None:
+            species = list(config['species_parameters'].keys())[0]
+            logger.info("No species was specified, so using species: " + species)
+        # Check if the config file was the optimization config file format, and convert
+        if "optimization_options" in list(config):
+            site_param_dict = {}
+            species_param_dict = {}
+            for param in config["site_parameters"].keys():
+                site_param_dict[param] = config["site_parameters"][param]["value"]
+            for param in config["species_parameters"][species].keys():
+                try:
+                    species_param_dict[param] = config["species_parameters"][species][param]["value"]
+                except KeyError as e:
+                    logger.info(species, param)
+                    logger.warning(repr(e))
+                    raise
+        else:
+            site_param_dict = config["site_parameters"]
+            species_param_dict = config["species_parameters"][species]
+
+        return cls(**{"model_options": {**config["model_options"], 'species': species},
+                      "parameters": {**site_param_dict, **species_param_dict}})
+
     @property
     def species(self):
         return self.model_options.species
@@ -631,4 +663,4 @@ def save_calculated_params(fileout, cfg):
 if __name__ == "__main__":
     import pathlib
     config_path = pathlib.Path(__file__).parent.parent / "config_files/model_config.yml"
-    c = setup_config(config_path)
+    c = ConfigParams.from_deprecated_config(config_path)
