@@ -248,56 +248,19 @@ Jarvis parameters
 """
 
 import logging
-from dataclasses import dataclass
+from attrs import define, field
 
 import yaml
 
 from fetch3.scaling import calc_Aind_x, calc_LAIc_sp, calc_xylem_cross_sectional_area
 from fetch3.utils import load_yaml
 
-# # Default paths for config file, input data, and model output
-# parent_path = Path(__file__).resolve().parent.parent
-# default_config_path = parent_path / 'config_files' / 'model_config.yml'
-# default_data_path = parent_path / 'data'
-# default_output_path = parent_path / 'output'
-
-# # Taking command line arguments for path of config file, input data, and output directory
-# try:
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument('--config_path', nargs='?', default=default_config_path)
-#     parser.add_argument('--data_path', nargs='?', default=default_data_path)
-#     parser.add_argument('--output_path', nargs='?', default= default_output_path)
-#     args = parser.parse_args()
-#     config_file = args.config_path
-#     data_dir = Path(args.data_path)
-#     output_dir = Path(args.output_path)
-# except SystemExit as e:  # sphinx passing in args instead, using default.
-#     #use default options if invalid command line arguments are given
-#     config_file = default_config_path
-#     data_dir = default_data_path
-#     output_dir = default_output_path
-
-# # If using the default output directory, create directory if it doesn't exist
-# if output_dir == default_output_path:
-#   (output_dir).mkdir(exist_ok=True)
-
-# model_dir = Path(__file__).parent.resolve() # File path of model source code
-
-# # Set up logging
-# log_format = "%(levelname)s %(asctime)s - %(message)s"
-
-# logging.basicConfig(filename=output_dir / "fetch3.log",
-#                     filemode="w",
-#                     format=log_format,
-#                     level=logging.DEBUG)
-# logging.getLogger().addHandler(logging.StreamHandler())
 logger = logging.getLogger(__file__)
 
 
 # Dataclass to hold the config parameters
-@dataclass
+@define
 class ConfigParams:
-    """Dataclass to hold parameters from .yml file"""
 
 
     # File for input met data
@@ -499,7 +462,13 @@ class ConfigParams:
     Rho: float = 998  # [kg m-3] water density
     g: float = 9.81  # [m s-2]
 
-    def __post_init__(self):
+    m_1: float = field(init=False)
+    m_2: float = field(init=False)
+    sapwood_area: float = field(init=False)
+    Aind_x: float = field(init=False)
+    LAIc_sp: float = field(init=False)
+
+    def __attrs_post_init__(self):
 
         # Calculate m_1 and m_2
         self.m_1 = 1 - (1 / self.n_1)

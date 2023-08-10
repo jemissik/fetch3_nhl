@@ -4,7 +4,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.9
+  - python=3.10
+  - attrs
   - torchvision
   - pytorch > 2
   - matplotlib
