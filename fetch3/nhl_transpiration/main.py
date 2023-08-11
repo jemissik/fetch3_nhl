@@ -40,12 +40,13 @@ def main(cfg: ConfigParams, output_dir, data_dir, to_model_res=True, write_outpu
 
     Returns
     -------
-    LAD : array
-        LAD profile
     NHL transpiration : xarray.DataArray
         NHL transpiration. If to_model_res is True, NHL is returned in the resolution
         needed to run in FETCH, with units of [m3 H2O m-2crown m-1stem s-1]. If to_model_res is False,
         NHL is returned as tree-level transpiration, with units of [kg H2O s-1].
+    LAD : array
+        LAD profile
+    DS: xarray.Dataset
     """
     logger = logging.getLogger(__name__)
 
@@ -70,19 +71,16 @@ def main(cfg: ConfigParams, output_dir, data_dir, to_model_res=True, write_outpu
 
     logger.info(f"NHL calculations finished in {time.time() - start} s")
 
-    if write_output:
-        # logger.info("Saving NHL output...")
-        nhl_trans_tot = trans2d_to_tree(ds.NHL_trans_sp_stem, cfg.parameters.mean_crown_area_sp, cfg.model_options.dz) # kg h20 s-1
+    if not to_model_res:
+        nhl_trans_tot = trans2d_to_tree(ds.NHL_trans_sp_stem, cfg.parameters.mean_crown_area_sp,
+                                        cfg.model_options.dz)  # kg h20 s-1
         nhl_trans_tot.attrs = dict(
             units="kg h20 s-1", description="NHL transpiration per tree"
         )
         nhl_trans_tot = nhl_trans_tot.assign_coords(species=cfg.species)
-        write_outputs_netcdf(output_dir, ds, filename=f'nhl_2d_{cfg.species}.nc')
-        write_outputs_netcdf(output_dir, nhl_trans_tot, filename=f'nhl_tree_{cfg.species}.nc')
-        # write_outputs({"zenith": zen, "LAD": LAD}, output_dir)
-
-    if not to_model_res:
-        return nhl_trans_tot, LAD
+        if write_output:
+            write_nhl_output(output_dir=output_dir, ds=ds, nhl_trans_tot=nhl_trans_tot, species=cfg.species)
+        return nhl_trans_tot, LAD, ds
 
     if to_model_res:
         logger.info(f"Interpolating NHL to the time resolution for FETCH3...")
@@ -113,4 +111,12 @@ def main(cfg: ConfigParams, output_dir, data_dir, to_model_res=True, write_outpu
         NHL_modelres = NHL_modelres.data.transpose()
 
         logger.info(f"NHL module finished in {time.time() - start} s")
-        return NHL_modelres, LAD
+        return NHL_modelres, LAD, ds
+
+
+def write_nhl_output(ds: xr.Dataset, nhl_trans_tot: xr.Dataset, output_dir, species: str = ""):
+    species = f"_{species}" if species else ""
+    write_outputs_netcdf(output_dir, ds, filename=f'nhl_2d{species}.nc')
+    write_outputs_netcdf(output_dir, nhl_trans_tot, filename=f'nhl_tree{species}.nc')
+    # write_outputs({"zenith": zen, "LAD": LAD}, output_dir)
+    return nhl_trans_tot

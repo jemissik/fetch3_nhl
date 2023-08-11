@@ -214,7 +214,7 @@ def Picard(cfg: ConfigParams, H_initial, Head_bottom_H, zind, met, t_num, nt, ou
             calc_transpiration_nhl,
         )
 
-        NHL_modelres, LAD = nhl.main(cfg, output_dir, data_dir)
+        NHL_modelres, LAD, _ = nhl.main(cfg, output_dir, data_dir)
 
     # Stem water potential [Pa]
 
