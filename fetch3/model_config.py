@@ -709,13 +709,4 @@ def save_calculated_params(fileout, cfg):
 if __name__ == "__main__":
     import pathlib
     _cp = pathlib.Path(__file__).parent.parent / "config_files/test_param_groups.yml"
-    c = config_from_groupers(load_yaml(_cp))[0]
-
-
-
-    import timeit
-
-    print(timeit.repeat("for x in range(100): c.wp_s50", "from __main__ import c",
-                  number=100000))
-    print(timeit.repeat("for x in range(100): c.parameters.wp_s50", "from __main__ import c",
-                  number=100000))
+    print(config_from_groupers(load_yaml(_cp))[0])
