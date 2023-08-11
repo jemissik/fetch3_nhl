@@ -663,42 +663,6 @@ def config_from_groupers(config, species: Optional[str | list[str]]  = None):
     return configs
 
 
-# Read configs from yaml file
-
-
-# Convert config dict to config dataclass
-
-
-def setup_config(config_file, species=None):
-    logger.info("Reading config file")
-
-    loaded_configs = load_yaml(config_file)
-
-    if species is None:
-        species = list(loaded_configs['species_parameters'].keys())[0]
-        logger.info("No species was specified, so using species: " + species)
-    # Check if the config file was the optimization config file format, and convert
-    if "optimization_options" in list(loaded_configs):
-        site_param_dict = {}
-        species_param_dict = {}
-        for param in loaded_configs["site_parameters"].keys():
-            site_param_dict[param] = loaded_configs["site_parameters"][param]["value"]
-        for param in loaded_configs["species_parameters"][species].keys():
-            try:
-                species_param_dict[param] = loaded_configs["species_parameters"][species][param]["value"]
-            except KeyError as e:
-                print(species, param)
-                print(repr(e))
-                raise
-    else:
-        site_param_dict = loaded_configs["site_parameters"]
-        species_param_dict = loaded_configs["species_parameters"][species]
-
-    cfg = ConfigParams(**{"model_options": {**loaded_configs["model_options"], 'species': species},
-                          "parameters": {**site_param_dict, **species_param_dict}})
-    return cfg
-
-
 def save_calculated_params(fileout, cfg):
     with open(fileout, "w") as f:
         # Write model options from loaded config
