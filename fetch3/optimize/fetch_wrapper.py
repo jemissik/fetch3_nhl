@@ -133,11 +133,13 @@ def get_model_nhl_trans(modelfile, obs_file, obs_var, output_var, hour_range=Non
 
     # Read in model output
     modelds = xr.load_dataset(modelfile)
+    modelds = modelds.sel(species=output_var)
+
 
     # Convert model output to the same units as the input data
     # Sapfluxnet data is in cm3 hr-1
     # 1d NHL output is in kg h20 s-1
-    modelds["nhl_scaled"] = convert_trans_m3s_to_cm3hr(modelds[output_var] * 10**-3) #* 10**-3 to convert kg to m3
+    modelds["nhl_scaled"] = convert_trans_m3s_to_cm3hr(modelds.NHL_trans_sp_stem * 10**-3) #* 10**-3 to convert kg to m3
 
     modeldf = modelds.squeeze(drop=True).to_dataframe()
 
@@ -233,6 +235,7 @@ class Fetch3Wrapper(BaseWrapper):
                         }
 
     def __init__(self, *args, **kwargs):
+        self._model_trees = {}
         print(args, kwargs)
         super().__init__(*args, **kwargs)
 
@@ -260,8 +263,18 @@ class Fetch3Wrapper(BaseWrapper):
             loaded_config
         """
         config = load_jsonlike(config_path, normalize=False)
-        parameter_keys = [["species_parameters", key] for key in config.get("species_parameters", {}).keys()]
-        parameter_keys.append(["site_parameters"])
+
+        if "model_trees" in config:
+            parameter_keys = [["groups", key] for key in config.get("groups", {}).keys()]
+            parameter_keys.extend([["model_trees", tree] for tree in config["model_trees"].keys()])
+            for model_tree, parameters in config["model_trees"].items():
+                self._model_trees[model_tree] = parameters.pop("parents", None)
+        elif "species_parameters" in config:
+            parameter_keys = [["species_parameters", key] for key in config.get("species_parameters", {}).keys()]
+            parameter_keys.append(["site_parameters"])
+        else:
+            raise ValueError("No model trees or species parameters found in config file")
+
         self.config = normalize_config(config=config, parameter_keys=parameter_keys)
         return self.config
 
@@ -287,6 +300,10 @@ class Fetch3Wrapper(BaseWrapper):
         config_dict["model_options"] = self.model_settings
 
         logging.info(pformat(config_dict))
+
+        if self._model_trees:
+            for model_tree, parameters in config_dict["model_trees"].items():
+                parameters["parents"] = self._model_trees[model_tree]
 
         with open(trial_dir / self.config_file_name, "w") as f:
             # Write model options from loaded config
@@ -359,7 +376,8 @@ class NHLWrapper(Fetch3Wrapper):
         cmd = self.script_options["run_cmd"].format(config_path=config_path,
                                                     data_path=self.ex_settings['data_path'],
                                                     trial_dir=trial_dir,
-                                                    species=self.ex_settings['species'])
+                                                    # species=self.ex_settings['species']
+                                                    )
 
         args = cmd.split()
         popen = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
