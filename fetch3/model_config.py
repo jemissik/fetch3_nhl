@@ -601,6 +601,8 @@ class ConfigParams:
 
 def get_multi_config(config_path: Optional[str | PathLike] = None, config: Optional[dict] = None, species: Optional[str | list[str]] = None) -> list[ConfigParams]:
     """Get a list of ConfigParams objects from a config file or dict"""
+    if isinstance(species, str):
+        species = [species]
     if config and config_path:
         raise ValueError("Only one of config and config_path can be specified")
     if config_path is not None:
@@ -658,6 +660,9 @@ def config_from_groupers(config, species: Optional[str | list[str]]  = None):
 
         for parent in parents:
             parameters.update(groups[parent])  # update the parameters dict with the parent parameters
+        for key, value in parameters.items():
+            if isinstance(value, dict):
+                parameters[key] = value["value"]
         model_options["species"] = tree
         configs.append(ConfigParams(model_options=model_options, parameters=parameters))
     return configs
