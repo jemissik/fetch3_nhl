@@ -29,8 +29,8 @@ from boa import (
     BaseWrapper,
     get_trial_dir,
     make_trial_dir,
-    normalize_config,
-    boa_params_to_wpr, load_jsonlike
+    load_jsonlike,
+    BOAConfig
 )
 
 from fetch3.scaling import convert_trans_m3s_to_cm3hr, convert_sapflux_m3s_to_mm30min
@@ -239,7 +239,7 @@ class Fetch3Wrapper(BaseWrapper):
         print(args, kwargs)
         super().__init__(*args, **kwargs)
 
-    def load_config(self, config_path, *args, **kwargs) -> dict:
+    def load_config(self, config_path, *args, **kwargs):
         """
         Load config takes a configuration path of either a JSON file or a YAML file and returns
         your configuration dictionary.
@@ -259,10 +259,10 @@ class Fetch3Wrapper(BaseWrapper):
 
         Returns
         -------
-        dict
+        BOAConfig
             loaded_config
         """
-        config = load_jsonlike(config_path, normalize=False)
+        config = load_jsonlike(config_path)
 
         if "model_trees" in config:
             parameter_keys = [["groups", key] for key in config.get("groups", {}).keys()]
@@ -275,7 +275,7 @@ class Fetch3Wrapper(BaseWrapper):
         else:
             raise ValueError("No model trees or species parameters found in config file")
 
-        self.config = normalize_config(config=config, parameter_keys=parameter_keys)
+        self.config = BOAConfig(parameter_keys=parameter_keys, **config)
         return self.config
 
     def write_configs(self, trial: Trial) -> None:
@@ -296,7 +296,7 @@ class Fetch3Wrapper(BaseWrapper):
             Path for the config file
         """
         trial_dir = make_trial_dir(self.experiment_dir, trial.index)
-        config_dict = boa_params_to_wpr(trial.arm.parameters, self.config["optimization_options"]["mapping"])
+        config_dict = self.config.boa_params_to_wpr(trial.arm.parameters, self.config.mapping)
         config_dict["model_options"] = self.model_settings
 
         logging.info(pformat(config_dict))
@@ -316,12 +316,12 @@ class Fetch3Wrapper(BaseWrapper):
         trial_dir = get_trial_dir(self.experiment_dir, trial.index)
         config_path = trial_dir / self.config_file_name
 
-        model_dir = self.ex_settings["model_dir"]
+        model_dir = self.model_settings["model_dir"]
 
         os.chdir(model_dir)
 
-        cmd = self.script_options["run_cmd"].format(config_path=config_path,
-                                                    data_path=self.ex_settings['data_path'],
+        cmd = self.script_options.run_model.format(config_path=config_path,
+                                                    data_path=self.model_settings['data_path'],
                                                     trial_dir=trial_dir)
 
         args = cmd.split()
@@ -369,12 +369,12 @@ class NHLWrapper(Fetch3Wrapper):
         trial_dir = get_trial_dir(self.experiment_dir, trial.index)
         config_path = trial_dir / self.config_file_name
 
-        model_dir = self.ex_settings["model_dir"]
+        model_dir = self.model_settings["model_dir"]
 
         os.chdir(model_dir)
 
-        cmd = self.script_options["run_cmd"].format(config_path=config_path,
-                                                    data_path=self.ex_settings['data_path'],
+        cmd = self.script_options.run_model.format(config_path=config_path,
+                                                    data_path=self.model_settings['data_path'],
                                                     trial_dir=trial_dir,
                                                     # species=self.ex_settings['species']
                                                     )

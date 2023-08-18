@@ -344,6 +344,9 @@ class ModelOptions:
     experiment_name: str = None
     met_column_labels: dict = None
 
+    model_dir: str = None
+    data_path: str = None
+
 
 @define
 class NHLModelOptions(ModelOptions):
