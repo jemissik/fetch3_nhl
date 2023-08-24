@@ -12,7 +12,7 @@ from pathlib import Path
 from fetch3.__main__ import run
 
 # These paths point to the default locations
-parent_path = Path(__file__).resolve().parent
+parent_path = Path(__file__).resolve().parent.parent
 # config_path = parent_path / "config_files" / "model_config.yml"
 data_path = parent_path / "data"
 output_path = parent_path / "output"
