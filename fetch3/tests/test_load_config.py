@@ -6,7 +6,7 @@ from fetch3.model_config import config_from_groupers, ConfigParams, get_multi_co
 def test_config_from_groupers(param_groups_config):
     configs = config_from_groupers(param_groups_config)
     for config in configs:
-        assert config.species in ["oak",  "maple"]
+        assert config.species in ["oak",  "maple1"]
 
 
 @pytest.mark.parametrize(

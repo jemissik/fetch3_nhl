@@ -65,6 +65,8 @@ model_options:
 
   # TREE INFO
   LAD_norm:  'LAD_data.csv' #LAD data #TODO
+  LAD_column_labels:
+    maple1: maple
 
 
 #  # PHYSICAL CONSTANTS
@@ -252,7 +254,7 @@ model_trees:
 #    hx50: -1274000         #Pa  Jarvis leaf water potential parameter
 #    nl: 2                   #[-] Jarvis leaf water potential parameter
 #    Emax: 1.0e-9        #m/s maximum nightime transpiration
-  maple:
+  maple1:
     parents: ["NHL", "maple_species", "site_parameters"]
 
     #Soil stress parameters

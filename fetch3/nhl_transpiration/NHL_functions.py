@@ -743,7 +743,12 @@ def calc_NHL(cfg: ConfigParams, met_data, LADnorm_df, timestep):
     doy = met_data.Timestamp.iloc[timestep].dayofyear
     time_of_day = met_data.Timestamp[timestep].hour + met_data.Timestamp[timestep].minute / 60
 
-    LADnorm = LADnorm_df[cfg.species]
+    # Look up the correct LADnorm for the model tree
+    if cfg.model_options.LAD_column_labels is not None:
+        LADnorm = LADnorm_df[cfg.model_options.LAD_column_labels[cfg.species]]
+    else:
+        LADnorm = LADnorm_df[cfg.species]
+
     z_h_LADnorm = LADnorm_df.z_h
 
     VPD = met_data.VPD_F_kPa[timestep]

@@ -339,6 +339,7 @@ class ModelOptions:
     UpperBC: int
     BottomBC: int
     LAD_norm: str = None  # LAD data
+    LAD_column_labels: dict = None  # Mapping of column headers in LAD data to model tree names
 
     make_experiment_dir: bool = False
     experiment_name: str = None
