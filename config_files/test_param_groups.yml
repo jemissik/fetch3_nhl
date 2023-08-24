@@ -132,7 +132,9 @@ groups:
 
     Vcmax25: 59.9300000000000
     alpha_gs: 6.67330000000000
-    alpha_p: 1
+    alpha_p:  # Testing that it should work with a dictionary of value even if not with BOA config options
+      type: fixed
+      value: 1
 
     wp_s50: -9.1e+5 #value for oak from Mirfenderesgi
     c3: 12.3 #value for oak from Mirfenderesgi
@@ -300,5 +302,3 @@ model_trees:
 #
 #    wp_s50: -9.1e+5
 #    c3: 12.3
-
-

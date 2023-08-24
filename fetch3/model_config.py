@@ -569,22 +569,16 @@ class ConfigParams:
         if species is None:
             species = list(config['species_parameters'].keys())[0]
             logger.info("No species was specified, so using species: " + species)
-        # Check if the config file was the optimization config file format, and convert
-        if "optimization_options" in list(config):
-            site_param_dict = {}
-            species_param_dict = {}
-            for param in config["site_parameters"].keys():
-                site_param_dict[param] = config["site_parameters"][param]["value"]
-            for param in config["species_parameters"][species].keys():
-                try:
-                    species_param_dict[param] = config["species_parameters"][species][param]["value"]
-                except KeyError as e:
-                    logger.info(species, param)
-                    logger.warning(repr(e))
-                    raise
-        else:
-            site_param_dict = config["site_parameters"]
-            species_param_dict = config["species_parameters"][species]
+        site_param_dict = config["site_parameters"]
+        species_param_dict = config["species_parameters"][species]
+
+        # Check if the config file parameters are in the optimization config file format, and convert
+        for param, value in site_param_dict.items():
+            if isinstance(value, dict):
+                site_param_dict[param] = value["value"]
+        for param, value in species_param_dict.items():
+            if isinstance(value, dict):
+                species_param_dict[param] = value["value"]
 
         return cls(**{"model_options": {**config["model_options"], 'species': species},
                       "parameters": {**site_param_dict, **species_param_dict}})
