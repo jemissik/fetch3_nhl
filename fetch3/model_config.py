@@ -347,6 +347,7 @@ class ModelOptions:
 
     model_dir: str = None
     data_path: str = None
+    # output_dir: str = None
 
 
 @define

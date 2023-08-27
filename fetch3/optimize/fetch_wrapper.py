@@ -98,7 +98,8 @@ def get_model_sapflux(modelfile, obs_file, obs_var, output_var, hour_range=None,
 
     # Read in model output
     modelds = xr.load_dataset(modelfile)
-    modelds = modelds.sel(species=output_var)
+    if 'species' in modelds.dims:
+        modelds = modelds.sel(species=output_var)
 
     # Convert model output to the same units as the input data
     # Sapfluxnet data is in cm3 hr-1
@@ -133,7 +134,8 @@ def get_model_nhl_trans(modelfile, obs_file, obs_var, output_var, hour_range=Non
 
     # Read in model output
     modelds = xr.load_dataset(modelfile)
-    modelds = modelds.sel(species=output_var)
+    if 'species' in modelds.dims:
+        modelds = modelds.sel(species=output_var)
 
 
     # Convert model output to the same units as the input data
@@ -316,9 +318,9 @@ class Fetch3Wrapper(BaseWrapper):
         trial_dir = get_trial_dir(self.experiment_dir, trial.index)
         config_path = trial_dir / self.config_file_name
 
-        model_dir = self.model_settings["model_dir"]
+        # model_dir = self.model_settings["model_dir"]
 
-        os.chdir(model_dir)
+        # os.chdir(model_dir)
 
         cmd = self.script_options.run_model.format(config_path=config_path,
                                                     data_path=self.model_settings['data_path'],
@@ -369,9 +371,9 @@ class NHLWrapper(Fetch3Wrapper):
         trial_dir = get_trial_dir(self.experiment_dir, trial.index)
         config_path = trial_dir / self.config_file_name
 
-        model_dir = self.model_settings["model_dir"]
+        # model_dir = self.model_settings["model_dir"]
 
-        os.chdir(model_dir)
+        # os.chdir(model_dir)
 
         cmd = self.script_options.run_model.format(config_path=config_path,
                                                     data_path=self.model_settings['data_path'],
