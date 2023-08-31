@@ -94,7 +94,7 @@ def get_model_sapflux(modelfile, obs_file, obs_var, output_var, hour_range=None,
     obsdf = pd.read_csv(obs_file, parse_dates=[0])
     # Converting time since sapfluxnet data is in GMT
     if obsdf['TIMESTAMP'].dt.tz is not None:
-        obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_localize(None) + obsdf.TIMESTAMP.dt.tz.utcoffset(obsdf.TIMESTAMP[0])
+        obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_localize(None)
     obsdf = obsdf.set_index("Timestamp")
 
     # Read in model output
@@ -131,7 +131,7 @@ def get_model_nhl_trans(modelfile, obs_file, obs_var, output_var, hour_range=Non
     obsdf = pd.read_csv(obs_file, parse_dates=[0])
     # Converting time since sapfluxnet data is in GMT
     if obsdf['TIMESTAMP'].dt.tz is not None:
-        obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_localize(None) + obsdf.TIMESTAMP.dt.tz.utcoffset(obsdf.TIMESTAMP[0])
+        obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_localize(None)
     obsdf = obsdf.set_index("Timestamp")
 
     # Read in model output
