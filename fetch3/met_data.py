@@ -1,7 +1,5 @@
 """
-###################
-Met data
-###################
+Input met data
 """
 
 from dataclasses import dataclass
@@ -67,9 +65,7 @@ def prepare_ameriflux_data(filein, cfg: ConfigParams):
 
     # fill any gaps in the data
     df = df.set_index('Timestamp')
-    df = df.interpolate(method='linear')
-    # extrapolate in case there were missing values at the endpoints
-    df = df.interpolate(fill_value="extrapolate", limit_direction="both")
+    df = df.interpolate(method='linear', limit_direction="both", limit_area=None)
     df = df.reset_index()
 
     # Select data for length of run
