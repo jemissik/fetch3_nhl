@@ -12,13 +12,11 @@ import yaml
 from pathlib import Path
 from fetch3.utils import load_yaml
 from fetch3.optimize.fetch_wrapper import get_model_sapflux, get_model_swc
+from fetch3.model_config import get_multi_config
 
 
 
 def load_model_outputs(model_output_path):
-
-    # filein = Path(model_output_path) / "ds_all.nc"
-    # dsall = xr.load_dataset(filein)
 
     filein = Path(model_output_path) / "ds_canopy.nc"
     canopy = xr.load_dataset(filein)
@@ -31,9 +29,6 @@ def load_model_outputs(model_output_path):
 
     filein = Path(model_output_path) / "ds_sapflux.nc"
     sapflux = xr.load_dataset(filein)
-
-    # filein = Path(model_output_path) / "nhl_modelres_trans_out.nc"
-    # nhl = xr.load_dataset(filein)
 
     return canopy, soil, roots, sapflux
 
@@ -70,28 +65,24 @@ def plot_precip_and_swc(model_ds, z=None, obs=None, obs_P='P_F', obs_swc='SWC_F_
 
 class Results:
 
-    def __init__(self, output_dir, label=None, config_name=None, data_dir = None):
+    def __init__(self, output_dir, label=None, config_name=None, data_dir=None):
 
         self.output_dir = Path(output_dir)
 
         try:
-            if not config_name:
-                files = output_dir.glob('*.yml')
+            if config_name is None:
+                files = self.output_dir.glob('*.yml')
                 config_name = [f.name for f in files if f.name != 'calculated_params.yml'][0]
 
-
+            print(config_name)
             self.config_path = self.output_dir / config_name
-            self.config = load_yaml(self.config_path)
+
+            # TODO assumes only one tree for now
+            self.cfg = get_multi_config(self.config_path)[0]
 
         except:
+            print("Error loading config")
             self.config = None
-
-        skip_lines=1
-        with open(self.output_dir / "calculated_params.yml", "r") as yml_file:
-            for i in range(skip_lines):
-                _ = yml_file.readline()
-            yaml_dict = yaml.safe_load(yml_file)
-        self.params = yaml_dict
 
         if label:
             self.label=label
@@ -104,14 +95,15 @@ class Results:
             self.canopy, self.soil, self.roots, self.sapflux = load_model_outputs(self.output_dir)
 
             # Reassign coordinates
-            self.canopy = self.canopy.assign_coords(z=self.canopy.z - self.params['Soil_depth'])
-            self.soil = self.soil.assign_coords(z=self.soil.z - self.params['Soil_depth'])
-            self.roots = self.roots.assign_coords(z=self.roots.z - self.params['Soil_depth'])
+            self.canopy = self.canopy.assign_coords(z=self.canopy.z - self.cfg.parameters.Soil_depth)
+            self.soil = self.soil.assign_coords(z=self.soil.z - self.cfg.parameters.Soil_depth)
+            self.roots = self.roots.assign_coords(z=self.roots.z - self.cfg.parameters.Soil_depth)
         except:
-            self.canopy = None
-            self.soil = None
-            self.roots = None
-            self.sapflux = None 
+            print("Error loading outputs")
+            # self.canopy = None
+            # self.soil = None
+            # self.roots = None
+            # self.sapflux = None
 
         # Load met data
 
