@@ -15,6 +15,8 @@ Initial conditions in the plant:
 
 import numpy as np
 
+from fetch3.model_config import ConfigParams
+
 
 def calc_potential_vangenuchten(theta, theta_r, theta_s, alpha, m, n, rho, g):
     """
@@ -53,7 +55,7 @@ def calc_potential_vangenuchten(theta, theta_r, theta_s, alpha, m, n, rho, g):
     return water_potential_Pa  # [Pa]
 
 
-def initial_conditions(cfg, q_rain, zind):
+def initial_conditions(cfg: ConfigParams, q_rain, zind):
     """
     Calculate initial water potential conditions
 
@@ -78,25 +80,25 @@ def initial_conditions(cfg, q_rain, zind):
     # soil
     H_initial_soil = np.piecewise(
         zind.z_soil,
-        [zind.z_soil <= cfg.clay_d, zind.z_soil > cfg.clay_d],
+        [zind.z_soil <= cfg.parameters.clay_d, zind.z_soil > cfg.parameters.clay_d],
         [
             calc_potential_vangenuchten(
-                cfg.initial_swc_clay,
-                cfg.theta_R1,
-                cfg.theta_S1,
-                cfg.alpha_1,
-                cfg.m_1,
-                cfg.n_1,
+                cfg.parameters.initial_swc_clay,
+                cfg.parameters.theta_R1,
+                cfg.parameters.theta_S1,
+                cfg.parameters.alpha_1,
+                cfg.parameters.m_1,
+                cfg.parameters.n_1,
                 cfg.Rho,
                 cfg.g,
             ),
             calc_potential_vangenuchten(
-                cfg.initial_swc_sand,
-                cfg.theta_R2,
-                cfg.theta_S2,
-                cfg.alpha_2,
-                cfg.m_2,
-                cfg.n_2,
+                cfg.parameters.initial_swc_sand,
+                cfg.parameters.theta_R2,
+                cfg.parameters.theta_S2,
+                cfg.parameters.alpha_2,
+                cfg.parameters.m_2,
+                cfg.parameters.n_2,
                 cfg.Rho,
                 cfg.g,
             ),
@@ -106,7 +108,7 @@ def initial_conditions(cfg, q_rain, zind):
     # roots
 
     # z index where roots begin (round to get rid of floating point precision error so it matches the z array)
-    z_root_start = np.round(cfg.Soil_depth - cfg.Root_depth, decimals=5)
+    z_root_start = np.round(cfg.parameters.Soil_depth - cfg.parameters.Root_depth, decimals=5)
     H_initial_root_bottom = H_initial_soil[zind.z_soil == z_root_start]
     H_initial_root = H_initial_root_bottom - (zind.z_root - z_root_start) * cfg.Rho * cfg.g
 
@@ -120,19 +122,19 @@ def initial_conditions(cfg, q_rain, zind):
     Head_bottom_H = np.full(
         len(q_rain),
         calc_potential_vangenuchten(
-            cfg.soil_moisture_bottom_boundary,
-            cfg.theta_R1,
-            cfg.theta_S1,
-            cfg.alpha_1,
-            cfg.m_1,
-            cfg.n_1,
+            cfg.parameters.soil_moisture_bottom_boundary,
+            cfg.parameters.theta_R1,
+            cfg.parameters.theta_S1,
+            cfg.parameters.alpha_1,
+            cfg.parameters.m_1,
+            cfg.parameters.n_1,
             cfg.Rho,
             cfg.g,
         ),
     )
 
     # set bottom boundary for initial condition
-    if cfg.BottomBC == 0:
+    if cfg.model_options.BottomBC == 0:
         H_initial[0] = Head_bottom_H[0]
 
     return H_initial, Head_bottom_H

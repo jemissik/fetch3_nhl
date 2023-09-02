@@ -4,7 +4,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.9
+  - python=3.10
+  - attrs
   - torchvision
   - pytorch > 2
   - matplotlib
@@ -24,7 +25,7 @@ dependencies:
   - flake8
   - PyYAML
   - click
-  - conda-forge::boa-framework==0.8.7
+  - conda-forge::boa-framework==0.9.7
   - pip
   - pip:
     - -e .

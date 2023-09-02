@@ -1,7 +1,5 @@
 """
-###################
-Met data
-###################
+Input met data
 """
 
 from dataclasses import dataclass
@@ -10,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from fetch3.model_config import ConfigParams, TranspirationScheme
 from fetch3.utils import interpolate_2d
 
 def import_ameriflux_data(filein):
@@ -31,21 +30,21 @@ def import_ameriflux_data(filein):
     return df
 
 
-def prepare_ameriflux_data(filein, cfg):
+def prepare_ameriflux_data(filein, cfg: ConfigParams):
 
     df = import_ameriflux_data(filein)
     df = df.rename(columns={"TIMESTAMP_START": "Timestamp"})
 
     # Rename
-    if cfg.met_column_labels is not None:
-        df = df.rename(columns=cfg.met_column_labels)
+    if cfg.model_options.met_column_labels is not None:
+        df = df.rename(columns=cfg.model_options.met_column_labels)
 
     # Add VPD in kPa. VPD_F is in hPa
     df["VPD_F_kPa"] = df.VPD_F / 10
 
-    if cfg.transpiration_scheme == 0:
+    if cfg.transpiration_scheme == TranspirationScheme.PM:
         varlist = ["Timestamp", "TA_F", "VPD_F_kPa", "P_F", "SW_IN_F"]
-    elif cfg.transpiration_scheme == 1:
+    elif cfg.transpiration_scheme == TranspirationScheme.NHL:
         varlist = [
             "Timestamp",
             "TA_F",
@@ -58,19 +57,19 @@ def prepare_ameriflux_data(filein, cfg):
             "CO2_F",
             "PA_F",
         ]
+    else:
+        raise ValueError(f"Unknown transpiration scheme: {cfg.transpiration_scheme}")
 
     # Keep only variables needed
     df = df[varlist]
 
     # fill any gaps in the data
     df = df.set_index('Timestamp')
-    df = df.interpolate(method='linear')
-    # extrapolate in case there were missing values at the endpoints
-    df = df.interpolate(fill_value="extrapolate", limit_direction="both")
+    df = df.interpolate(method='linear', limit_direction="both", limit_area=None)
     df = df.reset_index()
 
     # Select data for length of run
-    df = df[(df.Timestamp >= cfg.start_time) & (df.Timestamp <= cfg.end_time)].reset_index(
+    df = df[(df.Timestamp >= cfg.model_options.start_time) & (df.Timestamp <= cfg.model_options.end_time)].reset_index(
         drop=True
     )
 
@@ -78,22 +77,22 @@ def prepare_ameriflux_data(filein, cfg):
 
 
 # Helper functions
-def calc_model_time_grid(df, cfg):
-    tmax = len(df) * cfg.dt
-    t_data = np.arange(cfg.tmin, tmax, cfg.dt)  # data time grids for input data
+def calc_model_time_grid(df, cfg: ConfigParams):
+    tmax = len(df) * cfg.model_options.dt
+    t_data = np.arange(cfg.model_options.tmin, tmax, cfg.model_options.dt)  # data time grids for input data
     t_data = list(t_data)
     nt_data = len(t_data)  # length of input data
     return tmax, t_data, nt_data
 
 
-def calc_infiltration_rate(cfg, precipitation, tmax, t_data):
-    precipitation = precipitation / cfg.dt  # dividing the value over half hour to seconds [mm/s]
+def calc_infiltration_rate(cfg: ConfigParams, precipitation, tmax, t_data):
+    precipitation = precipitation / cfg.model_options.dt  # dividing the value over half hour to seconds [mm/s]
     rain = precipitation / cfg.Rho  # [converting to m/s]
-    q_rain = np.interp(np.arange(0, tmax + cfg.dt0, cfg.dt0), t_data, rain)  # interpolating
+    q_rain = np.interp(np.arange(0, tmax + cfg.model_options.dt0, cfg.model_options.dt0), t_data, rain)  # interpolating
     q_rain = np.nan_to_num(q_rain)  # m/s precipitation rate= infiltration rate
 
     # Reduce by frac_infiltration
-    q_rain = cfg.frac_infiltration * q_rain
+    q_rain = cfg.parameters.frac_infiltration * q_rain
     return q_rain
 
 
@@ -126,16 +125,16 @@ def calc_NETRAD(SW_in):
     return SW_in * 0.6
 
 
-def prepare_met_data(cfg, data_dir, z_upper):
+def prepare_met_data(cfg: ConfigParams, data_dir, z_upper):
     ###########################################################
     # Load and format input data
     ###########################################################
 
     # Input file
-    data_path = data_dir / cfg.input_fname
+    data_path = data_dir / cfg.model_options.input_fname
 
-    start_time = pd.to_datetime(cfg.start_time)
-    end_time = pd.to_datetime(cfg.end_time)
+    start_time = pd.to_datetime(cfg.model_options.start_time)
+    end_time = pd.to_datetime(cfg.model_options.end_time)
 
     # read input data
     df = prepare_ameriflux_data(data_path, cfg)
@@ -171,9 +170,9 @@ def prepare_met_data(cfg, data_dir, z_upper):
 
     q_rain = calc_infiltration_rate(cfg, precipitation, tmax, t_data)
 
-    Ta = interp_to_model_res(Ta, tmax, t_data, cfg.dt0)
-    SW_in = interp_to_model_res(SW_in, tmax, t_data, cfg.dt0)
-    VPD = interp_to_model_res(VPD, tmax, t_data, cfg.dt0)
+    Ta = interp_to_model_res(Ta, tmax, t_data, cfg.model_options.dt0)
+    SW_in = interp_to_model_res(SW_in, tmax, t_data, cfg.model_options.dt0)
+    VPD = interp_to_model_res(VPD, tmax, t_data, cfg.model_options.dt0)
 
     e_sat = calc_esat(Ta)
     delta_2d = calc_delta(Ta, e_sat)

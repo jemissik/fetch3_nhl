@@ -15,6 +15,7 @@ import torch
 import xarray as xr
 from numpy.linalg import multi_dot
 
+from fetch3.model_config import ConfigParams, TranspirationScheme
 from fetch3.roots import calc_root_K, feddes_root_stress, verma_root_mass_dist
 
 logger = logging.getLogger(__name__)
@@ -167,7 +168,7 @@ def vanGenuchten(
 ###############################################################################
 
 
-def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data_dir):
+def Picard(cfg: ConfigParams, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data_dir):
     # picard iteration solver, as described in the supplementary material
     # solution following Celia et al., 1990
     z_soil = zind.z_soil
@@ -188,7 +189,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
     Ta_2d = met.Ta_2d
 
     # Imports for PM transpiration
-    if cfg.transpiration_scheme == 0:
+    if cfg.transpiration_scheme == TranspirationScheme.PM:
         from fetch3.canopy import calc_LAD
         from fetch3.pm_transpiration import (
             calc_pm_transpiration,
@@ -198,22 +199,22 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
             jarvis_fTa,
         )
 
-        LAD = calc_LAD(z_Above, cfg.dz, cfg.z_m, cfg.Hspec, cfg.L_m)
+        LAD = calc_LAD(z_Above, cfg.model_options.dz, cfg.parameters.z_m, cfg.parameters.Hspec, cfg.parameters.L_m)
 
         # 2D stomata reduction functions and variables for canopy-distributed transpiration
-        f_Ta_2d = jarvis_fTa(Ta_2d, cfg.kt, cfg.Topt)
-        f_d_2d = jarvis_fd(VPD_2d, cfg.kd)
-        f_s_2d = jarvis_fs(SW_in_2d, cfg.kr)
+        f_Ta_2d = jarvis_fTa(Ta_2d, cfg.parameters.kt, cfg.parameters.Topt)
+        f_d_2d = jarvis_fd(VPD_2d, cfg.parameters.kd)
+        f_s_2d = jarvis_fs(SW_in_2d, cfg.parameters.kr)
 
     # Imports for NHL transpiration
-    elif cfg.transpiration_scheme == 1:
+    elif cfg.transpiration_scheme == TranspirationScheme.NHL:
         import fetch3.nhl_transpiration.main as nhl
         from fetch3.nhl_transpiration.NHL_functions import (
             calc_stem_wp_response,
             calc_transpiration_nhl,
         )
 
-        NHL_modelres, LAD = nhl.main(cfg, output_dir, data_dir)
+        NHL_modelres, LAD, _ = nhl.main(cfg, output_dir, data_dir)
 
     # Stem water potential [Pa]
 
@@ -303,32 +304,32 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
                 z_soil,
                 cfg.g,
                 cfg.Rho,
-                cfg.clay_d,
-                cfg.theta_S1,
-                cfg.theta_R1,
-                cfg.alpha_1,
-                cfg.n_1,
-                cfg.m_1,
-                cfg.Ksat_1,
-                cfg.theta_S2,
-                cfg.theta_R2,
-                cfg.alpha_2,
-                cfg.n_2,
-                cfg.m_2,
-                cfg.Ksat_2,
-                cfg.dt0,
+                cfg.parameters.clay_d,
+                cfg.parameters.theta_S1,
+                cfg.parameters.theta_R1,
+                cfg.parameters.alpha_1,
+                cfg.parameters.n_1,
+                cfg.parameters.m_1,
+                cfg.parameters.Ksat_1,
+                cfg.parameters.theta_S2,
+                cfg.parameters.theta_R2,
+                cfg.parameters.alpha_2,
+                cfg.parameters.n_2,
+                cfg.parameters.m_2,
+                cfg.parameters.Ksat_2,
+                cfg.model_options.dt0,
             )
 
             # Equations for C, K for the root nodes
             cnp1m[nz_s:nz_r], knp1m[nz_s:nz_r], stress_kr[:] = Porous_media_root(
                 hnp1m[nz_s:nz_r],
-                cfg.ap,
-                cfg.bp,
-                cfg.Ksax,
-                cfg.Aind_r,
-                cfg.p,
-                cfg.sat_xylem,
-                cfg.Phi_0,
+                cfg.parameters.ap,
+                cfg.parameters.bp,
+                cfg.parameters.Ksax,
+                cfg.parameters.Aind_r,
+                cfg.parameters.p,
+                cfg.parameters.sat_xylem,
+                cfg.parameters.Phi_0,
                 nz_r,
                 nz_s,
             )
@@ -336,13 +337,13 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
             # Equations for C, K for stem nodes
             cnp1m[nz_r:nz], knp1m[nz_r:nz], stress_kx[:] = Porous_media_xylem(
                 hnp1m[nz_r:nz],
-                cfg.ap,
-                cfg.bp,
-                cfg.kmax,
-                cfg.Aind_x,
-                cfg.p,
-                cfg.sat_xylem,
-                cfg.Phi_0,
+                cfg.parameters.ap,
+                cfg.parameters.bp,
+                cfg.parameters.kmax,
+                cfg.parameters.Aind_x,
+                cfg.parameters.p,
+                cfg.parameters.sat_xylem,
+                cfg.parameters.Phi_0,
                 z,
                 nz_r,
                 nz,
@@ -390,18 +391,18 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
             # LA note:
             # This matrix is invertable because kbarplus and kbarminus should never be 0 at the same place (under reasonable situatisn)
             # and then with deltaplus and deltaminus you atridiagonal matrix with values defined on every diagonal
-            A = (1 / cfg.dt0) * C - (1 / (cfg.dz**2)) * (
+            A = (1 / cfg.model_options.dt0) * C - (1 / (cfg.model_options.dz**2)) * (
                 np.dot(Kbarplus, DeltaPlus) - np.dot(Kbarminus, DeltaMinus)
             )
 
             # Infiltration calculation - only infitrates if top soil layer is not saturated
             # equation S.53
-            if cfg.UpperBC == 0:
-                q_inf = min(q_rain[i], ((cfg.theta_S2 - theta[-1]) * (cfg.dz / cfg.dt0)))  # m/s
+            if cfg.model_options.UpperBC == 0:
+                q_inf = min(q_rain[i], ((cfg.parameters.theta_S2 - theta[-1]) * (cfg.model_options.dz / cfg.model_options.dt0)))  # m/s
 
             ################################## SINK/SOURCE TERM ON THE SAME TIMESTEP #####################################
             # equation S.22 suplementary material
-            if cfg.Root_depth == cfg.Soil_depth:
+            if cfg.parameters.Root_depth == cfg.parameters.Soil_depth:
                 # diagonals
                 for k, e in zip(np.arange(0, nz_s, 1), np.arange(0, (nz_r - nz_s), 1)):
                     A[k, k] = A[k, k] - Kr[e]  # soil ---  from 0:soil top
@@ -462,30 +463,30 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
             ##########TRANSPIRATION FORMULATION #################
 
             # For PM transpiration
-            if cfg.transpiration_scheme == 0:  # 0: PM transpiration scheme
+            if cfg.transpiration_scheme == TranspirationScheme.PM:  # 0: PM transpiration scheme
                 Pt_2d[:, i] = calc_pm_transpiration(
                     SW_in_2d[:, i],
                     NET_2d[:, i],
                     delta_2d[i],
-                    cfg.Cp,
+                    cfg.parameters.Cp,
                     VPD_2d[:, i],
-                    cfg.lamb,
-                    cfg.gama,
-                    cfg.gb,
-                    cfg.ga,
-                    cfg.gsmax,
-                    cfg.Emax,
+                    cfg.parameters.lamb,
+                    cfg.parameters.gama,
+                    cfg.parameters.gb,
+                    cfg.parameters.ga,
+                    cfg.parameters.gsmax,
+                    cfg.parameters.Emax,
                     f_Ta_2d[:, i],
                     f_s_2d[:, i],
                     f_d_2d[:, i],
-                    jarvis_fleaf(hn[nz_r:nz], cfg.hx50, cfg.nl),
+                    jarvis_fleaf(hn[nz_r:nz], cfg.parameters.hx50, cfg.parameters.nl),
                     LAD,
                 )
             # For NHL transpiration
             elif cfg.transpiration_scheme == 1:  # 1: NHL transpiration scheme
                 Pt_2d[:, i] = calc_transpiration_nhl(
                     NHL_modelres[:, i],
-                    calc_stem_wp_response(hn[nz_r:nz], cfg.wp_s50, cfg.c3).transpose(),
+                    calc_stem_wp_response(hn[nz_r:nz], cfg.parameters.wp_s50, cfg.parameters.c3).transpose(),
                 )
 
             # SINK/SOURCE ARRAY : concatenating all sinks and sources in a vector
@@ -499,24 +500,24 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
             # % Compute the residual of MPFD (right hand side)
 
             R_MPFD = (
-                (1 / (cfg.dz**2)) * (matrix2)
-                + (1 / cfg.dz) * cfg.Rho * cfg.g * (kbarplus - kbarminus)
-                - (1 / cfg.dt0) * np.dot((hnp1m - hn), C)
+                (1 / (cfg.model_options.dz**2)) * (matrix2)
+                + (1 / cfg.model_options.dz) * cfg.Rho * cfg.g * (kbarplus - kbarminus)
+                - (1 / cfg.model_options.dt0) * np.dot((hnp1m - hn), C)
                 + (S_S[:, i])
             )
 
             # bottom boundary condition - known potential - \delta\Phi=0
-            if cfg.BottomBC == 0:
+            if cfg.model_options.BottomBC == 0:
                 A[1, 0] = 0
                 A[0, 1] = 0
                 A[0, 0] = 1
                 R_MPFD[0] = 0
 
-            if cfg.UpperBC == 0:  # adding the infiltration on the most superficial soil layer [1/s]
-                R_MPFD[nz_s - 1] = R_MPFD[nz_s - 1] + (q_inf) / cfg.dz
+            if cfg.model_options.UpperBC == 0:  # adding the infiltration on the most superficial soil layer [1/s]
+                R_MPFD[nz_s - 1] = R_MPFD[nz_s - 1] + (q_inf) / cfg.model_options.dz
 
-            if cfg.BottomBC == 2:  # free drainage condition: F1-1/2 = K at the bottom of the soil
-                R_MPFD[0] = R_MPFD[0] - (kbarplus[0] * cfg.Rho * cfg.g) / cfg.dz
+            if cfg.model_options.BottomBC == 2:  # free drainage condition: F1-1/2 = K at the bottom of the soil
+                R_MPFD[0] = R_MPFD[0] - (kbarplus[0] * cfg.Rho * cfg.g) / cfg.model_options.dz
 
             # Compute deltam for iteration level m+1 : equations S.25 to S.41 (matrix)
             # deltam = np.dot(linalg.pinv2(A),R_MPFD)
@@ -524,13 +525,13 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
             R_MPFD_ = torch.from_numpy(R_MPFD)
             deltam = torch.linalg.lstsq(A_, R_MPFD_, rcond=-1).solution.numpy()
 
-            if np.max(np.abs(deltam[:])) < cfg.stop_tol:  # equation S.42
+            if np.max(np.abs(deltam[:])) < cfg.model_options.stop_tol:  # equation S.42
                 stop_flag = 1
                 hnp1mp1 = hnp1m + deltam
 
                 # Bottom boundary condition at bottom of the soil
                 # setting for the next time step value for next cycle
-                if cfg.BottomBC == 0:
+                if cfg.model_options.BottomBC == 0:
                     hnp1mp1[0] = Head_bottom_H[i]
 
                 # saving output variables only every 30min
@@ -540,7 +541,7 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
                     H[:, sav] = hnp1mp1  # saving potential
                     trans_2d[:, sav] = Pt_2d[:, i]  # 1/s
 
-                    if cfg.transpiration_scheme == 1:
+                    if cfg.transpiration_scheme == TranspirationScheme.NHL:
                         nhl_trans_2d[:, sav] = NHL_modelres[:, i]
 
                     hsoil = hnp1mp1[nz_s - (nz_r - nz_s) : nz_s]
@@ -556,12 +557,12 @@ def Picard(cfg, H_initial, Head_bottom_H, zind, met, t_num, nt, output_dir, data
                     S_sink[:, sav] = stress_roots
                     Kr_sink[:, sav] = Kr
 
-                    if cfg.UpperBC == 0 and q_rain[i] > 0:
+                    if cfg.model_options.UpperBC == 0 and q_rain[i] > 0:
                         infiltration[sav] = q_inf
                 niter = niter + 1
 
-                if cfg.print_run_progress:
-                    if (niter % cfg.print_freq) == 0:
+                if cfg.model_options.print_run_progress:
+                    if (niter % cfg.model_options.print_freq) == 0:
                         logger.info("calculated time steps: %d" % niter)
 
             else:
@@ -609,18 +610,18 @@ def format_model_output(
     start_time,
     end_time,
     dz,
-    cfg,
+    cfg: ConfigParams,
     zind,
 ):
     ####################### Water balance ###################################
 
-    theta_i = sum(THETA[:, 1] * cfg.dz)
-    theta_t = sum(THETA[:, -1] * cfg.dz)
+    theta_i = sum(THETA[:, 1] * cfg.model_options.dz)
+    theta_t = sum(THETA[:, -1] * cfg.model_options.dz)
     theta_tot = theta_i - theta_t  # (m)
     theta_tot = theta_tot * 1000  # (mm)
 
     infilt_tot = sum(infiltration) * dt * 1000  # mm
-    if cfg.UpperBC == 0:
+    if cfg.model_options.UpperBC == 0:
         theta_tot = (theta_tot) + infilt_tot
     ############################
 

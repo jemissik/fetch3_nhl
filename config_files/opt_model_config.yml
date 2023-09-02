@@ -1,44 +1,42 @@
-optimization_options:
-  objective_options:
-    objectives:
-      - metric: "RootMeanSquaredError"
-        name: rmse_oak
-        properties:
-          obs_file: './data/USA_UMB_CON_sapf_data.csv'
-          obs_var: 'USA_UMB_CON_Qru_Js_10'
-          output_fname: 'ds_sapflux.nc'
-          output_var: 'oak'
-          fetch_data_func: get_model_sapflux
-          hour_range: [10, 11]
-      - metric: "RootMeanSquaredError"
-        name: rmse_pine
-        properties:
-          obs_file: ./data/USA_UMB_CON_sapf_data.csv
-          output_fname: ds_sapflux.nc
-          obs_var: USA_UMB_CON_Pst_Js_14
-          output_var: 'pine'
-          fetch_data_func: get_model_sapflux
-    weights:
-      - 1
-      - 1
-    minimize: True
-  scheduler:
-    total_trials: 2
+objective:
+  metrics:
+    - metric: "RootMeanSquaredError"
+      name: rmse_oak
+      weight: 1
+      properties:
+        obs_file: './data/USA_UMB_CON_sapf_data.csv'
+        obs_var: 'USA_UMB_CON_Qru_Js_10'
+        output_fname: 'ds_sapflux.nc'
+        output_var: 'oak'
+        fetch_data_func: get_model_sapflux
+        hour_range: [10, 11]
+    - metric: "RootMeanSquaredError"
+      name: rmse_pine
+      weight: 1
+      properties:
+        obs_file: ./data/USA_UMB_CON_sapf_data.csv
+        output_fname: ds_sapflux.nc
+        obs_var: USA_UMB_CON_Pst_Js_14
+        output_var: 'pine'
+        fetch_data_func: get_model_sapflux
+  minimize: True
+
+scheduler:
+  n_trials: 2
 #  parameter_keys: # defined dynamically in config to remap species_parameters keys to parameters
-  model_dir: .
-  data_path: ./data
-  output_dir: ./output
-  experiment:
-    name: multispecies_test
 
 script_options:
-  run_cmd: python -m fetch3 --config_path {config_path} --data_path {data_path} --output_path {trial_dir}
+  exp_name: multispecies_test
+  output_dir: ./output
+  run_model: python -m fetch3 --config_path {config_path} --data_path {data_path} --output_path {trial_dir}
   # run_cmd: sbatch slurm_main.sh {config_path} {data_path} {trial_dir}
   wrapper_path: ./fetch3/optimize/fetch_wrapper.py
   wrapper_name: Fetch3Wrapper
   rel_to_launch: true
 
 model_options:
+  model_dir: .
+  data_path: ./data
 
   # File for input met data
   input_fname: "FLX_US-UMB_FLUXNET2015_SUBSET_HH_2007-2017_beta-4.csv"
@@ -89,8 +87,6 @@ model_options:
   BottomBC: 0
 
 
-  #Infiltration
-  frac_infiltration: 0.5
 
   # Tree information
   # species:  "Oak"
@@ -114,6 +110,11 @@ site_parameters:
   initial_swc_clay:
     type: fixed
     value: 0.28 #from Verma et al
+
+  #Infiltration
+  frac_infiltration:
+    type: fixed
+    value: 0.5 #from Verma et al
 
   initial_swc_sand:
     type: fixed

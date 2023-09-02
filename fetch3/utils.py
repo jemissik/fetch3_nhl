@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import datetime as dt
 import yaml
@@ -65,3 +67,9 @@ def load_yaml(file_path):
     with open(file_path, "r") as yml_file:
         yaml_dict = yaml.safe_load(yml_file)
     return yaml_dict
+
+
+def deprecation(message, version_to_remove=None):
+    if version_to_remove:
+        message += "\nScheduled to be removed on version {version}".format(version=version_to_remove)
+    warnings.warn(message, DeprecationWarning, stacklevel=2)

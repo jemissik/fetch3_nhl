@@ -34,7 +34,7 @@ model_options:
   #TRANSPIRATION OPTIONS - NHL OR PM
   ##################################
   transpiration_scheme:  0 # 0: PM transpiration; 1: NHL transpiration
-  zenith_method: "fetch2"  # Method to use for zenith angle calculation (if using NHL)
+#  zenith_method: "fetch2"  # Method to use for zenith angle calculation (if using NHL)
 
   #NUMERICAL SOLUTION TIME AND SPACE CONSTANTS (dz and dt0)
   #########################################################

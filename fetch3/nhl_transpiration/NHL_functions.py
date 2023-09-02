@@ -12,6 +12,8 @@ import pandas as pd
 import xarray as xr
 from scipy.interpolate import interp1d
 
+from fetch3.model_config import ConfigParams
+
 
 def calc_esat(Tair):
     """
@@ -710,26 +712,26 @@ def calc_LAI_vertical(LADnorm, z_h_LADnorm, tot_LAI_crown, dz, h):
     return LAD_z
 
 
-def calc_NHL(cfg, met_data, LADnorm_df, timestep):
+def calc_NHL(cfg: ConfigParams, met_data, LADnorm_df, timestep):
     """
     Calculate NHL transpiration
     #TODO make docstring
     """
     # unpack config parameters
-    dz = cfg.dz
-    h = cfg.Hspec
-    Cd = cfg.Cd
-    Vcmax25 = cfg.Vcmax25
-    m = cfg.m
-    alpha_p = cfg.alpha_p
-    LAIp_sp = cfg.LAI
-    LAIc_sp = cfg.LAIc_sp
-    latitude = cfg.latitude
-    longitude = cfg.longitude
-    zenith_method = cfg.zenith_method
-    x = cfg.x
-    Cf = cfg.Cf
-    time_offset = cfg.time_offset
+    dz = cfg.model_options.dz
+    h = cfg.parameters.Hspec
+    Cd = cfg.parameters.Cd
+    Vcmax25 = cfg.parameters.Vcmax25
+    m = cfg.parameters.m
+    alpha_p = cfg.parameters.alpha_p
+    LAIp_sp = cfg.parameters.LAI
+    LAIc_sp = cfg.parameters.LAIc_sp
+    latitude = cfg.model_options.latitude
+    longitude = cfg.model_options.longitude
+    zenith_method = cfg.model_options.zenith_method
+    x = cfg.parameters.x
+    Cf = cfg.parameters.Cf
+    time_offset = cfg.model_options.time_offset
 
     # unpack met data
     U_top = met_data.WS_F[timestep]
@@ -741,7 +743,12 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     doy = met_data.Timestamp.iloc[timestep].dayofyear
     time_of_day = met_data.Timestamp[timestep].hour + met_data.Timestamp[timestep].minute / 60
 
-    LADnorm = LADnorm_df[cfg.species]
+    # Look up the correct LADnorm for the model tree
+    if cfg.model_options.LAD_column_labels is not None:
+        LADnorm = LADnorm_df[cfg.model_options.LAD_column_labels[cfg.species]]
+    else:
+        LADnorm = LADnorm_df[cfg.species]
+
     z_h_LADnorm = LADnorm_df.z_h
 
     VPD = met_data.VPD_F_kPa[timestep]
@@ -815,7 +822,7 @@ def calc_NHL(cfg, met_data, LADnorm_df, timestep):
     return ds, LAD, zenith_angle
 
 
-def calc_NHL_timesteps(cfg, met_data, LADnorm_df, **kwargs):
+def calc_NHL_timesteps(cfg: ConfigParams, met_data, LADnorm_df, **kwargs):
     """
     Calls NHL for each timestep in the met data
     #TODO docstring
@@ -859,8 +866,8 @@ def calc_NHL_timesteps(cfg, met_data, LADnorm_df, **kwargs):
         _description_
     """
 
-    h = cfg.Hspec
-    dz = cfg.dz
+    h = cfg.parameters.Hspec
+    dz = cfg.model_options.dz
     zmin = 0
     z = np.arange(zmin, h, dz)  # [m]
 

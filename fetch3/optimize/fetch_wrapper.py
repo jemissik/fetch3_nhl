@@ -29,8 +29,8 @@ from boa import (
     BaseWrapper,
     get_trial_dir,
     make_trial_dir,
-    normalize_config,
-    boa_params_to_wpr, load_jsonlike
+    load_jsonlike,
+    BOAConfig
 )
 
 from fetch3.scaling import convert_trans_m3s_to_cm3hr, convert_sapflux_m3s_to_mm30min
@@ -93,12 +93,14 @@ def get_model_sapflux(modelfile, obs_file, obs_var, output_var, hour_range=None,
     # Read in observation data
     obsdf = pd.read_csv(obs_file, parse_dates=[0])
     # Converting time since sapfluxnet data is in GMT
-    obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST").dt.tz_localize(None)
+    if obsdf['TIMESTAMP'].dt.tz is not None:
+        obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_localize(None)
     obsdf = obsdf.set_index("Timestamp")
 
     # Read in model output
     modelds = xr.load_dataset(modelfile)
-    modelds = modelds.sel(species=output_var)
+    if 'species' in modelds.dims:
+        modelds = modelds.sel(species=output_var)
 
     # Convert model output to the same units as the input data
     # Sapfluxnet data is in cm3 hr-1
@@ -128,16 +130,20 @@ def get_model_nhl_trans(modelfile, obs_file, obs_var, output_var, hour_range=Non
     # Read in observation data
     obsdf = pd.read_csv(obs_file, parse_dates=[0])
     # Converting time since sapfluxnet data is in GMT
-    obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_convert("EST").dt.tz_localize(None)
+    if obsdf['TIMESTAMP'].dt.tz is not None:
+        obsdf["Timestamp"] = obsdf.TIMESTAMP.dt.tz_localize(None)
     obsdf = obsdf.set_index("Timestamp")
 
     # Read in model output
     modelds = xr.load_dataset(modelfile)
+    if 'species' in modelds.dims:
+        modelds = modelds.sel(species=output_var)
+
 
     # Convert model output to the same units as the input data
     # Sapfluxnet data is in cm3 hr-1
     # 1d NHL output is in kg h20 s-1
-    modelds["nhl_scaled"] = convert_trans_m3s_to_cm3hr(modelds[output_var] * 10**-3) #* 10**-3 to convert kg to m3
+    modelds["nhl_scaled"] = convert_trans_m3s_to_cm3hr(modelds.NHL_trans_sp_stem * 10**-3) #* 10**-3 to convert kg to m3
 
     modeldf = modelds.squeeze(drop=True).to_dataframe()
 
@@ -233,10 +239,11 @@ class Fetch3Wrapper(BaseWrapper):
                         }
 
     def __init__(self, *args, **kwargs):
+        self._model_trees = {}
         print(args, kwargs)
         super().__init__(*args, **kwargs)
 
-    def load_config(self, config_path, *args, **kwargs) -> dict:
+    def load_config(self, config_path, *args, **kwargs):
         """
         Load config takes a configuration path of either a JSON file or a YAML file and returns
         your configuration dictionary.
@@ -256,13 +263,23 @@ class Fetch3Wrapper(BaseWrapper):
 
         Returns
         -------
-        dict
+        BOAConfig
             loaded_config
         """
-        config = load_jsonlike(config_path, normalize=False)
-        parameter_keys = [["species_parameters", key] for key in config.get("species_parameters", {}).keys()]
-        parameter_keys.append(["site_parameters"])
-        self.config = normalize_config(config=config, parameter_keys=parameter_keys)
+        config = load_jsonlike(config_path)
+
+        if "model_trees" in config:
+            parameter_keys = [["groups", key] for key in config.get("groups", {}).keys()]
+            parameter_keys.extend([["model_trees", tree] for tree in config["model_trees"].keys()])
+            for model_tree, parameters in config["model_trees"].items():
+                self._model_trees[model_tree] = parameters.pop("parents", None)
+        elif "species_parameters" in config:
+            parameter_keys = [["species_parameters", key] for key in config.get("species_parameters", {}).keys()]
+            parameter_keys.append(["site_parameters"])
+        else:
+            raise ValueError("No model trees or species parameters found in config file")
+
+        self.config = BOAConfig(parameter_keys=parameter_keys, **config)
         return self.config
 
     def write_configs(self, trial: Trial) -> None:
@@ -283,10 +300,14 @@ class Fetch3Wrapper(BaseWrapper):
             Path for the config file
         """
         trial_dir = make_trial_dir(self.experiment_dir, trial.index)
-        config_dict = boa_params_to_wpr(trial.arm.parameters, self.config["optimization_options"]["mapping"])
+        config_dict = self.config.boa_params_to_wpr(trial.arm.parameters, self.config.mapping)
         config_dict["model_options"] = self.model_settings
 
         logging.info(pformat(config_dict))
+
+        if self._model_trees:
+            for model_tree, parameters in config_dict["model_trees"].items():
+                parameters["parents"] = self._model_trees[model_tree]
 
         with open(trial_dir / self.config_file_name, "w") as f:
             # Write model options from loaded config
@@ -299,12 +320,12 @@ class Fetch3Wrapper(BaseWrapper):
         trial_dir = get_trial_dir(self.experiment_dir, trial.index)
         config_path = trial_dir / self.config_file_name
 
-        model_dir = self.ex_settings["model_dir"]
+        # model_dir = self.model_settings["model_dir"]
 
-        os.chdir(model_dir)
+        # os.chdir(model_dir)
 
-        cmd = self.script_options["run_cmd"].format(config_path=config_path,
-                                                    data_path=self.ex_settings['data_path'],
+        cmd = self.script_options.run_model.format(config_path=config_path,
+                                                    data_path=self.model_settings['data_path'],
                                                     trial_dir=trial_dir)
 
         args = cmd.split()
@@ -352,14 +373,15 @@ class NHLWrapper(Fetch3Wrapper):
         trial_dir = get_trial_dir(self.experiment_dir, trial.index)
         config_path = trial_dir / self.config_file_name
 
-        model_dir = self.ex_settings["model_dir"]
+        # model_dir = self.model_settings["model_dir"]
 
-        os.chdir(model_dir)
+        # os.chdir(model_dir)
 
-        cmd = self.script_options["run_cmd"].format(config_path=config_path,
-                                                    data_path=self.ex_settings['data_path'],
+        cmd = self.script_options.run_model.format(config_path=config_path,
+                                                    data_path=self.model_settings['data_path'],
                                                     trial_dir=trial_dir,
-                                                    species=self.ex_settings['species'])
+                                                    # species=self.ex_settings['species']
+                                                    )
 
         args = cmd.split()
         popen = subprocess.Popen(args, stdout=subprocess.PIPE, universal_newlines=True)
