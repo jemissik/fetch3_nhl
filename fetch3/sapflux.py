@@ -39,6 +39,44 @@ def format_inputs(canopy_ds, crown_area):
     return H_above, trans_2d_tree
 
 
+def calc_xylem_theta(H_MPa, cfg: ConfigParams):
+    """
+    Calculates xylem water content based on water potential
+
+    Parameters
+    ----------
+    H : xarray.DataArray
+        Water potential [MPa]
+    cfg : dataclass
+        Model configuration parameters
+
+    Returns
+    -------
+    theta: xarray.DataArray
+        Xylem water content [m3 h2o/m3xylem]
+    """
+    sapwood_area = cfg.parameters.sapwood_area  # m2
+    Phi0x = cfg.parameters.Phi_0
+    p = cfg.parameters.p
+
+    # Convert H to Pa
+    H = H_MPa * 10**6
+
+    # cfg.sat_xylem is in [m3 h2o/m3xylem]
+    thetasat = cfg.parameters.sat_xylem
+    taper_top = cfg.parameters.taper_top
+
+    nz = len(H.z)
+
+    taper = np.linspace(1, taper_top, nz)
+
+    sapwood_area_z = sapwood_area * taper
+
+    theta = thetasat * ((Phi0x / (Phi0x - H)) ** p) #* sapwood_area_z
+
+    return theta
+
+
 def calc_sap_storage(H_MPa, cfg: ConfigParams):
     """
     Calculates sap storage based on water potential
