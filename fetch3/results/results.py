@@ -98,6 +98,10 @@ class Results:
             self.canopy = self.canopy.assign_coords(z=self.canopy.z - self.cfg.parameters.Soil_depth)
             self.soil = self.soil.assign_coords(z=self.soil.z - self.cfg.parameters.Soil_depth)
             self.roots = self.roots.assign_coords(z=self.roots.z - self.cfg.parameters.Soil_depth)
+
+            # Start and end times
+            self.start_time = self.canopy.time.min().values
+            self.end_time = self.canopy.time.max().values
         except:
             print("Error loading outputs")
             # self.canopy = None
