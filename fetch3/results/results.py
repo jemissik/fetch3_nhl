@@ -13,7 +13,22 @@ from pathlib import Path
 from fetch3.utils import load_yaml
 from fetch3.optimize.fetch_wrapper import get_model_sapflux, get_model_swc
 from fetch3.model_config import get_multi_config
+from fetch3.sapflux import calc_xylem_theta
+from fetch3.scaling import convert_trans2d_to_cm3hr
 
+from boa import scheduler_from_json_file
+
+
+def clip_timerange(df, tmin=None, tmax=None):
+    if tmin is None:
+        tmin = df.index.min()
+
+    if tmax is None:
+        tmax = df.index.max()
+
+    mask = (df.index >= tmin) & (df.index <= tmax)
+
+    return df.loc[mask]
 
 
 def load_model_outputs(model_output_path):
@@ -63,11 +78,44 @@ def plot_precip_and_swc(model_ds, z=None, obs=None, obs_P='P_F', obs_swc='SWC_F_
     swc_plot = (swc_obs_plot * swc_model_plot).opts(ylim=(0,0.3))
     return (precip_plot + swc_plot).cols(1)
 
+def calc_canopy1d(res):
+
+    dz = res.cfg.model_options.dz
+    crown_area = res.cfg.parameters.mean_crown_area_sp
+    tree_name = res.cfg.species
+
+    nhl = convert_trans2d_to_cm3hr(res.canopy.nhl_trans_2d, crown_area, dz).sel(species=tree_name)
+    trans = convert_trans2d_to_cm3hr(res.canopy.trans_2d, crown_area, dz).sel(species=tree_name)
+    canopy1d = xr.Dataset(dict(nhl= nhl, trans=trans))
+    canopy1d.nhl.attrs = dict(
+        units="cm3 hr-1", description=("NHL transpiration in cm3 hr-1")
+    )
+    canopy1d.trans.attrs = dict(
+        units="cm3 hr-1", description=("transpiration in cm3 hr-1")
+    )
+
+    canopy1d['theta'] = res.canopy.theta.mean(dim="z", skipna=True)
+
+    return canopy1d
+
+
+def get_best_opt_results(exp_dir):
+    exp_dir = Path(exp_dir)
+    scheduler_fp = exp_dir / 'scheduler.json'
+    scheduler = scheduler_from_json_file(scheduler_fp)
+    best_trial = scheduler.best_raw_trials()
+    best_trial_index = list(best_trial.keys())[0]
+    dir_best_trial = exp_dir / str(best_trial_index).zfill(6)
+    return best_trial, dir_best_trial
 class Results:
 
-    def __init__(self, output_dir, label=None, config_name=None, data_dir=None):
-
-        self.output_dir = Path(output_dir)
+    def __init__(self, output_dir, opt=True, label=None, config_name=None, data_dir=None, obs_file=None, obs_tvar='TIMESTAMP'):
+        
+        if opt:
+            self.best_trial, self.dir_best_trial = get_best_opt_results(output_dir)
+            self.output_dir = self.dir_best_trial
+        else:
+            self.output_dir = Path(output_dir)
 
         try:
             if config_name is None:
@@ -102,6 +150,13 @@ class Results:
             # Start and end times
             self.start_time = self.canopy.time.min().values
             self.end_time = self.canopy.time.max().values
+
+            # Add stem water content
+            self.canopy['theta'] = calc_xylem_theta(self.canopy['H'], self.cfg)
+
+            #1d canopy
+            self.canopy1d = calc_canopy1d(self)
+
         except:
             print("Error loading outputs")
             # self.canopy = None
@@ -109,8 +164,14 @@ class Results:
             # self.roots = None
             # self.sapflux = None
 
+        data_dir = Path(data_dir)
         # Load met data
+        if obs_file is None:
+            self.obs_file = data_dir / self.cfg.model_options.input_fname
+        else:
+            self.obs_file = data_dir / obs_file
 
+        self.obs = pd.read_csv(self.obs_file, index_col=[obs_tvar], parse_dates=[obs_tvar])
         # Load sapflux observation data
 
 class MultiResults:
