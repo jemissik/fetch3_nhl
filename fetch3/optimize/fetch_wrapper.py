@@ -219,10 +219,12 @@ def get_model_swc(modelfile, obs_file, obs_var, output_var, species, obs_tvar='T
     return modeldf_not_nans, obsdf_not_nans
 
 
-def get_model_obs_1d(modelfile, obs_file, obs_var, output_var, species, obs_tvar='TIMESTAMP', obs_multiplier=None, **kwargs):
+def get_model_obs(modelfile, obs_file, obs_var, output_var, species, obs_tvar='TIMESTAMP_START', obs_multiplier=True, obs_z=None, **kwargs):
     """
-    Read in observation data and 1d model output for a trial. This function can be used for any 1d model output where
-    observations only need a scalar multiplier to convert to the same units as the model output.
+    Read in observation data and model output for a trial. This function can be used for 1d and 2d model outputs
+    where observations only need a scalar multiplier to convert to the same units as the model output. For 2d model
+    outputs, the observations are compared to the z-slice of the model output that is closest to the observation
+    height/depth.
 
     Parameters
     ----------
@@ -241,6 +243,10 @@ def get_model_obs_1d(modelfile, obs_file, obs_var, output_var, species, obs_tvar
     obs_multiplier : float, optional
         Scalar multiplier to apply to the observation data in order to convert units to the model output. If `None`, no
         multiplier is applied.
+    obs_z : float, optional
+        Depth/height [m] of the observation data, where 0 is the soil surface. Aboveground is positive, belowground is
+        negative. If `None`, the depth is set to the max z in the model output (i.e. soil surface for soil outputs,
+        canopy top for canopy outputs). If the model output is 1d, this parameter is ignored.
 
     Returns
     -------
@@ -248,6 +254,7 @@ def get_model_obs_1d(modelfile, obs_file, obs_var, output_var, species, obs_tvar
         model data
     array_like
         observation data
+
     """
 
     # Read in observation data
@@ -261,16 +268,27 @@ def get_model_obs_1d(modelfile, obs_file, obs_var, output_var, species, obs_tvar
     # Read in model output
     modelds = xr.load_dataset(modelfile)
 
-    modelds = modelds.sel(species=species)
+    # Select species
+    if 'species' in modelds.dims:
+        modelds = modelds.sel(species=species)
 
-    # Slice obs data to just the time period that was modeled
+    # Get depth slice for 2d outputs
+    if 'z' in modelds.dims:
+        # select depth
+        if obs_z is None:
+            z_sel = modelds.z.values.max()
+        else:
+            z_sel = obs_z
+
+        modelds = modelds.sel(z=z_sel, method='nearest')
+
+    # Slice met data to just the time period that was modeled
     obsdf = obsdf.loc[modelds.time.data[0] : modelds.time.data[-1]]
 
     # remove first and last timestamp
     obsdf = obsdf.iloc[1:-1]
     modelds = modelds[output_var].isel(time=np.arange(1, len(modelds.time) - 1))
 
-    # Remove nans
     not_nans = ~obsdf[obs_var].isna()
     obsdf_not_nans = obsdf[obs_var].loc[not_nans]
     modelds_not_nans = modelds.isel(time=not_nans).data.transpose()
@@ -299,7 +317,7 @@ class Fetch3Wrapper(BaseWrapper):
                         get_model_plot_trans.__name__: get_model_plot_trans,
                         get_model_swc.__name__: get_model_swc,
                         get_model_nhl_trans.__name__: get_model_nhl_trans,
-                        get_model_obs_1d.__name__: get_model_obs_1d,
+                        get_model_obs.__name__: get_model_obs,
                         }
 
     def __init__(self, *args, **kwargs):
