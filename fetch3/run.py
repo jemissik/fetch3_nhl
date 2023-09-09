@@ -220,9 +220,9 @@ def run_single(cfg: ConfigParams, data_dir, output_dir):
     )
 
     # Calculate sapflux and aboveground storage
-    H_above, trans_2d_tree = format_inputs(nc_output["ds_canopy"], cfg.parameters.mean_crown_area_sp)
+    # H_above, trans_2d_tree = format_inputs(nc_output["ds_canopy"], cfg.parameters.mean_crown_area_sp)
 
-    ds_sapflux = calc_sapflux(H_above, trans_2d_tree, cfg)
+    ds_sapflux = calc_sapflux(nc_output["ds_canopy"], cfg)
 
     nc_output["sapflux"] = ds_sapflux
 

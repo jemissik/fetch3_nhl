@@ -33,10 +33,11 @@ def format_inputs(canopy_ds, crown_area):
     # trans_2d [ m3H2O m-2crown_projection s-1 m-1stem]
     # multiply by crown area to get transpiration in [m3 s-1 m-1stem]
     trans_2d_tree = canopy_ds.trans_2d * crown_area
+    nhl_2d_tree = canopy_ds.nhl_trans_2d * crown_area
 
     H_above = canopy_ds.H
 
-    return H_above, trans_2d_tree
+    return H_above, trans_2d_tree, nhl_2d_tree
 
 
 def calc_xylem_theta(H_MPa, cfg: ConfigParams):
@@ -55,7 +56,6 @@ def calc_xylem_theta(H_MPa, cfg: ConfigParams):
     theta: xarray.DataArray
         Xylem water content [m3 h2o/m3xylem]
     """
-    sapwood_area = cfg.parameters.sapwood_area  # m2
     Phi0x = cfg.parameters.Phi_0
     p = cfg.parameters.p
 
@@ -64,15 +64,8 @@ def calc_xylem_theta(H_MPa, cfg: ConfigParams):
 
     # cfg.sat_xylem is in [m3 h2o/m3xylem]
     thetasat = cfg.parameters.sat_xylem
-    taper_top = cfg.parameters.taper_top
 
-    nz = len(H.z)
-
-    taper = np.linspace(1, taper_top, nz)
-
-    sapwood_area_z = sapwood_area * taper
-
-    theta = thetasat * ((Phi0x / (Phi0x - H)) ** p) #* sapwood_area_z
+    theta = thetasat * ((Phi0x / (Phi0x - H)) ** p)
 
     return theta
 
@@ -95,30 +88,21 @@ def calc_sap_storage(H_MPa, cfg: ConfigParams):
     """
     sapwood_area = cfg.parameters.sapwood_area  # m2
     dz = cfg.model_options.dz
-    Phi0x = cfg.parameters.Phi_0
-    p = cfg.parameters.p
-
-    # Convert H to Pa
-    H = H_MPa * 10**6
-
-    # cfg.sat_xylem is in [m3 h2o/m3xylem]
-    thetasat = cfg.parameters.sat_xylem
     taper_top = cfg.parameters.taper_top
 
-    nz = len(H.z)
-
-    taper = np.linspace(1, taper_top, nz)
+    taper = np.linspace(1, taper_top, len(H_MPa.z))
 
     sapwood_area_z = sapwood_area * taper
 
-    theta = thetasat * ((Phi0x / (Phi0x - H)) ** p) * sapwood_area_z
+    theta = calc_xylem_theta(H_MPa, cfg)  # m3 h2o / m3 xylem
 
-    storage = (theta.rolling(z=2).mean() * dz).sum(dim="z", skipna=True)  # m3
+    storage = (theta.rolling(z=2).mean() * sapwood_area_z * dz).sum(dim="z", skipna=True)  # m3
+    theta = theta.mean(dim="z", skipna=True)
 
-    return storage
+    return theta, storage
 
 
-def calc_sapflux(H, trans_2d_tree, cfg: ConfigParams):
+def calc_sapflux(canopy_ds, cfg: ConfigParams):
     """
     Calculates sapflux and total aboveground water storage of the tree.
 
@@ -142,11 +126,20 @@ def calc_sapflux(H, trans_2d_tree, cfg: ConfigParams):
     """
     dt = cfg.model_options.dt
     dz = cfg.model_options.dz
+    crown_area = cfg.parameters.mean_crown_area_sp
 
-    storage = calc_sap_storage(H, cfg)
+    theta, storage = calc_sap_storage(canopy_ds.H, cfg)
+    theta.name = "theta"
     storage.name = "storage"
 
+    trans_2d_tree = canopy_ds.trans_2d * crown_area
+    nhl_2d_tree = canopy_ds.nhl_trans_2d * crown_area
+
     trans_tot = integrate_trans2d(trans_2d_tree, dz)  # [m3 s-1]
+    trans_tot.name = "trans"
+
+    nhl_tot = integrate_trans2d(nhl_2d_tree, dz)  # [m3 s-1]
+    nhl_tot.name = "nhl_trans"
 
     # Change in storage
     delta_S = storage.pad(time=(1, 0)).diff(dim="time") / dt
@@ -155,7 +148,7 @@ def calc_sapflux(H, trans_2d_tree, cfg: ConfigParams):
     sapflux = trans_tot + delta_S
     sapflux.name = "sapflux"
 
-    ds_sapflux = xr.merge([sapflux, storage, delta_S])
+    ds_sapflux = xr.merge([sapflux, storage, delta_S, theta, trans_tot, nhl_tot])
 
     # Add plot-level sapflux for the species
     ds_sapflux['sapflux_plot'] = (0.0001 * cfg.parameters.stand_density_sp) * ds_sapflux.sapflux
@@ -167,6 +160,12 @@ def calc_sapflux(H, trans_2d_tree, cfg: ConfigParams):
     # Add metadata to dataset
     ds_sapflux.sapflux.attrs = dict(units="m3 s-1", description="Tree-level sap flux")
     ds_sapflux.storage.attrs = dict(units="m3", description="Total aboveground water storage")
+    ds_sapflux.theta.attrs = dict(units="m3 m-3", description="Xylem water content")
+    ds_sapflux.trans.attrs = dict(units="m3 s-1", description="Tree-level transpiration")
+    ds_sapflux.nhl_trans.attrs = dict(units="m3 s-1", description="Tree-level NHL transpiration")
+
+
+
     ds_sapflux.delta_S.attrs = dict(
         units="m3", description="Change in aboveground water storage from the previous timestep"
     )
