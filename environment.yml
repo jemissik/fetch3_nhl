@@ -13,6 +13,8 @@ dependencies:
   - pyviz::panel
   - pyviz::datashader
   - conda-forge::jupyterlab
+  - conda-forge::jupyter_bokeh
+  - pyviz::pyviz_comms
   - numpy
   - pandas
   - scipy
