@@ -164,7 +164,7 @@ def get_model_nhl_trans(modelfile, obs_file, obs_var, output_var, hour_range=Non
 
     return df['nhl_scaled'], df[obs_var]
 
-def get_model_swc(modelfile, obs_file, obs_var, output_var, species, **kwargs):
+def get_model_swc(modelfile, obs_file, obs_var, output_var, species, obs_tvar='TIMESTAMP_START', percent_units=True, obs_depth=0.1, **kwargs):
     """
     Read in observation data model output for a trial, which will be used for
     calculating the objective function for the trial.
@@ -193,13 +193,19 @@ def get_model_swc(modelfile, obs_file, obs_var, output_var, species, **kwargs):
     # Read config file
 
     # Read in observation data
-    obsdf = pd.read_csv(obs_file, parse_dates=[0])
-    obsdf["Timestamp"] = obsdf.TIMESTAMP_START
-    obsdf = obsdf.set_index("Timestamp")
+    obsdf = pd.read_csv(obs_file, index_col=[obs_tvar], parse_dates=[obs_tvar])
+
+    if percent_units:
+        obsdf[obs_var] = obsdf[obs_var] / 100
 
     # Read in model output
     modeldf = xr.load_dataset(modelfile)
-    modeldf = modeldf.sel(z=5.9, species=species) * 100  #TODO
+
+    # find depth
+    z_soil_surface = modeldf.z.max().values
+    z_sel = z_soil_surface - obs_depth
+
+    modeldf = modeldf.sel(z=z_sel, species=species, method='nearest')
 
     # Slice met data to just the time period that was modeled
     obsdf = obsdf.loc[modeldf.time.data[0] : modeldf.time.data[-1]]
