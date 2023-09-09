@@ -790,6 +790,11 @@ def format_model_output(
     ds_root = xr.merge([ds_root1, ds_root2])
     ds_canopy = xr.merge([ds_canopy1, ds_canopy2])
 
+    # Reassign z coordinares so that z=0 is the soil surface
+    ds_canopy = ds_canopy.assign_coords(z=ds_canopy.z - cfg.parameters.Soil_depth)
+    ds_soil = ds_soil.assign_coords(z=ds_soil.z - cfg.parameters.Soil_depth)
+    ds_root = ds_root.assign_coords(z=ds_root.z - cfg.parameters.Soil_depth)
+
     return (
         df_waterbal,
         df_EP,

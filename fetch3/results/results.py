@@ -124,9 +124,11 @@ class Results:
             self.canopy, self.soil, self.roots, self.sapflux = load_model_outputs(self.output_dir)
 
             # Reassign coordinates
-            self.canopy = self.canopy.assign_coords(z=self.canopy.z - self.cfg.parameters.Soil_depth)
-            self.soil = self.soil.assign_coords(z=self.soil.z - self.cfg.parameters.Soil_depth)
-            self.roots = self.roots.assign_coords(z=self.roots.z - self.cfg.parameters.Soil_depth)
+            # TODO should be removed eventually
+            if self.soil.z.min().values >= 0:  # old model output where 0 is bottom of soil column, not soil surface
+                self.canopy = self.canopy.assign_coords(z=self.canopy.z - self.cfg.parameters.Soil_depth)
+                self.soil = self.soil.assign_coords(z=self.soil.z - self.cfg.parameters.Soil_depth)
+                self.roots = self.roots.assign_coords(z=self.roots.z - self.cfg.parameters.Soil_depth)
 
             # Start and end times
             self.start_time = self.canopy.time.min().values
