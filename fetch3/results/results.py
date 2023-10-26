@@ -80,20 +80,6 @@ def calc_canopy1d(res):
     return canopy1d
 
 
-def get_best_opt_results(exp_dir):
-    exp_dir = Path(exp_dir)
-    scheduler_fp = exp_dir / 'scheduler.json'
-    scheduler = scheduler_from_json_file(scheduler_fp)
-    best_trial = scheduler.best_raw_trials()
-    best_trial_index = list(best_trial.keys())[0]
-    dir_best_trial = exp_dir / str(best_trial_index).zfill(6)
-
-    #TODO add experiment dataframe
-
-    #TODO add plotting for optimization results
-    return best_trial, dir_best_trial
-
-
 class OptResults:
 
     def __init__(self, output_dir):
@@ -133,8 +119,8 @@ class Results:
     def __init__(self, output_dir, opt=True, label=None, config_name=None, data_dir=None, obs_file=None, obs_tvar='TIMESTAMP'):
 
         if opt:
-            self.best_trial, self.dir_best_trial = get_best_opt_results(output_dir)
-            self.output_dir = self.dir_best_trial
+            self.opt = OptResults(output_dir)
+            self.output_dir = self.opt.dir_best_trial
         else:
             self.output_dir = Path(output_dir)
 
