@@ -53,10 +53,12 @@ def concat_ds(results, var):
     ds = xr.concat(ds_list, dim='experiment')
     return ds
 
-def load_met_data(filein, timevar='TIMESTAMP_START'):
-    met = met = pd.read_csv(filein, parse_dates=[timevar])
-    met = met.set_index(timevar)
-    return met
+
+def load_obs_data(filein, timevar):
+    obsdf = pd.read_csv(filein, index_col=[timevar], parse_dates=[timevar])
+    if obsdf.index.tz is not None:
+        obsdf.index = obsdf.index.tz_localize(None)  # Change to tz-naive time
+    return obsdf
 
 
 def calc_canopy1d(res):
@@ -116,7 +118,7 @@ class Results:
 
     """
 
-    def __init__(self, output_dir, opt=True, label=None, config_name=None, data_dir=None, obs_file=None, obs_tvar='TIMESTAMP'):
+    def __init__(self, output_dir, opt=True, label=None, config_name=None, data_dir=None, obs=None):
 
         if opt:
             self.opt = OptResults(output_dir)
@@ -124,6 +126,14 @@ class Results:
         else:
             self.output_dir = Path(output_dir)
 
+        # Set label for the model run
+        if label:
+            self.label=label
+        else:
+            # TODO check config for an experiment name first
+            self.label = self.output_dir.name
+
+        # Load config for the model run
         try:
             if config_name is None:
                 files = self.output_dir.glob('*.yml')
@@ -139,12 +149,25 @@ class Results:
             print("Error loading config")
             self.config = None
 
-        if label:
-            self.label=label
-        else:
-            # TODO check config for an experiment name first
-            self.label = self.output_dir.name
+        if obs is None:
+            obs = {'met': {
+                            'fname': self.cfg.model_options.input_fname,
+                            'tvar': 'TIMESTAMP_START'
+                            }
+            }
 
+        self.load_model_results()
+        self.load_obs(data_dir, obs)
+
+
+    def load_obs(self, data_dir, obs):
+        self.data_dir = Path(data_dir)
+        self.obs = {}
+
+        for k, v in obs.items():
+            self.obs[k] = load_obs_data(self.data_dir / obs[k]['fname'], timevar=obs[k]['tvar'])
+
+    def load_model_results(self):
         try:
             # Load results
             self.canopy, self.soil, self.roots, self.sapflux = load_model_outputs(self.output_dir)
@@ -173,15 +196,6 @@ class Results:
             # self.roots = None
             # self.sapflux = None
 
-        data_dir = Path(data_dir)
-        # Load met data
-        if obs_file is None:
-            self.obs_file = data_dir / self.cfg.model_options.input_fname
-        else:
-            self.obs_file = data_dir / obs_file
-
-        self.obs = pd.read_csv(self.obs_file, index_col=[obs_tvar], parse_dates=[obs_tvar])
-        # Load sapflux observation data
 
 class MultiResults:
 
