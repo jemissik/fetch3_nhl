@@ -15,6 +15,8 @@ from fetch3.sapflux import calc_xylem_theta
 from fetch3.scaling import convert_trans2d_to_cm3hr
 
 from boa import scheduler_from_json_file
+from ax.service.utils.report_utils import get_standard_plots, exp_to_df
+
 
 
 def clip_timerange(df, tmin=None, tmax=None):
@@ -85,10 +87,48 @@ def get_best_opt_results(exp_dir):
     best_trial = scheduler.best_raw_trials()
     best_trial_index = list(best_trial.keys())[0]
     dir_best_trial = exp_dir / str(best_trial_index).zfill(6)
+
+    #TODO add experiment dataframe
+
+    #TODO add plotting for optimization results
     return best_trial, dir_best_trial
 
 
+class OptResults:
+
+    def __init__(self, output_dir):
+        self.exp_dir = Path(output_dir)
+        self.scheduler_fp = self.exp_dir / 'scheduler.json'
+        self.scheduler = scheduler_from_json_file(self.scheduler_fp)
+        self.experiment = self.scheduler.experiment
+        self.exp_df = exp_to_df(self.experiment)
+        self.best_trial = self.scheduler.best_raw_trials()
+        self.best_trial_index = list(self.best_trial.keys())[0]
+        self.dir_best_trial = self.exp_dir / str(self.best_trial_index).zfill(6)
+
+        self.plots = None
+        try:
+            self.get_opt_plots()
+        except:
+            print("Error loading plots")
+
+    def get_opt_plots(self):
+        self.plots = get_standard_plots(self.experiment, self.scheduler.generation_strategy.model)
+
+    def show_plots(self):
+        if self.plots:
+            for plot in self.plots:
+                plot.show()
+        else:
+            print("No plots found")
+
+
 class Results:
+    """
+    Loading and plotting model results
+    - get best trial from an optimization
+
+    """
 
     def __init__(self, output_dir, opt=True, label=None, config_name=None, data_dir=None, obs_file=None, obs_tvar='TIMESTAMP'):
 
