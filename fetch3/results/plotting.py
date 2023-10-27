@@ -62,10 +62,11 @@ def plot_precip_swc_vpd(res, swc_var='SWC', p_var='P_F', irr_var=None, vpd_var='
     return overlay.opts(multi_y=True, xlim=(tmin, tmax)).redim(**rename)
 
 
-def plot_sap(res, **kwargs):
+def plot_sap(res, obs_df, tree_name=None, **kwargs):
     canopy1d = res.canopy1d
-    tree_name = res.cfg.species
-    df = res.obs
+    df = res.obs[obs_df]
+    if tree_name is None:
+        tree_name = res.cfg.species
     rename = {df.index.name: 'time'}
     mod_sap = hv.Curve(canopy1d, kdims='time', vdims='trans', label="Model sapflow").opts(**kwargs)
     nhl = hv.Curve(canopy1d, kdims='time', vdims='nhl', label="Potential Transp.").opts(**kwargs)
