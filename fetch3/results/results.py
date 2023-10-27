@@ -14,6 +14,7 @@ from fetch3.model_config import get_multi_config
 from fetch3.sapflux import calc_xylem_theta
 from fetch3.scaling import convert_trans2d_to_cm3hr
 
+
 from boa import scheduler_from_json_file
 from ax.service.utils.report_utils import get_standard_plots, exp_to_df
 
@@ -82,9 +83,11 @@ def calc_canopy1d(res):
     return canopy1d
 
 
+
 class OptResults:
 
     def __init__(self, output_dir):
+
         self.exp_dir = Path(output_dir)
         self.scheduler_fp = self.exp_dir / 'scheduler.json'
         self.scheduler = scheduler_from_json_file(self.scheduler_fp)
@@ -94,14 +97,33 @@ class OptResults:
         self.best_trial_index = list(self.best_trial.keys())[0]
         self.dir_best_trial = self.exp_dir / str(self.best_trial_index).zfill(6)
 
+        self.get_obs_dict_from_opt_cfg()
         self.plots = None
         try:
             self.get_opt_plots()
         except:
             print("Error loading plots")
 
+
+    def get_obs_dict_from_opt_cfg(self):
+        from fetch3.optimize.fetch_wrapper import Fetch3Wrapper
+
+        wrapper = Fetch3Wrapper()
+        opt_config_path = list(Path(self.exp_dir).glob('*.yml'))[0]
+        wrapper.load_config(opt_config_path)
+        metrics = wrapper.config.objective.metrics
+
+        self.obs_dict = {}
+        for metric in metrics:
+            fname = Path(metrics[0].properties['obs_file']).name
+            self.obs_dict[metric.name] = {'fname': fname,
+                                    'tvar': metric.properties.get('obs_tvar', 'TIMESTAMP')
+            }
+
+
     def get_opt_plots(self):
         self.plots = get_standard_plots(self.experiment, self.scheduler.generation_strategy.model)
+
 
     def show_plots(self):
         if self.plots:
@@ -150,11 +172,13 @@ class Results:
             self.config = None
 
         if obs is None:
-            obs = {'met': {
+            obs = {}
+            obs['met'] =  {
                             'fname': self.cfg.model_options.input_fname,
                             'tvar': 'TIMESTAMP_START'
                             }
-            }
+            if opt:
+                obs.update(self.opt.obs_dict)
 
         self.load_model_results()
         self.load_obs(data_dir, obs)
@@ -164,7 +188,7 @@ class Results:
         self.data_dir = Path(data_dir)
         self.obs = {}
 
-        for k, v in obs.items():
+        for k in obs.keys():
             self.obs[k] = load_obs_data(self.data_dir / obs[k]['fname'], timevar=obs[k]['tvar'])
 
     def load_model_results(self):
