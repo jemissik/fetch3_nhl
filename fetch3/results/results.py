@@ -18,7 +18,11 @@ from fetch3.scaling import convert_trans2d_to_cm3hr
 from boa import scheduler_from_json_file
 from ax.service.utils.report_utils import get_standard_plots, exp_to_df
 
+import warnings
 
+# Suppress FutureWarnings from Ax
+warnings.filterwarnings('ignore', message='Passing literal json')
+warnings.filterwarnings('ignore', message='The behavior of DataFrame concatenation with empty or all-NA entries is deprecated')
 
 def clip_timerange(df, tmin=None, tmax=None):
     if tmin is None:
@@ -188,6 +192,7 @@ class Results:
         self.data_dir = Path(data_dir)
         self.obs = {}
 
+
         for k in obs.keys():
             self.obs[k] = load_obs_data(self.data_dir / obs[k]['fname'], timevar=obs[k]['tvar'])
 
@@ -219,6 +224,7 @@ class Results:
             # self.soil = None
             # self.roots = None
             # self.sapflux = None
+
 
 
 class MultiResults:
