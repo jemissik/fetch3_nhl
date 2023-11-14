@@ -13,6 +13,7 @@ from fetch3.optimize.fetch_wrapper import get_model_sapflux, get_model_swc
 from fetch3.model_config import get_multi_config
 from fetch3.sapflux import calc_xylem_theta
 from fetch3.scaling import convert_trans2d_to_cm3hr
+from fetch3.results.plotting import plot_sap
 
 
 from boa import scheduler_from_json_file
@@ -68,13 +69,15 @@ def load_obs_data(filein, timevar):
 
 def calc_canopy1d(res):
 
+    #TODO needs to be updated for multiple trees
+
     dz = res.cfg.model_options.dz
     crown_area = res.cfg.parameters.mean_crown_area_sp
     tree_name = res.cfg.species
 
     nhl = convert_trans2d_to_cm3hr(res.canopy.nhl_trans_2d, crown_area, dz).sel(species=tree_name)
     trans = convert_trans2d_to_cm3hr(res.canopy.trans_2d, crown_area, dz).sel(species=tree_name)
-    canopy1d = xr.Dataset(dict(nhl= nhl, trans=trans))
+    canopy1d = xr.Dataset(dict(nhl=nhl, trans=trans))
     canopy1d.nhl.attrs = dict(
         units="cm3 hr-1", description=("NHL transpiration in cm3 hr-1")
     )
@@ -84,9 +87,37 @@ def calc_canopy1d(res):
 
     canopy1d['theta'] = res.canopy.theta.mean(dim="z", skipna=True)
 
+    canopy1d['H'] = res.canopy.H.mean(dim='z', skipna=True)
+
     return canopy1d
 
 
+def rename_vars(ds, label):
+    renames = {}
+    for var in ds.data_vars:
+        renames[var] = f'{var}_{label}'
+    return ds.rename(renames)
+
+
+def calc_canopy_daily(res):
+
+    # mean
+    daily_mean = rename_vars(res.canopy1d.resample(time='1D').mean(), 'mean')
+
+    # min
+    daily_min = rename_vars(res.canopy1d.resample(time='1D').min(), 'min')
+
+    # max
+    daily_max = rename_vars(res.canopy1d.resample(time='1D').max(), 'max')
+
+    # sum
+    ds = res.canopy1d[['nhl', 'trans']]
+    daily_tot = rename_vars(ds.resample(time='1D').sum(), 'tot')
+
+    # concat
+    daily = xr.merge([daily_mean, daily_min, daily_max, daily_tot])
+
+    return daily
 
 class OptResults:
 
@@ -125,6 +156,13 @@ class OptResults:
             }
 
 
+    def get_wp50(self):
+        params = self.best_trial[list(self.res.best_trial)[0]]['params']
+        wp50_param = [x for x in list(params.keys()) if 'wp_s50' in x][0]
+        wp50 =params[wp50_param]
+        wp50_Mpa = wp50 * 10 ** -6
+        return wp50_Mpa
+    
     def get_opt_plots(self):
         self.plots = get_standard_plots(self.experiment, self.scheduler.generation_strategy.model)
 
@@ -218,6 +256,9 @@ class Results:
             #1d canopy
             self.canopy1d = calc_canopy1d(self)
 
+            # daily canopy
+            self.canopy_daily = calc_canopy_daily(self)
+
         except:
             print("Error loading outputs")
             # self.canopy = None
@@ -225,6 +266,11 @@ class Results:
             # self.roots = None
             # self.sapflux = None
 
+
+    def plot_sap(self, obs_df, obs_var=None, **kwargs):
+        if obs_var is None:
+            obs_var = self.cfg.species
+        return plot_sap(self.canopy1d, self.obs[obs_df], obs_var=obs_var, **kwargs).opts(xlim=(self.start_time, self.end_time))
 
 
 class MultiResults:
