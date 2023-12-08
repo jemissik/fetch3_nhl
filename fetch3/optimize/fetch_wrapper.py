@@ -219,7 +219,7 @@ def get_model_swc(modelfile, obs_file, obs_var, output_var, species, obs_tvar='T
     return modeldf_not_nans, obsdf_not_nans
 
 
-def get_model_obs(modelfile, obs_file, obs_var, output_var, species, obs_tvar='TIMESTAMP_START', obs_multiplier=True, obs_z=None, **kwargs):
+def get_model_obs(modelfile, obs_file, obs_var, output_var, species, obs_tvar='TIMESTAMP_START', obs_multiplier=True, obs_z=None, normalize=False, **kwargs):
     """
     Read in observation data and model output for a trial. This function can be used for 1d and 2d model outputs
     where observations only need a scalar multiplier to convert to the same units as the model output. For 2d model
@@ -247,6 +247,10 @@ def get_model_obs(modelfile, obs_file, obs_var, output_var, species, obs_tvar='T
         Depth/height [m] of the observation data, where 0 is the soil surface. Aboveground is positive, belowground is
         negative. If `None`, the depth is set to the max z in the model output (i.e. soil surface for soil outputs,
         canopy top for canopy outputs). If the model output is 1d, this parameter is ignored.
+    normalize : bool, optional
+        If `True`, normalize the model output and observation data by subtracting the mean and dividing by the standard
+        deviation. This is useful for comparing that have different magnitudes but the same shape
+        (which is what we care about). If `False`, no normalization is applied.
 
     Returns
     -------
@@ -292,6 +296,10 @@ def get_model_obs(modelfile, obs_file, obs_var, output_var, species, obs_tvar='T
     not_nans = ~obsdf[obs_var].isna()
     obsdf_not_nans = obsdf[obs_var].loc[not_nans]
     modelds_not_nans = modelds.isel(time=not_nans).data.transpose()
+
+    if normalize:
+        modelds_not_nans = (modelds_not_nans - modelds_not_nans.mean()) / modelds_not_nans.std()
+        obsdf_not_nans = (obsdf_not_nans - obsdf_not_nans.mean()) / obsdf_not_nans.std()
 
     return modelds_not_nans, obsdf_not_nans
 
