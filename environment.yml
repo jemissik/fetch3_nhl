@@ -4,7 +4,7 @@ channels:
   - pytorch
   - defaults
 dependencies:
-  - python=3.10
+  - python=3.11
   - attrs
   - torchvision
   - pytorch > 2
@@ -28,7 +28,8 @@ dependencies:
   - PyYAML
   - click
   - conda-forge::botorch
-  - conda-forge::boa-framework==0.10.2
+  - conda-forge::boa-framework==0.11.0
+  - scikit-learn<1.6 # This needs to be <1.6 until a new version of boa is released. see https://github.com/madeline-scyphers/boa/issues/178
   - pip
   - pip:
     - -e .
