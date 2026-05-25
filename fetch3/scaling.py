@@ -148,3 +148,17 @@ def convert_sapflux_m3s_to_mm30min(sapflux_m3s):
     sapflux_mm30min = convert_sapflux_cm3hr_to_mm30min(sapflux_cm3hr)
 
     return sapflux_mm30min
+
+
+def scale_sapflux(sapflux, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
+    """Scale sapflux from FETCH output in kg s-1 to W m-2."""
+    scaled_sapflux = sapflux * 2440000 / mean_crown_area_sp * total_crown_area_sp / plot_area
+    return scaled_sapflux
+
+
+def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
+    """Scale transpiration from FETCH output to W m-2."""
+    scaled_trans = (trans * 1000 * dz * 2440000 * total_crown_area_sp / plot_area).sum(
+        dim="z", skipna=True
+    )
+    return scaled_trans

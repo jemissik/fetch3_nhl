@@ -20,9 +20,6 @@ from pprint import pformat
 
 logger = logging.getLogger(__name__)
 
-import numpy as np
-import pandas as pd
-import xarray as xr
 import yaml
 from ax import Trial
 from boa import (
@@ -33,301 +30,18 @@ from boa import (
     BOAConfig
 )
 
-from fetch3.scaling import convert_trans_m3s_to_cm3hr, convert_sapflux_m3s_to_mm30min
-
-
-def get_model_plot_trans(modelfile, obs_file, obs_var, output_var, obs_tvar='TIMESTAMP_START', **kwargs):
-
-    # Read in observation data
-    obsdf = pd.read_csv(obs_file, index_col=[obs_tvar], parse_dates=[obs_tvar])
-    if obsdf.index.tz is not None:
-        obsdf.index = obsdf.index.tz_localize(None)  # Change to tz-naive time
-
-    # Read in model output
-    modeldf = xr.load_dataset(modelfile)
-    modeldf = modeldf.sel(species=output_var)
-
-    # # Slice met data to just the time period that was modeled
-    obsdf = obsdf.loc[modeldf.time.data[0]: modeldf.time.data[-1]]
-
-    # # Convert model output to the same units as the input data
-    # # tower data is in mm 30min-1
-    modeldf["sapflux_plot_mm30min"] = convert_sapflux_m3s_to_mm30min(modeldf.sapflux_plot)
-
-    # # remove first and last timestamp
-    obsdf = obsdf.iloc[1:-1]
-    modeldf = modeldf.sapflux_plot_mm30min.isel(time=np.arange(1, len(modeldf.time) - 1))
-
-    not_nans = ~obsdf[obs_var].isna()
-    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
-    modeldf_not_nans = modeldf.data[not_nans]
-
-    return modeldf_not_nans, obsdf_not_nans
-
-
-def get_model_sapflux(modelfile, obs_file, obs_var, output_var, obs_tvar='TIMESTAMP', hour_range=None, normalize=True, **kwargs):
-    """
-    Read in observation data model output for a trial, which will be used for
-    calculating the objective function for the trial.
-
-    Parameters
-    ----------
-    modelfile : str
-        File path to the model output
-    obs_file : str
-        File path to the observation data
-    model_settings: dict
-        dictionary with model settings read from model config file
-
-    Returns
-    -------
-    model_output: pandas Series
-        Model output
-    obs: pandas Series
-        Observations
-
-    ..todo::
-        * Add option to read from .nc file
-
-    """
-
-    # Read in observation data
-    obsdf = pd.read_csv(obs_file, index_col=[obs_tvar], parse_dates=[obs_tvar])
-    if obsdf.index.tz is not None:
-        obsdf.index = obsdf.index.tz_localize(None)  # Change to tz-naive time
-
-    # Read in model output
-    modelds = xr.load_dataset(modelfile)
-    if 'species' in modelds.dims:
-        modelds = modelds.sel(species=output_var)
-
-    # Convert model output to the same units as the input data
-    # Sapfluxnet data is in cm3 hr-1
-    modelds["sapflux_scaled"] = convert_trans_m3s_to_cm3hr(modelds.sapflux)
-
-    modeldf = modelds.squeeze(drop=True).to_dataframe()
-
-    # Merge model and obs dataframes
-    df = pd.merge(modeldf, obsdf[[obs_var]], how='left', right_index=True, left_index=True, suffixes=['model', 'obs'])
-
-    # remove first and last timestamp
-    obsdf = obsdf.iloc[1:-1]
-
-    # Drop rows with NaN
-    df = df.dropna()
-
-    if normalize:
-        df['sapflux_scaled'] = (df['sapflux_scaled'] - df['sapflux_scaled'].mean()) / df['sapflux_scaled'].std()
-        df[obs_var] = (df[obs_var] - df[obs_var].mean()) / df[obs_var].std()
-
-    if hour_range:
-        df = df[(df.index.hour >= hour_range[0]) & (df.index.hour <= hour_range[1])]
-
-    return df['sapflux_scaled'], df[obs_var]
-
-def get_model_nhl_trans(modelfile, obs_file, obs_var, output_var, hour_range=None, normalize=False, use_daily=False, scaling_factor=None, obs_tvar='TIMESTAMP', **kwargs):
-    # Read in observation data
-    obsdf = pd.read_csv(obs_file, index_col=[obs_tvar], parse_dates=[obs_tvar])
-    if obsdf.index.tz is not None:
-        obsdf.index = obsdf.index.tz_localize(None)  # Change to tz-naive time
-
-    # Read in model output
-    modelds = xr.load_dataset(modelfile)
-    if 'species' in modelds.dims:
-        modelds = modelds.sel(species=output_var)
-
-
-    # Convert model output to the same units as the input data
-    # Sapfluxnet data is in cm3 hr-1
-    # 1d NHL output is in kg h20 s-1
-    modelds["nhl_scaled"] = convert_trans_m3s_to_cm3hr(modelds.NHL_trans_sp_stem * 10**-3) #* 10**-3 to convert kg to m3
-
-    modeldf = modelds.squeeze(drop=True).to_dataframe()
-
-    # Merge model and obs dataframes
-    df = pd.merge(modeldf, obsdf[[obs_var]], how='left', right_index=True, left_index=True, suffixes=['model', 'obs'])
-
-    # remove first and last timestamp
-    df = df.iloc[1:-1]
-
-    if use_daily:
-        df = df.resample('D').agg(pd.Series.sum, skipna=False)
-
-    # Drop rows with NaN
-    df = df.dropna()
-
-    if scaling_factor:
-        df[obs_var] = df[obs_var] * scaling_factor
-
-    if hour_range:
-        # ignore if using daily
-        if not use_daily:
-            df = df[(df.index.hour >= hour_range[0]) & (df.index.hour <= hour_range[1])]
-
-    if normalize:
-        df['nhl_scaled'], df[obs_var] = normalize_model_obs(df['nhl_scaled'], df[obs_var])
-
-    return df['nhl_scaled'], df[obs_var]
-
-def get_model_swc(modelfile, obs_file, obs_var, output_var, species, obs_tvar='TIMESTAMP_START', percent_units=True, obs_depth=0.1, **kwargs):
-    """
-    Read in observation data model output for a trial, which will be used for
-    calculating the objective function for the trial.
-
-    Parameters
-    ----------
-    modelfile : str
-        File path to the model output
-    obs_file : str
-        File path to the observation data
-    model_settings: dict
-        dictionary with model settings read from model config file
-
-    Returns
-    -------
-    model_output: pandas Series
-        Model output
-    obs: pandas Series
-        Observations
-
-    ..todo::
-        * Add options to specify certain variables from the observation/output files
-        * Add option to read from .nc file
-
-    """
-
-    # Read in observation data
-    obsdf = pd.read_csv(obs_file, index_col=[obs_tvar], parse_dates=[obs_tvar])
-    if obsdf.index.tz is not None:
-        obsdf.index = obsdf.index.tz_localize(None)  # Change to tz-naive time
-
-    if percent_units:
-        obsdf[obs_var] = obsdf[obs_var] / 100
-
-    # Read in model output
-    modeldf = xr.load_dataset(modelfile)
-
-    # find depth
-    z_soil_surface = modeldf.z.max().values
-    z_sel = z_soil_surface - obs_depth
-
-    modeldf = modeldf.sel(z=z_sel, species=species, method='nearest')
-
-    # Slice met data to just the time period that was modeled
-    obsdf = obsdf.loc[modeldf.time.data[0] : modeldf.time.data[-1]]
-
-    # remove first and last timestamp
-    obsdf = obsdf.iloc[1:-1]
-    modeldf = modeldf[output_var].isel(time=np.arange(1, len(modeldf.time) - 1))
-
-    not_nans = ~obsdf[obs_var].isna()
-    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
-    modeldf_not_nans = modeldf.isel(time=not_nans).data.transpose()
-
-    return modeldf_not_nans, obsdf_not_nans
-
-
-def get_model_obs(modelfile, obs_file, obs_var, output_var, species, obs_tvar='TIMESTAMP_START', obs_multiplier=True, obs_z=None, normalize=False, **kwargs):
-    """
-    Read in observation data and model output for a trial. This function can be used for 1d and 2d model outputs
-    where observations only need a scalar multiplier to convert to the same units as the model output. For 2d model
-    outputs, the observations are compared to the z-slice of the model output that is closest to the observation
-    height/depth.
-
-    Parameters
-    ----------
-    modelfile : str
-        File path to the model output file
-    obs_file : str
-        File path to the observation data file
-    obs_var : str
-        Column name of the observation variable
-    output_var : str
-        Name of the model output variable
-    species : str
-        Species
-    obs_tvar : str, optional
-        Name of the time column in the observation data, by default 'TIMESTAMP'
-    obs_multiplier : float, optional
-        Scalar multiplier to apply to the observation data in order to convert units to the model output. If `None`, no
-        multiplier is applied.
-    obs_z : float, optional
-        Depth/height [m] of the observation data, where 0 is the soil surface. Aboveground is positive, belowground is
-        negative. If `None`, the depth is set to the max z in the model output (i.e. soil surface for soil outputs,
-        canopy top for canopy outputs). If the model output is 1d, this parameter is ignored.
-    normalize : bool, optional
-        If `True`, normalize the model output and observation data by subtracting the mean and dividing by the standard
-        deviation. This is useful for comparing that have different magnitudes but the same shape
-        (which is what we care about). If `False`, no normalization is applied.
-
-    Returns
-    -------
-    array_like
-        model data
-    array_like
-        observation data
-
-    """
-
-    # Read in observation data
-    obsdf = pd.read_csv(obs_file, index_col=[obs_tvar], parse_dates=[obs_tvar])
-    if obsdf.index.tz is not None:
-        obsdf.index = obsdf.index.tz_localize(None)  # Change to tz-naive time
-
-    if obs_multiplier:
-        obsdf[obs_var] = obsdf[obs_var] * obs_multiplier
-
-    # Read in model output
-    modelds = xr.load_dataset(modelfile)
-
-    # Select species
-    if 'species' in modelds.dims:
-        modelds = modelds.sel(species=species)
-
-    # Get depth slice for 2d outputs
-    if 'z' in modelds.dims:
-        # select depth
-        if obs_z is None:
-            z_sel = modelds.z.values.max()
-        else:
-            z_sel = obs_z
-
-        modelds = modelds.sel(z=z_sel, method='nearest')
-
-    # Slice met data to just the time period that was modeled
-    obsdf = obsdf.loc[modelds.time.data[0] : modelds.time.data[-1]]
-
-    # remove first and last timestamp
-    obsdf = obsdf.iloc[1:-1]
-    modelds = modelds[output_var].isel(time=np.arange(1, len(modelds.time) - 1))
-
-    not_nans = ~obsdf[obs_var].isna()
-    obsdf_not_nans = obsdf[obs_var].loc[not_nans]
-    modelds_not_nans = modelds.isel(time=not_nans).data.transpose()
-
-    if normalize:
-        modelds_not_nans = (modelds_not_nans - modelds_not_nans.mean()) / modelds_not_nans.std()
-        obsdf_not_nans = (obsdf_not_nans - obsdf_not_nans.mean()) / obsdf_not_nans.std()
-
-    return modelds_not_nans, obsdf_not_nans
-
-def normalize_model_obs(model, obs):
-    model = (model - model.mean()) / model.std()
-    obs = (obs - obs.mean()) / obs.std()
-    return model, obs
-
-def scale_sapflux(sapflux, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
-    """Scales sapflux from FETCH output (in kg s-1) to W m-2"""
-    scaled_sapflux = sapflux * 2440000 / mean_crown_area_sp * total_crown_area_sp / plot_area
-    return scaled_sapflux
-
-
-def scale_transpiration(trans, dz, mean_crown_area_sp, total_crown_area_sp, plot_area):
-    """Scales transpiration from FETCH output (in m H20 m-2crown m-1stem s-1) to W m-2"""
-    scaled_trans = (trans * 1000 * dz * 2440000 * total_crown_area_sp / plot_area).sum(
-        dim="z", skipna=True
-    )
-    return scaled_trans
+# Keep these names in this module so older BOA configs can still reference
+# fetch_data_func values such as "get_model_sapflux".
+from fetch3.results.compare import (
+    get_model_obs_summary,
+    get_model_nhl_trans,
+    get_model_obs,
+    get_model_plot_trans,
+    get_model_sapflux,
+    get_model_swc,
+    normalize_model_obs,
+)
+from fetch3.scaling import scale_sapflux, scale_transpiration
 
 
 class Fetch3Wrapper(BaseWrapper):
@@ -338,6 +52,7 @@ class Fetch3Wrapper(BaseWrapper):
                         get_model_swc.__name__: get_model_swc,
                         get_model_nhl_trans.__name__: get_model_nhl_trans,
                         get_model_obs.__name__: get_model_obs,
+                        get_model_obs_summary.__name__: get_model_obs_summary,
                         }
 
     def __init__(self, *args, **kwargs):

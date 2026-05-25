@@ -4,20 +4,14 @@ Convenience functions:
 - plotting results
 """
 import xarray as xr
-import pandas as pd
-import yaml
 
 from pathlib import Path
-from fetch3.utils import load_yaml
-from fetch3.optimize.fetch_wrapper import get_model_sapflux, get_model_swc
 from fetch3.model_config import get_multi_config
 from fetch3.sapflux import calc_xylem_theta
 from fetch3.scaling import convert_trans2d_to_cm3hr
+from fetch3.results.compare import load_obs_data
 from fetch3.results.plotting import plot_sap
 
-
-from boa import scheduler_from_json_file
-from ax.service.utils.report_utils import get_standard_plots, exp_to_df
 
 import warnings
 
@@ -58,13 +52,6 @@ def concat_ds(results, var):
     ds_list = [result.__getattribute__(var).expand_dims(experiment=[result.label]) for result in results]
     ds = xr.concat(ds_list, dim='experiment')
     return ds
-
-
-def load_obs_data(filein, timevar):
-    obsdf = pd.read_csv(filein, index_col=[timevar], parse_dates=[timevar])
-    if obsdf.index.tz is not None:
-        obsdf.index = obsdf.index.tz_localize(None)  # Change to tz-naive time
-    return obsdf
 
 
 def calc_canopy1d(res):
@@ -122,6 +109,8 @@ def calc_canopy_daily(res):
 class OptResults:
 
     def __init__(self, output_dir):
+        from ax.service.utils.report_utils import exp_to_df
+        from boa import scheduler_from_json_file
 
         self.exp_dir = Path(output_dir)
         self.scheduler_fp = self.exp_dir / 'scheduler.json'
@@ -164,6 +153,8 @@ class OptResults:
         return wp50_Mpa
     
     def get_opt_plots(self):
+        from ax.service.utils.report_utils import get_standard_plots
+
         self.plots = get_standard_plots(self.experiment, self.scheduler.generation_strategy.model)
 
 
